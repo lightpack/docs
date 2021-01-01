@@ -22,6 +22,9 @@ $request->uri();
 // Gives: /users/editors
 $request->path();
 
+// Gives: /app
+$request->basepath();
+
 // Gives: status=active
 $request->query();
 

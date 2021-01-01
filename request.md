@@ -67,7 +67,8 @@ $request->post('key');
 Provide second parameter for default input value:
 
 ```php
-$request->input('key', 'default');
+$request->get('key', 'default');
+$request->post('key', 'default');
 ```
 
 Passing no key will return global $_GET/$_POST arrays.

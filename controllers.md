@@ -37,7 +37,7 @@ namespace App\Controllers;
 
 class PageController
 {
-    public function index(int $page, string $status)
+    public function index($page, $status)
     {
         // ...
     }

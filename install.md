@@ -11,3 +11,9 @@ Now run the composer command.
 ```bash
 composer install --no-dev
 ```
+
+**Note** To view installation progress details, add `-vvv` option.
+
+```bash
+composer install --no-dev -vvv
+```

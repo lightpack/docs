@@ -18,6 +18,7 @@ Lightpack supports following routing methods for your convinience:
 * <code>$route->patch()</code>
 * <code>$route->delete()</code>
 * <code>$route->any()</code>
+* <code>$route->map()</code>
 * <code>$route->group()</code>
 
 ## Route Parameters

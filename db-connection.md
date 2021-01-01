@@ -51,7 +51,7 @@ $sqlite = new \Framework\Database\Adapters\Sqlite($options);
 
 ## Configuration
 
-You should set the database configuration options in <code>config/database.php</code> file. If you open the database config file, you will find configurations
+You should set the database configuration options in <code>config/default.php</code> file. If you open the database config file, you will find configurations
 defined for <code>mysql</code> and <code>sqlite</code>. Change them as per your
 database options. 
 

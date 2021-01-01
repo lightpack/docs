@@ -7,7 +7,7 @@ request handlers aka <code>controllers</code>.
 $route->get('/users', 'UserController@index');
 ```
 
-All your routes definitions goes in file: <code>app/config/routes.php</code> 
+All your routes definitions goes in file: <code>config/routes.php</code> 
 
 ## Route Methods
 

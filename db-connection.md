@@ -3,7 +3,42 @@
 Lightpack aims to provide a performant thin layer of abstraction for easing working with relational database systems. Currently it supports PDO adapters for
 <code>Sqlite</code> and <code>MySQL</code>.
 
-To get a new connection, simply instantiate an adapter class passing it 
+Before you get set with a databse connection, you need to configure database credentials. For that, open `config/default.php` and look for `connection` key to set your database credentials. For example:
+
+```php
+// config/default.php
+<?php
+
+return [
+    // ...
+    'connection' => [
+        'sqlite' => [
+            'database' => '',
+        ],
+        'mysql' => [
+            'host' => 'localhost',
+            'port' => 3306,
+            'username' => 'root',
+            'password' => '',
+            'database' => '',
+            'options' => null,
+        ]
+    ],
+    // ...
+];
+```
+
+If you use `MySQL` as database, set those credentials in `mysql` key. Once done, Lightpack already configures `MySQL` database service by default in `bootstrap/services.php`. So you can access the `MySQL` database connection simply by using `app('db')` function call.
+
+```php
+$db = app('db')
+```
+
+<p class="tip">For your convinience, Lightpack already comes with a registered service for MySQL in <code>config/services.php</code> file. You can simply access the connection using <code>app('db')</code> function call.</p>
+
+## Adapters
+
+Lightpack supports `MySQL` and `Sqlite` adapters. To manually create a new connection, you can instantiate an adapter class passing it 
 the database connections options.
 
 ```php
@@ -41,8 +76,6 @@ $container->register('mysql', function($container) {
     );
 });
 ```
-
-<p class="tip">For your convinience, Lightpack already comes with a registered service for MySQL in <code>config/services.php</code> file. You can simply access the connection using <code>app('db')</code> function call.</p>
 
 ## Raw Queries
 

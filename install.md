@@ -6,13 +6,13 @@ Clone the <code>Lightpack</code> repository into your project web root directory
 git clone https://github.com/lightpack/lightpack.git
 ```
 
-Now run the composer command.
+Move into your repository folder.
 
 ```bash
-composer install --no-dev
+cd lightpack
 ```
 
-**Note** To view installation progress details, add `-vvv` option.
+Now run the composer command.
 
 ```bash
 composer install --no-dev -vvv

@@ -56,7 +56,7 @@ $route->get('/tasks', 'TaskController@index');
 
 We have registered `/tasks` route specifying `index` method of `TaskController`. So we now need to define our controller.
 
-### Defining Task Controller
+### Defining tasks controller
 
 Create a new file in `app/Controller` folder named `TaskController.php` with following code contents. 
 
@@ -77,3 +77,31 @@ class TaskController
 Now if you visit `/tasks` in your browser, you should see the following screen.
 
 <img src="_media/tutorial/screen-2.png" style="width: 420px">
+
+### Rendering tasks view 
+
+Rather than simply echoing tasks, we would like to render a view template with actual
+tasks list. For now let us fake tasks data in our controller. Later in this tutorial, we will
+fetch tasks from database itself.
+
+Edit `app/Controllers/TaskController.php` file to add fake tasks and render tasks view template.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    public function index()
+    {
+        $data['tasks'] = [
+            ['title' => 'Buy shoes', 'status' => 0], 
+            ['title' => 'Eat Snacks', 'status' => 0], 
+            ['title' => 'Learn PHP' 'status' => 0],
+        ];
+
+        app('response')->render('tasks/home', $data);
+    }
+}
+```

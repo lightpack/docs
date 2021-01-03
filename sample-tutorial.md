@@ -460,8 +460,73 @@ Let us also populate **tasks** status field. Update `app/views/tasks/form.php` a
     
     <!-- Submit -->
     <button>Submit</button>
-    
+
 </form>
 
 <a href="<?= url("tasks") ?>">Cancel</a>
 ```
+
+Refresh your browser to see the task form populated with **status** field.
+
+<img src="_media/tutorial/screen-8.png" style="max-width: 420px">
+
+
+#### Post task form
+
+Let us add a route for handling `POST` requests to edit our tasks. Update `config/routes.php` file a new route definition for posting task edit form.
+
+```php
+<?php
+
+$route->group(['namespace' => 'App\Controllers'], function($route) {
+    // ...
+    $route->post('/tasks/edit/:num', 'TaskController@edit');
+});
+```
+
+Now update `edit()` method in `TaskController`.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    // ...
+
+    public function edit($id)
+    {
+        $data['task'] = app('db')->table('tasks')->where('id', '=', $id)->fetchOne();
+        $request = app('request');
+
+        if($request->isPost()) {
+            app('db')->table('tasks')->update(['id', $id], [
+                    'title' => $request->post('title'),
+                    'status' => $request->post('status')
+                ]
+            );
+
+            redirect('tasks');
+        }
+
+
+        app('response')->render('tasks/form', $data);
+    }
+}
+```
+
+Now try to edit a task. It should successfully update the database to reflect changes.
+
+## Final Notes
+
+If you reached so far with this tutorial, you definitely have got acquainted with `Lightpack` framework. We could have extended this tutorial to introduce **filters**,
+**models**, **events**, **layouts**, and a couple of tips for much cleaner code. But to 
+keep things simple, we restricted it to only have an introduction about working with `Lightpack`.
+
+Performance benchmark shows `Lightpack` outshine some of the well known frameworks in PHP community. It even outshines **Codeigniter3** and **Codeigniter4** in our benchmark. But we do not want you take our word for granted.
+
+We encourage you to evaluate `Ligtpack` with your own benchmarks and let us know about your experience. `Lightpack` is in its **alpha** version for now and is bound to change 
+in its architecture. This is the best time to support this framework and become a core contributor. 
+
+Open pull requests and issues if you find it good enough for your attention. 😀👍

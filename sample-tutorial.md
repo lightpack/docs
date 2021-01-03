@@ -151,15 +151,14 @@ CREATE TABLE tasks (
 ) ENGINE = InnoDB; 
 ```
 
-Let us insert some tasks manually in the table for now. Later we will create task add/update form to do the same.
-
-Execute this query to insert some tasks.
+Execute this query to insert some tasks manually in the table for now. Later we will create task add/update form to do the same.
 
 ```sql
 INSERT INTO tasks 
-    (id, title, status) 
+    (title, status) 
 VALUES 
-    (NULL, 'Buy shoes', 'Done'), 
-    (NULL, 'Eat Snacks', 'Pending'), 
-    (NULL, 'Learn PHP', 'Pending') 
+    ('Buy shoes', 'Done'), 
+    ('Eat Snacks', 'Pending'), 
+    ('Learn PHP', 'Pending') 
 ```
+

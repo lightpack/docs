@@ -132,3 +132,34 @@ To render our tasks view, create `tasks` folder with `home.php` file in `app/vie
 Now if you refresh the browser, you should see tasks rendered.
 
 <img src="_media/tutorial/screen-3.png" style="width: 420px">
+
+### Adding database
+
+Now that we have successfully rendered our fake tasks list, its time to prepare database.
+
+> We are going to use `MySQL` as our database system for this tutorial.
+
+In you `MySQL` database, create a new database named `taskapp`. When done, execute
+this query to create a table named `tasks`.
+
+```sql
+CREATE TABLE tasks ( 
+    id INT NOT NULL AUTO_INCREMENT , 
+    title VARCHAR(120) NOT NULL , 
+    status ENUM('Done','Pending') NOT NULL DEFAULT 'Pending' , 
+    PRIMARY KEY (id)
+) ENGINE = InnoDB; 
+```
+
+Let us insert some tasks manually in the table for now. Later we will create task add/update form to do the same.
+
+Execute this query to insert some tasks.
+
+```sql
+INSERT INTO tasks 
+    (id, title, status) 
+VALUES 
+    (NULL, 'Buy shoes', 'Done'), 
+    (NULL, 'Eat Snacks', 'Pending'), 
+    (NULL, 'Learn PHP', 'Pending') 
+```

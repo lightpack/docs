@@ -204,3 +204,5 @@ class TaskController
 If you refresh your browser, you should see the tasks view as same as previous one before working with database.
 
 <img src="_media/tutorial/screen-3.png" style="max-width: 420px">
+
+Calling `app('db')` return a database connection instance that define a `table()` method. This methods taskes the name of database table we are interested in querying. The `table()` method return an instance of query builder.

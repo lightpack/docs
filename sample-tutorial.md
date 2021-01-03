@@ -58,7 +58,7 @@ We have registered `/tasks` route specifying `index` method of `TaskController`.
 
 ### Defining tasks controller
 
-Create a new file in `app/Controller` folder named `TaskController.php` with following code contents. 
+Create a new file in `app/Controllers` folder named `TaskController.php` with following code contents. 
 
 ```php
 <?php
@@ -162,7 +162,7 @@ VALUES
     ('Learn PHP', 'Pending') 
 ```
 
-To work with the new database, you will need to configure database credentials. open `config/default.php` file and look for 'connection' key. There you need to configure 'mysql` key with appropriate database credentials.
+To work with the new database, you will need to configure database credentials. Open `config/default.php` file and look for 'connection' key. There you need to configure 'mysql` key with appropriate database credentials.
 
 ```php
 <?php
@@ -205,7 +205,7 @@ If you refresh your browser, you should see the tasks view as same as previous o
 
 <img src="_media/tutorial/screen-3.png" style="max-width: 420px">
 
-Calling `app('db')` returns the database connection instance that defines a `table()` method. This methods taskes the name of database table we are interested in querying. The `table()` method return an instance of query builder. The `fetchAll()` method returns the result set as an array of objects by default. Passing it `true` returns the result set as an array.
+Calling `app('db')` returns the database connection instance that defines a `table()` method. This methods takes the name of database table we are interested in querying. The `table()` method returns an instance of query builder. The `fetchAll()` method returns the result set as an array of objects by default. Passing it `true` returns the result set as an array.
 
 Now that you have successfully listed tasks from database, its time to build functionality to add/edit tasks in the database.
 

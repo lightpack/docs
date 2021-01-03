@@ -139,7 +139,7 @@ Now that we have successfully rendered our fake tasks list, its time to prepare 
 
 > We are going to use `MySQL` as our database system for this tutorial.
 
-In you `MySQL` database, create a new database named `taskapp`. When done, execute
+In your `MySQL` database, create a new database named `taskapp`. When done, execute
 this query to create a table named `tasks`.
 
 ```sql

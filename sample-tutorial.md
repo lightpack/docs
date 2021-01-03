@@ -162,3 +162,45 @@ VALUES
     ('Learn PHP', 'Pending') 
 ```
 
+To work with the new database, you will need to configure database credentials. open `config/default.php` file and look for 'connection' key. There you need to configure 'mysql` key with appropriate database credentials.
+
+```php
+<?php
+
+return [
+    // ...
+    'connection' => [
+        // ...
+        'mysql' => [
+            'host' => 'localhost',
+            'port' => 3306,
+            'username' => 'root',
+            'password' => 'root',
+            'database' => 'taskapp',
+            'options' => null,
+        ]
+    ],
+];
+```
+
+Now its time to update our `TaskController.php` file to fetch tasks from database. Replace `app/ControllersTaskController.php` with following code.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    public function index()
+    {
+        $data['tasks'] = app('db')->table('tasks')->fetchAll();
+
+        app('response')->render('tasks/home', $data);
+    }
+}
+```
+
+If you refresh your browser, you should see the tasks view as same as previous one before working with database.
+
+<img src="_media/tutorial/screen-3.png" style="max-width: 420px">

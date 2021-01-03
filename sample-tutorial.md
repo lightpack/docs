@@ -287,7 +287,7 @@ We will first start with adding new task feature. Clicking on **new task** link 
 
 <img src="_media/tutorial/screen-5.png">
 
-#### Show Task Form
+#### Show task form
 
 Open `config/routes.php` file and add a new route for `/tasks/add`
 
@@ -333,7 +333,7 @@ Refresh your browser to see the task form.
 
 <img src="_media/tutorial/screen-6.png" style="max-width:420px">
 
-#### Post Task Form
+#### Post task form
 
 Try to add a new task and submit the form. You should see `RouetNotFoundException` because
 when the form is posted, the browser requests `POST /tasks/add` for which we have not registered any route in our routes definition file.
@@ -386,3 +386,82 @@ Try to add a new task. You should now see the new task listed.
 We first check if the current request method is `POST`. For that we call `app('request')->isPost()` method. To access the `POST` request form data, you can simply use the global `$_POST` array, but we used `app('request)->post()` method. It takes the name of form field and returns the data. We then finally insert the posted data in the database using `insert()` method.
 
 > Note: We can also define a **TaskModel** that extends Lightpack's ORM model to ease working with **tasks** table. In this tutorial though, we will simply use the query builder to work with database.
+
+### Edit Task
+
+Click on **edit** task link to edit a task. You should see `RouteNotFoundException` because we need to register a route for editing our task. Let us solve that now.
+
+#### Show task form
+
+Update `config/routes.php` file to support task edting.
+
+```php
+<?php
+
+$route->group(['namespace' => 'App\Controllers'], function($route) {
+    // ...
+    $route->get('/tasks/edit/:num', 'TaskController@edit');
+});
+```
+
+In the `TaskController.php` file, add a new method named `edit()`.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    // ...
+
+    public function edit($id)
+    {
+        $data['task'] = app('db')->table('tasks')->where('id', '=', $id)->fetchOne();
+        
+        app('response')->render('tasks/form', $data);
+    }
+}
+```
+
+We are going to use the same form to edit a task. Update `app/views/tasks/form.php` as shown below.
+
+```php
+<form method="post">
+    <input name="title" placeholder="Title" value="<?= $task->title ?? '' ?>" required>
+    <button>Submit</button>
+</form>
+
+<a href="<?= url("tasks") ?>">Cancel</a>
+```
+
+Now if you try to edit a task, you should see the form populated with task title.
+
+<img src="_media/tutorial/screen-7.png" style="max-width: 420px">
+
+Let us also populate **tasks** status field. Update `app/views/tasks/form.php` as shown below.
+
+```php
+<form method="post">
+
+    <!-- Title -->
+    <input name="title" placeholder="Title" value="<?= $task->title ?? '' ?>" required>
+    
+    <!-- Status -->
+    <?php if($task->status): ?>
+        <select name="status">
+            <?php foreach(['Done', 'Pending'] as $status): ?>
+                <option <?= $task->status == $status ? 'selected' : '' ?>>
+                    <?= $status ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    <?php endif; ?>
+    
+    <!-- Submit -->
+    <button>Submit</button>
+    
+</form>
+
+<a href="<?= url("tasks") ?>">Cancel</a>
+```

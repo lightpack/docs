@@ -207,8 +207,121 @@ If you refresh your browser, you should see the tasks view as same as previous o
 
 Calling `app('db')` returns the database connection instance that defines a `table()` method. This methods takes the name of database table we are interested in querying. The `table()` method returns an instance of query builder. The `fetchAll()` method returns the result set as an array of objects by default. Passing it `true` returns the result set as an array.
 
-Now that you have successfully listed tasks from database, its time to build functionality to add/edit tasks in the database.
+#### Using objects instead of arrays
+
+Before we go further with our **tasks** application, let us update `TaskController.php` to fetch tasks from database as an "array of objects". You will possibly find working with objects much cleaner than arrays in your view templates. Edit the contents of `app/Controllers/TaskController.php` as shown below.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    public function index()
+    {
+        // $data['tasks'] = app('db')->table('tasks')->fetchAll(true);
+        $data['tasks'] = app('db')->table('tasks')->fetchAll();
+
+        app('response')->render('tasks/home', $data);
+    }
+}
+```
+
+In the view template file, you will need to update array keys with object keys. Open `app/views/tasks/home.php` to update the template.
+
+```php
+<ul>
+<?php foreach($tasks as $task): ?>
+    <li>
+        <?= $task->title ?> :
+        <?= $task->status ?>
+    </li>
+<?php endforeach; ?>
+</ul>
+```
+
+If you refresh your browser, you should see tasks rendered with no errors.
+
+<img src="_media/tutorial/screen-3.png" style="width: 420px">
+
+Now that you have successfully listed tasks from database, its time to build functionality to **add/edit** tasks in the database.
 
 ## Task Management
 
-Documentation in progress...
+We have successfully rendered tasks from database. Now its time to enable task management feature by providing
+**add/edit** tasks form.
+
+Open `app/views/tasks/home.php` template and update the markup to support links editing a task and creating new tasks.
+
+```php
+<ul>
+<?php foreach($tasks as $task): ?>
+    <li>
+        <?= $task->title ?> :
+        <?= $task->status ?>
+        <a href="<?= url('tasks/edit', $task->id) ?>">
+            Edit
+        </a>
+    </li>
+<?php endforeach; ?>
+</ul>
+
+<hr>
+
+<a href="<?= url('tasks/add') ?>">
+    + New Task
+</a>
+```
+
+Now refresh your browser to view the updated screen.
+
+<img src="_media/tutorial/screen-4.png" style="max-width: 520px">
+
+<p class="tip">Note that we have used a utility function <code>url()</code> to generate our urls. This function takes any number of string arguments, concats them, and produces an URL relative to our application's base url.
+</p>
+
+### Add New Task
+
+We will first start with adding new task feature. Clicking on **new task** link will take you to `/tasks/add` URL path which will throw `RouteNotFoundException` exception because we have not registered our `GET /tasks/add` route.
+
+<img src="_media/tutorial/screen-5.png">
+
+Open `config/routes.php` file and add a new route for `/tasks/add`
+
+```php
+<?php
+
+/**
+ * Register app routes here.
+ */
+
+$route->group(['namespace' => 'App\Controllers'], function($route) {
+    // ...
+    $route->get('/tasks/add', 'TaskController@add');
+});
+```
+
+Now create a method named `add()` in `TaskController.php` file.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    // ...
+
+    public function add()
+    {
+        app('response')->render('tasks/form');
+    }
+}
+```
+
+We will need to create our task form template in `app/views/tasks/form.php` file.
+
+```php
+
+```

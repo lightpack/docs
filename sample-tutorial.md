@@ -287,14 +287,12 @@ We will first start with adding new task feature. Clicking on **new task** link 
 
 <img src="_media/tutorial/screen-5.png">
 
+#### Show Task Form
+
 Open `config/routes.php` file and add a new route for `/tasks/add`
 
 ```php
 <?php
-
-/**
- * Register app routes here.
- */
 
 $route->group(['namespace' => 'App\Controllers'], function($route) {
     // ...
@@ -323,5 +321,68 @@ class TaskController
 We will need to create our task form template in `app/views/tasks/form.php` file.
 
 ```php
+<form method="post">
+    <input name="title" placeholder="Title" required>
+    <button>Submit</button>
+</form>
 
+<a href="<?= url("tasks") ?>">Cancel</a>
 ```
+
+Refresh your browser to see the task form.
+
+<img src="_media/tutorial/screen-6.png" style="max-width:420px">
+
+#### Post Task Form
+
+Try to add a new task and submit the form. You should see `RouetNotFoundException` because
+when the form is posted, the browser requests `POST /tasks/add` for which we have not registered any route in our routes definition file.
+
+Add a route for `POST /tasks/add` in `config/routes.php` file.
+
+```php
+<?php
+
+$route->group(['namespace' => 'App\Controllers'], function($route) {
+    // ...
+    $route->post('/tasks/add', 'TaskController@add');
+});
+```
+
+Now try to re-submit the form. This time you should see the task form rendered with no exception. We now need to update `TaskController::add()` method to support inserting new data in database.
+
+Update the `add()` method in `app/Controllers/TaskController.php` file as shown.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    // ...
+
+    public function add()
+    {
+        $request = app('request');
+
+        if($request->isPost()) {
+            app('db')->table('tasks')->insert([
+                'title' => $request->post('title')
+            ]);
+
+            redirect('tasks');
+        }
+
+        app('response')->render('tasks/form');
+    }
+}
+```
+
+<p class="tip">Note that <code>app('request')</code> gives an instance of current HTTP request.</p>
+
+Try to add a new task. You should now see the new task listed. 
+
+We first check if the current request method is `POST`. For that we call `app('request')->isPost()` method. To access the `POST` request form data, you can simply use the global `$_POST` array, but we used `app('request)->post()` method. It takes the name of form field and returns the data. We then finally insert the posted data in the database using `insert()` method.
+
+> Note: We can also define a **TaskModel** that extends Lightpack's ORM model to ease working with **tasks** table. In this tutorial though, we will simply use the query builder to work with database.

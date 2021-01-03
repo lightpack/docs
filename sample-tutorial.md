@@ -96,9 +96,9 @@ class TaskController
     public function index()
     {
         $data['tasks'] = [
-            ['title' => 'Buy shoes', 'status' => 1], 
-            ['title' => 'Eat Snacks', 'status' => 0], 
-            ['title' => 'Learn PHP', 'status' => 0],
+            ['title' => 'Buy shoes', 'status' => 'Done'], 
+            ['title' => 'Eat Snacks', 'status' => 'Pending'], 
+            ['title' => 'Learn PHP', 'status' => 'Pending'],
         ];
 
         app('response')->render('tasks/home', $data);
@@ -106,7 +106,7 @@ class TaskController
 }
 ```
 
-In the above code, we have defined an array of fake tasks. Each task is an array having **title** and **status** key. By **status**, we mean whether the task is done **(1)** or not **(0)**.
+In the above code, we have defined an array of fake tasks. Each task is an array having **title** and **status** key.
 
 To render a view template, we call the `render()` method of response object returned by `app('response')` function call. This method takes path to a view template file relative to `app/views` directory and an optional array of data.
 
@@ -123,7 +123,7 @@ To render our tasks view, create `tasks` folder with `home.php` file in `app/vie
 <?php foreach($tasks as $task): ?>
     <li>
         <?= $task['title'] ?> :
-        <?= $task['status'] == 0 ? 'Pending' : 'Done' ?>
+        <?= $task['status'] ?>
     </li>
 <?php endforeach; ?>
 </ul>

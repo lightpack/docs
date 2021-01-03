@@ -1,7 +1,7 @@
 # Sample Tutorial
 
 In this tutorial, we are going to build a simple **tasks** application. The purpose of this
-tutorial is to give you a quick introduction of working with `Lightpack PHP` framework.
+tutorial is to give you a quick introduction of working with `Lightpack PHP` framework. This tutorial will not include working with **models**, **filters**, **events**, **validation**, **layouts** etc. It will be simple enough to get you a taset of this framework with a simple tasks management app.
 
 > **Note:** This tutorial has been tested on an **Ubuntu** dev server running **apache**.
 

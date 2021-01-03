@@ -14,4 +14,4 @@ The philosophy that drives `Lightpack` PHP framework:
 * It's okay to violate few industry best practices.
 * Avoid crippled today for an easier future tomorrow.
 
-`Lightpack` is released under [MIT] License Terms | &copy; [Pradeep Tiwari](https://github.com/pradeep-tiwari) 
+[Lightpack](https://github.com/lightpack/) is released under [MIT] License Terms | &copy; [Pradeep Tiwari](https://github.com/pradeep-tiwari) 

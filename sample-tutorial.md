@@ -194,7 +194,7 @@ class TaskController
 {
     public function index()
     {
-        $data['tasks'] = app('db')->table('tasks')->fetchAll();
+        $data['tasks'] = app('db')->table('tasks')->fetchAll(true);
 
         app('response')->render('tasks/home', $data);
     }
@@ -205,4 +205,6 @@ If you refresh your browser, you should see the tasks view as same as previous o
 
 <img src="_media/tutorial/screen-3.png" style="max-width: 420px">
 
-Calling `app('db')` return a database connection instance that define a `table()` method. This methods taskes the name of database table we are interested in querying. The `table()` method return an instance of query builder.
+Calling `app('db')` returns the database connection instance that defines a `table()` method. This methods taskes the name of database table we are interested in querying. The `table()` method return an instance of query builder. The `fetchAll()` method returns the result set as an array of objects by default. Passing it `true` returns the result set as an array.
+
+Now that you have successfully listed tasks from database, its time to build functionality to add/edit tasks in the database.

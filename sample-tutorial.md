@@ -1,7 +1,7 @@
 # Sample Tutorial
 
 In this tutorial, we are going to build a simple **tasks** application. The purpose of this
-tutorial is to give you a quick introduction of working with `Lightpack PHP` framework.
+tutorial is to give you a quick introduction of working with `Lightpack PHP` framework. This tutorial will not include working with **models**, **filters**, **events**, **validation**, **layouts** etc. It will be simple enough to get you a taset of this framework with a simple tasks management app.
 
 > **Note:** This tutorial has been tested on an **Ubuntu** dev server running **apache**.
 
@@ -207,8 +207,326 @@ If you refresh your browser, you should see the tasks view as same as previous o
 
 Calling `app('db')` returns the database connection instance that defines a `table()` method. This methods takes the name of database table we are interested in querying. The `table()` method returns an instance of query builder. The `fetchAll()` method returns the result set as an array of objects by default. Passing it `true` returns the result set as an array.
 
-Now that you have successfully listed tasks from database, its time to build functionality to add/edit tasks in the database.
+#### Using objects instead of arrays
+
+Before we go further with our **tasks** application, let us update `TaskController.php` to fetch tasks from database as an "array of objects". You will possibly find working with objects much cleaner than arrays in your view templates. Edit the contents of `app/Controllers/TaskController.php` as shown below.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    public function index()
+    {
+        // $data['tasks'] = app('db')->table('tasks')->fetchAll(true);
+        $data['tasks'] = app('db')->table('tasks')->fetchAll();
+
+        app('response')->render('tasks/home', $data);
+    }
+}
+```
+
+In the view template file, you will need to update array keys with object keys. Open `app/views/tasks/home.php` to update the template.
+
+```php
+<ul>
+<?php foreach($tasks as $task): ?>
+    <li>
+        <?= $task->title ?> :
+        <?= $task->status ?>
+    </li>
+<?php endforeach; ?>
+</ul>
+```
+
+If you refresh your browser, you should see tasks rendered with no errors.
+
+<img src="_media/tutorial/screen-3.png" style="width: 420px">
+
+Now that you have successfully listed tasks from database, its time to build functionality to **add/edit** tasks in the database.
 
 ## Task Management
 
-Documentation in progress...
+We have successfully rendered tasks from database. Now its time to enable task management feature by providing
+**add/edit** tasks form.
+
+Open `app/views/tasks/home.php` template and update the markup to support links editing a task and creating new tasks.
+
+```php
+<ul>
+<?php foreach($tasks as $task): ?>
+    <li>
+        <?= $task->title ?> :
+        <?= $task->status ?>
+        <a href="<?= url('tasks/edit', $task->id) ?>">
+            Edit
+        </a>
+    </li>
+<?php endforeach; ?>
+</ul>
+
+<hr>
+
+<a href="<?= url('tasks/add') ?>">
+    + New Task
+</a>
+```
+
+Now refresh your browser to view the updated screen.
+
+<img src="_media/tutorial/screen-4.png" style="max-width: 520px">
+
+<p class="tip">Note that we have used a utility function <code>url()</code> to generate our urls. This function takes any number of string arguments, concats them, and produces an URL relative to our application's base url.
+</p>
+
+### Add New Task
+
+We will first start with adding new task feature. Clicking on **new task** link will take you to `/tasks/add` URL path which will throw `RouteNotFoundException` exception because we have not registered our `GET /tasks/add` route.
+
+<img src="_media/tutorial/screen-5.png">
+
+#### Show task form
+
+Open `config/routes.php` file and add a new route for `/tasks/add`
+
+```php
+<?php
+
+$route->group(['namespace' => 'App\Controllers'], function($route) {
+    // ...
+    $route->get('/tasks/add', 'TaskController@add');
+});
+```
+
+Now create a method named `add()` in `TaskController.php` file.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    // ...
+
+    public function add()
+    {
+        app('response')->render('tasks/form');
+    }
+}
+```
+
+We will need to create our task form template in `app/views/tasks/form.php` file.
+
+```php
+<form method="post">
+    <input name="title" placeholder="Title" required>
+    <button>Submit</button>
+</form>
+
+<a href="<?= url("tasks") ?>">Cancel</a>
+```
+
+Refresh your browser to see the task form.
+
+<img src="_media/tutorial/screen-6.png" style="max-width:420px">
+
+#### Post task form
+
+Try to add a new task and submit the form. You should see `RouetNotFoundException` because
+when the form is posted, the browser requests `POST /tasks/add` for which we have not registered any route in our routes definition file.
+
+Add a route for `POST /tasks/add` in `config/routes.php` file.
+
+```php
+<?php
+
+$route->group(['namespace' => 'App\Controllers'], function($route) {
+    // ...
+    $route->post('/tasks/add', 'TaskController@add');
+});
+```
+
+Now try to re-submit the form. This time you should see the task form rendered with no exception. We now need to update `TaskController::add()` method to support inserting new data in database.
+
+Update the `add()` method in `app/Controllers/TaskController.php` file as shown.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    // ...
+
+    public function add()
+    {
+        $request = app('request');
+
+        if($request->isPost()) {
+            app('db')->table('tasks')->insert([
+                'title' => $request->post('title')
+            ]);
+
+            redirect('tasks');
+        }
+
+        app('response')->render('tasks/form');
+    }
+}
+```
+
+<p class="tip">Note that <code>app('request')</code> gives an instance of current HTTP request.</p>
+
+Try to add a new task. You should now see the new task listed. 
+
+We first check if the current request method is `POST`. For that we call `app('request')->isPost()` method. To access the `POST` request form data, you can simply use the global `$_POST` array, but we used `app('request)->post()` method. It takes the name of form field and returns the data. We then finally insert the posted data in the database using `insert()` method.
+
+> Note: We can also define a **TaskModel** that extends Lightpack's ORM model to ease working with **tasks** table. In this tutorial though, we will simply use the query builder to work with database.
+
+### Edit Task
+
+Click on **edit** task link to edit a task. You should see `RouteNotFoundException` because we need to register a route for editing our task. Let us solve that now.
+
+#### Show task form
+
+Update `config/routes.php` file to support task edting.
+
+```php
+<?php
+
+$route->group(['namespace' => 'App\Controllers'], function($route) {
+    // ...
+    $route->get('/tasks/edit/:num', 'TaskController@edit');
+});
+```
+
+In the `TaskController.php` file, add a new method named `edit()`.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    // ...
+
+    public function edit($id)
+    {
+        $data['task'] = app('db')->table('tasks')->where('id', '=', $id)->fetchOne();
+        
+        app('response')->render('tasks/form', $data);
+    }
+}
+```
+
+We are going to use the same form to edit a task. Update `app/views/tasks/form.php` as shown below.
+
+```php
+<form method="post">
+    <input name="title" placeholder="Title" value="<?= $task->title ?? '' ?>" required>
+    <button>Submit</button>
+</form>
+
+<a href="<?= url("tasks") ?>">Cancel</a>
+```
+
+Now if you try to edit a task, you should see the form populated with task title.
+
+<img src="_media/tutorial/screen-7.png" style="max-width: 420px">
+
+Let us also populate **tasks** status field. Update `app/views/tasks/form.php` as shown below.
+
+```php
+<form method="post">
+
+    <!-- Title -->
+    <input name="title" placeholder="Title" value="<?= $task->title ?? '' ?>" required>
+    
+    <!-- Status -->
+    <?php if($task->status): ?>
+        <select name="status">
+            <?php foreach(['Done', 'Pending'] as $status): ?>
+                <option <?= $task->status == $status ? 'selected' : '' ?>>
+                    <?= $status ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    <?php endif; ?>
+    
+    <!-- Submit -->
+    <button>Submit</button>
+
+</form>
+
+<a href="<?= url("tasks") ?>">Cancel</a>
+```
+
+Refresh your browser to see the task form populated with **status** field.
+
+<img src="_media/tutorial/screen-8.png" style="max-width: 420px">
+
+
+#### Post task form
+
+Let us add a route for handling `POST` requests to edit our tasks. Update `config/routes.php` file a new route definition for posting task edit form.
+
+```php
+<?php
+
+$route->group(['namespace' => 'App\Controllers'], function($route) {
+    // ...
+    $route->post('/tasks/edit/:num', 'TaskController@edit');
+});
+```
+
+Now update `edit()` method in `TaskController`.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class TaskController
+{
+    // ...
+
+    public function edit($id)
+    {
+        $data['task'] = app('db')->table('tasks')->where('id', '=', $id)->fetchOne();
+        $request = app('request');
+
+        if($request->isPost()) {
+            app('db')->table('tasks')->update(['id', $id], [
+                    'title' => $request->post('title'),
+                    'status' => $request->post('status')
+                ]
+            );
+
+            redirect('tasks');
+        }
+
+
+        app('response')->render('tasks/form', $data);
+    }
+}
+```
+
+Now try to edit a task. It should successfully update the database to reflect changes.
+
+## Final Notes
+
+If you reached so far with this tutorial, you definitely have got acquainted with `Lightpack` framework. We could have extended this tutorial to introduce **filters**,
+**models**, **events**, **layouts**, and a couple of tips for much cleaner code. But to 
+keep things simple, we restricted it to only have an introduction about working with `Lightpack`.
+
+Performance benchmark shows `Lightpack` outshine some of the well known frameworks in PHP community. It even outshines **Codeigniter3** and **Codeigniter4** in our benchmark. But we do not want you take our word for granted.
+
+We encourage you to evaluate `Ligtpack` with your own benchmarks and let us know about your experience. `Lightpack` is in its **alpha** version for now and is bound to change 
+in its architecture. This is the best time to support this framework and become a core contributor. 
+
+Open pull requests and issues if you find it good enough for your attention. 😀👍

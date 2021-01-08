@@ -34,9 +34,9 @@ in <code>app/filters</code> folder.
 ```php
 <?php
 
-use Framework\Http\Request;
-use Framework\Http\Response;
-use Framework\Filters\IFilter;
+use Lightpack\Http\Request;
+use Lightpack\Http\Response;
+use Lightpack\Filters\IFilter;
 
 class TrimFilter implements IFilter
 {

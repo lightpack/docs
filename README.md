@@ -10,7 +10,6 @@ The philosophy that drives `Lightpack` PHP framework:
 * Cut down the layers to minimize deep call chains.
 * Avoid wrappers around wrappers around wrappers. "The wrappers hell."
 * Avoid jargons in favor of well known terms. (Example: Model instead of Gateway)
-* A functional and obvious name is better than a cool one. (Example: Auth instead of SomeCoolAlien)
 * All design choices come with tradeoffs.
 * It's okay to violate few industry best practices.
 * Avoid crippled today for an easier future tomorrow.

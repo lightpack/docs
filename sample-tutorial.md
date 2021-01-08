@@ -186,7 +186,7 @@ return [
 ];
 ```
 
-Now its time to update our `TaskController.php` file to fetch tasks from database. Replace `app/ControllersTaskController.php` with following code.
+Now its time to update our `TaskController.php` file to fetch tasks from database. Replace `app/Controllers/TaskController.php` with following code.
 
 ```php
 <?php

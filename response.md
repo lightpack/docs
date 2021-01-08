@@ -1,6 +1,6 @@
 # Response
 
-The <code>Framework\Http\Response</code> class provides few utility methods to help with
+The <code>Lightpack\Http\Response</code> class provides few utility methods to help with
 generating appropriate response to output.
 
 An instance of this class has already been configured in service container. So you can access

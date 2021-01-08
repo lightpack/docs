@@ -1,6 +1,6 @@
 # Request
 
-The <code>Framework\Http\Request</code> class provides utility methods to deal with
+The <code>Lightpack\Http\Request</code> class provides utility methods to deal with
 incoming HTTP request. 
 
 Lightpack already configures an instance of <code>Request</code> in IoC container.

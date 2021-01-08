@@ -15,7 +15,7 @@ You can also manually configure a query builder object by instantiating the <cod
 ```php
 <?php
 
-use Framework\Database\Query\Query;
+use Lightpack\Database\Query\Query;
 
 $products = new Query('products');
 ```

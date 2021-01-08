@@ -47,7 +47,7 @@ Before relating our tables we first need to define their models as shown below.
 
 namespace App\Models;
 
-use Framework\Database\Lucid\Model;
+use Lightpack\Database\Lucid\Model;
 
 class Product extends Model
 {
@@ -64,7 +64,7 @@ class Product extends Model
 
 namespace App\Models;
 
-use Framework\Database\Lucid\Model;
+use Lightpack\Database\Lucid\Model;
 
 class Option extends Model
 {
@@ -81,7 +81,7 @@ class Option extends Model
 
 namespace App\Models;
 
-use Framework\Database\Lucid\Model;
+use Lightpack\Database\Lucid\Model;
 
 class Seo extends Model
 {

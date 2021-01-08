@@ -42,8 +42,8 @@ Lightpack supports `MySQL` and `Sqlite` adapters. To manually create a new conne
 the database connections options.
 
 ```php
-$mysql = new \Framework\Database\Adapters\Mysql($options);
-$sqlite = new \Framework\Database\Adapters\Sqlite($options);
+$mysql = new Lightpack\Database\Adapters\Mysql($options);
+$sqlite = new Lightpack\Database\Adapters\Sqlite($options);
 ```        
 
 <p class="tip">Once you make a database connection, you can start querying against it using the <a href="https://www.php.net/manual/en/book.pdo.php" target="_blank">PHP PDO APIs</a>.
@@ -71,7 +71,7 @@ in the service connector, you can register it as a service as shown below.
 
 ```php
 $container->register('mysql', function($container) {
-    return new Framework\Database\Adapters\MySql(
+    return new Lightpack\Database\Adapters\MySql(
         $container->get('config')->database['mysql']
     );
 });

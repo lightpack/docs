@@ -361,3 +361,11 @@ $validator->setRule('confirm_password', 'matches:password=' . $_POST['password']
 ```
 
 **NOTE:** You must pass the matching field name and its value seperated by `=` equals sign. 
+
+### regex
+
+Custom `regular expression` based validation logic is also supported.
+
+```php
+$validator->setRule('phone', 'regex:/^\d{3}-\d{3}-\d{4}$/');
+```

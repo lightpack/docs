@@ -46,3 +46,9 @@ Get all validation errors as an array
 ```php
 $validator->getErrors();
 ```
+
+Now that you have a quick start with data validation in `Lightpack`, let us go through docs in detail.
+
+## Setting Rules
+
+Documentation in progress...

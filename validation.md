@@ -357,7 +357,7 @@ as that of `password` field. Use the `matches` filter to do so.
 
 ```php
 $validator->setRule('password', 'required|min:8|max:45');
-$validator->setRule('confirm_password', 'matches:password=' . $_POST['password']);
+$validator->setRule('confirm_password', 'match:password=' . $_POST['password']);
 ```
 
 **NOTE:** You must pass the matching field name and its value seperated by `=` equals sign. 

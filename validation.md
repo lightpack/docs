@@ -316,7 +316,7 @@ date format seperated by ':'.
 
 ```php
 $validator->setRule('birthday', 'date:d-m-Y');
-$validator->setRule('last_login', 'date:YYYY-MM-DD);
+$validator->setRule('last_login', 'date:YYYY-MM-DD');
 ```
 
 ### before

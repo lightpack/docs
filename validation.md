@@ -211,3 +211,90 @@ Now this will produce error message with provided label.
 ```php
 echo $validator->getError('fname'); // First name is required
 ```
+
+## Available Validation Rules
+
+Lightpack provides a good number of validation rules for most frequently
+used scenarios. Below is a list of available rules with example.
+
+### required
+
+This rule validates if a data field is not empty.
+
+```php
+$validator->setrule('password', 'required');
+```
+
+### alpha
+
+This rule validates that a field has only ASCII characters `A-Z, a-z`.
+
+```php
+$validator->setrule('name', 'alpha');
+```
+
+### alnum
+
+This rule validates that a field has only ASCII characters `A-Z, a-z, 0-9`.
+
+```php
+$validator->setrule('username', 'alnum');
+```
+
+### email
+
+This rule check for a valid email.
+
+```php
+$validator->setrule('email', 'email');
+```
+
+### slug
+
+This rule validates that a field has a valid slug text. That means any combination
+of `A-Z, a-z, 0-9, -, _` characters is valid.
+
+```php
+$validator->setrule('id', 'slug');
+```
+
+### url
+
+This rule validates that a field has a valid URL.
+
+```php
+$validator->setrule('website', 'url');
+```
+
+### ip
+
+This rule validates that a field has a valid IP address.
+
+```php
+$validator->setrule('server', 'ip');
+```
+
+### min
+
+This rule checks that a field has exactly `N` ASCII characters where `N` is an integer.
+
+```php
+$validator->setRule('phone', 'length:10');
+```
+
+### min
+
+This rule checks whether a field has a minimum value provided as an integer.
+
+```php
+$validator->setRule('name', 'min:3');
+```
+
+### max
+
+This rule checks whether a field exceeds maximum value provided as an integer.
+
+```php
+$validator->setRule('name', 'max:25');
+```
+

@@ -211,3 +211,161 @@ Now this will produce error message with provided label.
 ```php
 echo $validator->getError('fname'); // First name is required
 ```
+
+## Available Validation Rules
+
+Lightpack provides a good number of validation rules for most frequently
+used scenarios. Below is a list of available rules with example.
+
+### required
+
+This rule validates if a data field is not empty.
+
+```php
+$validator->setrule('password', 'required');
+```
+
+### alpha
+
+This rule validates that a field has only ASCII characters `A-Z, a-z`.
+
+```php
+$validator->setrule('name', 'alpha');
+```
+
+### alnum
+
+This rule validates that a field has only ASCII characters `A-Z, a-z, 0-9`.
+
+```php
+$validator->setrule('username', 'alnum');
+```
+
+### email
+
+This rule check for a valid email.
+
+```php
+$validator->setrule('email', 'email');
+```
+
+### slug
+
+This rule validates that a field has a valid slug text. That means any combination
+of `A-Z, a-z, 0-9, -, _` characters is valid.
+
+```php
+$validator->setrule('id', 'slug');
+```
+
+### url
+
+This rule validates that a field has a valid URL.
+
+```php
+$validator->setrule('website', 'url');
+```
+
+### ip
+
+This rule validates that a field has a valid IP address.
+
+```php
+$validator->setrule('server', 'ip');
+```
+
+### length
+
+This rule checks that a field has exactly `N` ASCII characters where `N` is an integer.
+
+```php
+$validator->setRule('phone', 'length:10');
+```
+
+### min
+
+This rule checks whether a field has a minimum value provided as an integer.
+
+```php
+$validator->setRule('name', 'min:3');
+```
+
+### max
+
+This rule checks whether a field exceeds maximum value provided as an integer.
+
+```php
+$validator->setRule('name', 'max:25');
+```
+
+### between
+
+This rule checks if a field has a value between a minimum and maxium value.
+
+```php
+$this->validate('age', 'between:18,30');
+```
+
+**NOTE** The `between` filter also includes the range values. So the above example specifies
+to validate the field where `18 <= age <= 30`.
+
+### date
+
+This rule check if a field has valid date format. You need to provide a valid
+date format seperated by ':'.
+
+```php
+$this->validate('birthday', 'date:d-m-Y');
+$this->validate('last_login', 'date:YYYY-MM-DD);
+```
+
+### before
+
+This rule checks if a field has date value before a given date.
+
+```php
+$this->validate('registration_date', 'before:/d-m-Y,12-09-2021/');
+```
+
+Notice the syntax for providing before date filter. You must provide a valid
+date format and a date value seperatedby a comma.
+
+### after
+
+This rule checks if a field has date value after a given date.
+
+```php
+$this->validate('last_payment', 'after:/d-m-Y,12-09-2020/');
+```
+
+Notice the syntax for providing before date filter. You must provide a valid
+date format and a date value seperatedby a comma.
+
+### match
+
+This rule checks if a field has same value as with another field. For example, consider this form:
+
+```php
+<form method="post">
+    <input type="password" name="password">
+    <input type="password" name="confirm_password">
+</form>
+```
+
+When the above is posted, we might want to validate that `confirm_password` field has same value 
+as that of `password` field. Use the `matches` filter to do so.
+
+```php
+$validator->setRule('password', 'required|min:8|max:45');
+$validator->setRule('confirm_password', 'match:password=' . $_POST['password']);
+```
+
+**NOTE:** You must pass the matching field name and its value seperated by `=` equals sign. 
+
+### regex
+
+Custom `regular expression` based validation logic is also supported.
+
+```php
+$validator->setRule('phone', 'regex:/^\d{3}-\d{3}-\d{4}$/');
+```

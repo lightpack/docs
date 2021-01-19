@@ -99,7 +99,7 @@ documented below.
 
 ## Validation Errors
 
-Now you can check if validation has failed by calling `hasErrors()` method. This method returns
+You can check if validation has failed by calling `hasErrors()` method. This method returns
 a boolean `TRUE` if validation failed, otherwise `FALSE`.
 
 ```php
@@ -108,7 +108,7 @@ if($validator->hasErrors()) {
 }
 ```
 
-**NOTE**: You can chain together the call tos `run()` and `hasErrors()` methods.
+**NOTE**: You can chain together the calls to `run()` and `hasErrors()` methods.
 
 ```php
 if($validator->run()->hasErrors()) {
@@ -118,4 +118,15 @@ if($validator->run()->hasErrors()) {
 
 ### Getting validation errors
 
-Documentation in progress...
+To get all error messages together as an array, call `getErrors()` method.
+
+```php
+$validator->getErrors(); 
+```
+
+To get error message for an individual field, call `getError()` method. It returns the error message
+string text or an empty string if the field has no validation error.
+
+```php
+$validator->getError('email');
+```

@@ -180,13 +180,14 @@ To validate form data:
 $validator->setRule('fname', 'required');
 ```
 
-If you echo the error message in case form field is empty,
+If you echo the error message in case form field is empty, it will produce error message using
+`fname` as label.
 
 ```php
 echo $validator->getError('fname'); // Fname is required
 ```
 
-Because the validator tries to convert the field `fname` to human readable format. To make
+This is because the validator tries to convert the field `fname` to human readable format. To make
 things better, either you provide custom error message:
 
 ```php

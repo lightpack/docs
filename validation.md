@@ -51,4 +51,22 @@ Now that you have a quick start with data validation in `Lightpack`, let us go t
 
 ## Setting Rules
 
-Documentation in progress...
+You can specify rules per field either individually using `setRule()` or all together at once using 
+`setRules()` method.
+
+### Setting rules individually
+
+To set rules for an individual field, call `setRule()` method:
+
+```php
+$validator->setRule('email', 'required|email');
+$validator->setRule('password', 'required|min:8');
+```
+
+You can also chain calls to `setRule()` methods:
+
+```php
+$validator
+    ->setRule('email', 'required|email');
+    ->setRule('password', 'required|min:8');
+```

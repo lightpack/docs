@@ -65,7 +65,7 @@ $validator->setRule('email', 'required|email');
 $validator->setRule('password', 'required|min:8');
 ```
 
-You can also chain calls to `setRule()` methods:
+You can also chain calls to `setRule()` method:
 
 ```php
 $validator
@@ -140,7 +140,7 @@ message for a field, you can do that too.
 To customze an error message for a field, pass an array of rules and custom message.
 
 ```php
-$this->setRules([
+$validator->setRules([
     'email' => [
         'rules' => 'required|email',
         'error' => 'Email appears to be invalid.',
@@ -303,7 +303,7 @@ $validator->setRule('name', 'max:25');
 This rule checks if a field has a value between a minimum and maxium value.
 
 ```php
-$this->validate('age', 'between:18,30');
+$validator->setRule('age', 'between:18,30');
 ```
 
 **NOTE** The `between` filter also includes the range values. So the above example specifies
@@ -315,8 +315,8 @@ This rule check if a field has valid date format. You need to provide a valid
 date format seperated by ':'.
 
 ```php
-$this->validate('birthday', 'date:d-m-Y');
-$this->validate('last_login', 'date:YYYY-MM-DD);
+$validator->setRule('birthday', 'date:d-m-Y');
+$validator->setRule('last_login', 'date:YYYY-MM-DD);
 ```
 
 ### before
@@ -324,7 +324,7 @@ $this->validate('last_login', 'date:YYYY-MM-DD);
 This rule checks if a field has date value before a given date.
 
 ```php
-$this->validate('registration_date', 'before:/d-m-Y,12-09-2021/');
+$validator->setRule('registration_date', 'before:/d-m-Y,12-09-2021/');
 ```
 
 Notice the syntax for providing before date filter. You must provide a valid
@@ -335,7 +335,7 @@ date format and a date value seperatedby a comma.
 This rule checks if a field has date value after a given date.
 
 ```php
-$this->validate('last_payment', 'after:/d-m-Y,12-09-2020/');
+$validator->setRule('last_payment', 'after:/d-m-Y,12-09-2020/');
 ```
 
 Notice the syntax for providing before date filter. You must provide a valid

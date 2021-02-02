@@ -16,9 +16,9 @@ While caching in itself can introduce its own challenges, `Lightpack` provides y
 Following is the list of cache methods available:
 
 ```php
-app('cache')->has();
-app('cache')->get();
 app('cache')->set();
+app('cache')->get();
+app('cache')->has();
 app('cache')->delete();
 app('cache')->flush();
 ```
@@ -30,10 +30,19 @@ app('cache')->flush();
 To store an item in the cache, call `set()` method. It takes item `key`, item
 `value` and item expiry time in `minutes`.
 
-This example store in cache an item with key `name` and value `Bob` for `5 minutes`.
+This example stores in cache an item with key `name` and value `Bob` for `5 minutes`.
 
 ```php
 app('cache')->set('name', 'Bob', 5);
+```
+
+### get()
+
+To get an item from cache, call `get()` method passing it the item key. It returns
+`null` if the item does not exist in the cache.
+
+```php
+app('cache')->get('name'); // Bob
 ```
 
 ### has()
@@ -42,4 +51,13 @@ To check if an item is in the cache, use `has()` method. This method return a `b
 
 ```php
 app('cache')->has('name');
+```
+
+### delete()
+
+To delete an item from the cache, call `delete()` method passing it the
+the item key.
+
+```php
+app('cache')->delete('name');
 ```

@@ -76,10 +76,41 @@ app('cache')->flush();
 To store an item in the cache that doesn't expire soon, call `forever()` method.
 It takes the item `key` and item `value` as its parameters. 
 
-**NOTE:** This method sets the cache item expiry to 5 years.
+**NOTE:** This method sets the cache item expiry to 5 years. In case you want to expire the cached item, call `delete()` method manually to do so.
 
 The following example caches forever the item with key `site_theme` and value `Marble`.
 
 ```php
 app('cache')->forever('site_theme', 'Marble');
 ```
+
+## Manual Configuration
+
+As you already know by now that `Lightpack` provides **file** based caching by default. However, you can manually configure cache provider yourself.
+
+To manually create a cache service provider, first create an instance of the
+cache driver and then pass it to the contructor of `Cache` class as shown below.
+
+```php
+<?php
+
+use Lightpack\Cache\Cache;
+use Lightpack\Cache\Drivers\File;
+
+$driver = new File(DIR_STORAGE . '/cache');
+$cache = new Cache($driver);
+```
+
+Now you can access cache methods as usual.
+
+```php
+$cache->set('name', 'Bob', 5);
+$cache->get('name'); // Bob
+```
+
+## Available Drivers
+
+`Lightpack` provides a **file** based cache driver for now.  Adding new drivers
+is in the way. However, if you can, create a pull request with your own driver implementation to expand available cache drivers.
+
+**NOTE:** All the drivers must implement `Lightpack\Cache\DriverInterface`.

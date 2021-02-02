@@ -11,7 +11,7 @@ While caching in itself can introduce its own challenges, `Lightpack` provides y
 
 ## Quick start
 
-`Lightpack` comes pre-configured with a default file based cache service which you can start using without much changes required. 
+`Lightpack` comes pre-configured with a default **file** based cache service which you can start using without much changes required. 
 
 Following is the list of cache methods available:
 
@@ -24,3 +24,12 @@ app('cache')->flush();
 ```
 
 <p class="tip">NOTE: You will have to set appropriate write permissions on <code>storage</code> directory in order to work with file cache.</p>
+
+### has()
+
+To check if an item is in the cache, use `has()` method. This method return a `boolean` true or false. Pass it the item key to check for the item existence.
+
+```php
+app('cache')->has('name');
+```
+

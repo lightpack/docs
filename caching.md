@@ -21,6 +21,7 @@ app('cache')->get();
 app('cache')->has();
 app('cache')->delete();
 app('cache')->flush();
+app('cache')->forever();
 ```
 
 <p class="tip">NOTE: You will have to set appropriate write permissions on <code>storage</code> directory in order to work with file cache.</p>
@@ -60,4 +61,12 @@ the item key.
 
 ```php
 app('cache')->delete('name');
+```
+
+### flush()
+
+To delete all the items from the cache store, call `flush` method.
+
+```php
+app('cache')->flush();
 ```

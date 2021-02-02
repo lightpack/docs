@@ -25,6 +25,17 @@ app('cache')->flush();
 
 <p class="tip">NOTE: You will have to set appropriate write permissions on <code>storage</code> directory in order to work with file cache.</p>
 
+### set()
+
+To store an item in the cache, call `set()` method. It takes item `key`, item
+`value` and item expiry time in `minutes`.
+
+This example store in cache an item with key `name` and value `Bob` for `5 minutes`.
+
+```php
+app('cache')->set('name', 'Bob', 5);
+```
+
 ### has()
 
 To check if an item is in the cache, use `has()` method. This method return a `boolean` true or false. Pass it the item key to check for the item existence.
@@ -32,4 +43,3 @@ To check if an item is in the cache, use `has()` method. This method return a `b
 ```php
 app('cache')->has('name');
 ```
-

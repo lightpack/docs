@@ -76,7 +76,7 @@ app('cache')->flush();
 To store an item in the cache that doesn't expire soon, call `forever()` method.
 It takes the item `key` and item `value` as its parameters. 
 
-**NOTE:** This method sets the cache item expiry to 5 years.
+**NOTE:** This method sets the cache item expiry to 5 years. In case you want to expire the cached item, call `delete()` method manually to do so.
 
 The following example caches forever the item with key `site_theme` and value `Marble`.
 

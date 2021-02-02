@@ -70,3 +70,16 @@ To delete all the items from the cache store, call `flush` method.
 ```php
 app('cache')->flush();
 ```
+
+### forever()
+
+To store an item in the cache that doesn't expire soon, call `forever()` method.
+It takes the item `key` and item `value` as its parameters. 
+
+**NOTE:** This method sets the cache item expiry to 5 years.
+
+The following example caches forever the item with key `site_theme` and value `Marble`.
+
+```php
+app('cache')->forever('site_theme', 'Marble');
+```

@@ -37,4 +37,5 @@
   * [Filters](filters.md)
   * [Events](events.md)
   * [Modules](modules.md)
+  * [Caching](caching.md)
   * [Containers](containers.md)

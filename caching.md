@@ -1,6 +1,6 @@
 # Caching
 
-A cache is a store where you put some data to enhance application performance by reducing data computation. 
+A cache is a store where you put some data to enhance application performance by reducing frequent data computation. 
 
 For example, suppose an online shopping store website displays all its categories with products count. Querying the database
 to aggregate categories with products count
@@ -48,7 +48,7 @@ app('cache')->get('name'); // Bob
 
 ### has()
 
-To check if an item is in the cache, use `has()` method. This method return a `boolean` true or false. Pass it the item key to check for the item existence.
+To check if an item is in the cache, use `has()` method. This method returns a `boolean` true or false. Pass it the item key to check for the item existence.
 
 ```php
 app('cache')->has('name');

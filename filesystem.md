@@ -117,3 +117,25 @@ You can also get the formatted file size as `B, KB, MB, GB, TB`. Pass `true` as 
 ```php
 $file->size('/path/to/file'); // 1KB
 ```
+
+## modified()
+
+To get the time the file was last modified, call `modified()` method. 
+
+```php
+$file->modified('/path/to/file');
+```
+
+It returns a UNIX timestamp by default. But you can also format the result by passing `true` as second parameter.
+
+This will return the last modified date formatted as `M d, Y`.
+
+```php
+$file->modified('/path/to/file', true); // Feb 7, 2020
+```
+
+You can pass the date format as third parameter to this method.
+
+```php
+$file->modified('/path/to/file', true, 'd-M, Y'); // 7-Feb, 2020
+```

@@ -165,3 +165,17 @@ To check if a filepath is a folder, call `isDir()` method. It returns `true` on 
 ```php
 $file->isDir('/path/to/file');
 ```
+
+## makeDir()
+
+To create a new folder, call `makeDir()` method. This method returns `true` on success otherwise `false`.
+
+```php
+$file->makeDir('/path/to/file');
+```
+
+By default it tries to create the directory with a permission value `0777`. You can pass the permission assecond parameter to this method.
+
+```php
+$file->makeDir('/path/to/file', 0775);
+```

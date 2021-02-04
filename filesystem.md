@@ -23,6 +23,7 @@ $file->rename();
 $file->move();
 $file->extension();
 $file->size();
+$file->modified();
 $file->info();
 $file->isDir();
 $file->makeDir();
@@ -30,6 +31,13 @@ $file->copyDir();
 $file->emptyDir();
 $file->removeDir();
 $file->recent();
-$file->modified();
 $file->traverse();
+```
+
+## get()
+
+To read the entire contents of a file, call `get()` method. It returns `null` if the file doesn't exist.
+
+```php
+$file->get('/path/to/file');
 ```

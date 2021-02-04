@@ -227,4 +227,21 @@ This method returns an instance of [`SplFileInfo`](https://www.php.net/manual/en
 
 ```php
 $recent = $file->recent('/path/to/file');
+
+// Now you can access all methods in SplFileInfo class.
+$recent->getFilename();
+```
+
+## traverse()
+
+To list all the files and folders in a given directory, call `traverse()` method. 
+
+This method will return an array of the contents of a folder with filepath as `key` and an instance of `SplFileInfo` as value.
+
+```php
+$files = $file->traverse('path/to/file');
+
+foreach($files as $file) {
+    echo $file->getFilename();
+}
 ```

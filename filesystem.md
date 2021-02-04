@@ -99,3 +99,7 @@ This is an alias of the `rename()` method above. It moves a source file to a giv
 ```php
 $file->move('/path/to/source', '/path/to/destination');
 ```
+
+## extension()
+
+To get the extension of a file (e.g. txt, jpg, png, etc.), call `extension()` method.

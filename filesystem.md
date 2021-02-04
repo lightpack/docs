@@ -91,3 +91,11 @@ To rename a file, call `rename()` method. This is same as `copy()` except that i
 ```php
 $file->rename('/path/to/source', '/path/to/destination');
 ```
+
+## move()
+
+This is an alias of the `rename()` method above. It moves a source file to a given destination path and deletes the source file.
+
+```php
+$file->move('/path/to/source', '/path/to/destination');
+```

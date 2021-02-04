@@ -179,3 +179,20 @@ By default it tries to create the directory with a permission value `0777`. You 
 ```php
 $file->makeDir('/path/to/file', 0775);
 ```
+
+## copyDir()
+
+To copy the contents of a source folder into another folder, call `copyDir()` method. It will recursively copy all the files and sub-folders from the source to the destination folder.
+
+This returns `true` on success otherwise `false`. 
+
+```php
+$file->copyDir('/path/to/source', '/path/to/destination');
+```
+
+If you want to delete the surce folder after copy operation, pass
+`true` as third argument.
+
+```php
+$file->copyDir('/path/to/source', '/path/to/destination', true);
+```

@@ -36,8 +36,16 @@ $file->traverse();
 
 ## get()
 
-To read the entire contents of a file, call `get()` method. It returns `null` if the file doesn't exist.
+To read the entire contents of a file into a string, call `get()` method. It returns `null` if the file doesn't exist.
 
 ```php
 $file->get('/path/to/file');
+```
+
+## put()
+
+To write a string data to a file, call `put()` method. It will try to create the file if the file doesn't exist otherwise it will overwrite the file existing file contents with new data.
+
+```php
+$file->put('/path/to/file', 'Hello World');
 ```

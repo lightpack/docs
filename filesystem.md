@@ -49,3 +49,11 @@ To write a string data to a file, call `put()` method. It will try to create the
 ```php
 $file->put('/path/to/file', 'Hello World');
 ```
+
+## exists()
+
+To check whether a file or folder exists, call `exists()` method. It returns a boolean `true` if it exists otherwise `false`.
+
+```php
+$file->exists('/path/to/file');
+```

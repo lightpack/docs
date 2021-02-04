@@ -196,3 +196,15 @@ If you want to delete the surce folder after copy operation, pass
 ```php
 $file->copyDir('/path/to/source', '/path/to/destination', true);
 ```
+
+## emptyDir()
+
+To empty a folder, call `emptyDir()` method. This method will delete all the files and folders in the source directory.
+
+It returns `true` on success otherwise `false` on failure.
+
+```php
+$file->emptyDir('/path/to/source');
+```
+
+**Note** that this method will not delete the source folder itself.

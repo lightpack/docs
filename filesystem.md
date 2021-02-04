@@ -83,3 +83,11 @@ This method returns `true` on success otherwise `false`.
 ```php
 $file->copy('/path/to/source', '/path/to/destination');
 ```
+
+## rename()
+
+To rename a file, call `rename()` method. This is same as `copy()` except that it will delete the source file.
+
+```php
+$file->rename('/path/to/source', '/path/to/destination');
+```

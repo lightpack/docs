@@ -103,3 +103,17 @@ $file->move('/path/to/source', '/path/to/destination');
 ## extension()
 
 To get the extension of a file (e.g. txt, jpg, png, etc.), call `extension()` method.
+
+## size()
+
+The get the size of a file in bytes, call `size()` method.
+
+```php
+$file->size('/path/to/file'); // 1024
+```
+
+You can also get the formatted file size as `B, KB, MB, GB, TB`. Pass `true` as second parameter to this method.
+
+```php
+$file->size('/path/to/file'); // 1KB
+```

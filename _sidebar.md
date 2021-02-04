@@ -4,7 +4,7 @@
   * [Quick Install](install.md)
   * [Sample Tutorial](sample-tutorial.md)
 
-* HTTP
+* Basics
 
   * [Routing](routing.md)
   * [Controllers](controllers.md)
@@ -13,6 +13,7 @@
   * [Sessions](sessions.md)
   * [Cookies](cookies.md)
   * [Validation](validation.md)
+  * [Filesystem](filesystem.md)
 
 * Databases
 

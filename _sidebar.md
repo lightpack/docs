@@ -4,7 +4,7 @@
   * [Quick Install](install.md)
   * [Sample Tutorial](sample-tutorial.md)
 
-* HTTP
+* Basics
 
   * [Routing](routing.md)
   * [Controllers](controllers.md)

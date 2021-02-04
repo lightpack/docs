@@ -57,3 +57,12 @@ To check whether a file or folder exists, call `exists()` method. It returns a b
 ```php
 $file->exists('/path/to/file');
 ```
+
+## delete()
+
+To delete a file, call `delete` method. It returns `true` on success otherwise `false`.
+
+```php
+$file->delete('/path/to/file');
+```
+

@@ -218,3 +218,13 @@ It returns `true` on success otherwise `false`.
 ```php
 $file->removeDir('/path/to/file');
 ```
+
+## recent()
+
+To get the most recently modified file in a folder, call `recent()` method. 
+
+This method returns an instance of [`SplFileInfo`](https://www.php.net/manual/en/class.splfileinfo.php) class which provides a number of methods to get the information about a file.
+
+```php
+$recent = $file->recent('/path/to/file');
+```

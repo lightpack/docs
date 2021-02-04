@@ -73,3 +73,13 @@ To append data to the end of the file, call `append()` method.
 ```php
 $file->append('/path/to/file', 'Thanks.');
 ```
+
+## copy()
+
+To make a copy of a file, call `copy()` method. Pass it the source file path and destination path. If the destination path already exists, its content will be overwritten with source file contents.
+
+This method returns `true` on success otherwise `false`.
+
+```php
+$file->copy('/path/to/source', '/path/to/destination');
+```

@@ -204,7 +204,17 @@ To empty a folder, call `emptyDir()` method. This method will delete all the fil
 It returns `true` on success otherwise `false` on failure.
 
 ```php
-$file->emptyDir('/path/to/source');
+$file->emptyDir('/path/to/file');
 ```
 
 **Note** that this method will not delete the source folder itself.
+
+## removeDir()
+
+To delete a folder and all its content, call `removeDir()` method.
+
+It returns `true` on success otherwise `false`.
+
+```php
+$file->removeDir('/path/to/file');
+```

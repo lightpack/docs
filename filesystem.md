@@ -158,3 +158,10 @@ Now you can call all the methods defined in `SplFileInfo` class. For example:
 $fileinfo->getFilename();
 ```
 
+## isDir()
+
+To check if a filepath is a folder, call `isDir()` method. It returns `true` on success otherwise `false`.
+
+```php
+$file->isDir('/path/to/file');
+```

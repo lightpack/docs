@@ -44,7 +44,7 @@ $file->get('/path/to/file');
 
 ## put()
 
-To write a string data to a file, call `put()` method. It will try to create the file if the file doesn't exist otherwise it will overwrite the file existing file contents with new data.
+To write a string data to a file, call `put()` method. It will try to create the file if the file doesn't exist otherwise it will overwrite the existing file contents with new data.
 
 ```php
 $file->put('/path/to/file', 'Hello World');
@@ -66,3 +66,10 @@ To delete a file, call `delete` method. It returns `true` on success otherwise `
 $file->delete('/path/to/file');
 ```
 
+## append()
+
+To append data to the end of the file, call `append()` method.
+
+```php
+$file->append('/path/to/file', 'Thanks.');
+```

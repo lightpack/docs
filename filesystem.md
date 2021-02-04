@@ -139,3 +139,22 @@ You can pass the date format as third parameter to this method.
 ```php
 $file->modified('/path/to/file', true, 'd-M, Y'); // 7-Feb, 2020
 ```
+
+## info()
+
+Calling `info()` method returns an instance of `SplFileInfo` class from PHP SPL library. This class provides an object-oriented access to the properties of a file or directory.
+
+It is worth your time to have a look at this class details.
+
+[SplFileInfo](https://www.php.net/manual/en/class.splfileinfo.php)
+
+```php
+$fielinfo = $file->info('/path/to/file');
+```
+
+Now you can call all the methods defined in `SplFileInfo` class. For example:
+
+```php
+$fileinfo->getFilename();
+```
+

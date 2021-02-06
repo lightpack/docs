@@ -13,9 +13,9 @@ $file = new Lightpackk\File\File();
 Now you can access following listed methods to work with files in your local system.
 
 ```php
+$file->exists();
 $file->read();
 $file->write();
-$file->exists();
 $file->delete();
 $file->append();
 $file->copy();
@@ -34,6 +34,14 @@ $file->recent();
 $file->traverse();
 ```
 
+## exists()
+
+To check whether a file or folder exists, call `exists()` method. It returns a boolean `true` if it exists otherwise `false`.
+
+```php
+$file->exists('/path/to/file');
+```
+
 ## read()
 
 To read the entire contents of a file into a string, call `read()` method. It returns `null` if the file doesn't exist.
@@ -48,14 +56,6 @@ To write a string data to a file, call `write()` method. It will try to create t
 
 ```php
 $file->write('/path/to/file', 'Hello World');
-```
-
-## exists()
-
-To check whether a file or folder exists, call `exists()` method. It returns a boolean `true` if it exists otherwise `false`.
-
-```php
-$file->exists('/path/to/file');
 ```
 
 ## delete()

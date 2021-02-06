@@ -13,8 +13,8 @@ $file = new Lightpackk\File\File();
 Now you can access following listed methods to work with files in your local system.
 
 ```php
-$file->get();
-$file->put();
+$file->read();
+$file->write();
 $file->exists();
 $file->delete();
 $file->append();
@@ -34,20 +34,20 @@ $file->recent();
 $file->traverse();
 ```
 
-## get()
+## read()
 
-To read the entire contents of a file into a string, call `get()` method. It returns `null` if the file doesn't exist.
+To read the entire contents of a file into a string, call `read()` method. It returns `null` if the file doesn't exist.
 
 ```php
-$file->get('/path/to/file');
+$file->read('/path/to/file');
 ```
 
-## put()
+## write()
 
-To write a string data to a file, call `put()` method. It will try to create the file if the file doesn't exist otherwise it will overwrite the existing file contents with new data.
+To write a string data to a file, call `write()` method. It will try to create the file if the file doesn't exist otherwise it will overwrite the existing file contents with new data.
 
 ```php
-$file->put('/path/to/file', 'Hello World');
+$file->write('/path/to/file', 'Hello World');
 ```
 
 ## exists()

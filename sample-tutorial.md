@@ -37,6 +37,8 @@ You can simply visit `http://localhost/lightpack` (or whatever IP address you ha
 
 Other option is to run PHP's built in web server to test your application.
 
+<p class="tip">You need to configure your server to serve this application from <code>public</code> folder as web root.</p>
+
 ```bash
 php -S 127.0.0.1:8080
 ```

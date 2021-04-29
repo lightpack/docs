@@ -40,3 +40,4 @@
   * [Modules](modules.md)
   * [Caching](caching.md)
   * [Containers](containers.md)
+  * [CORS](cors.md)

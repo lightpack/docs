@@ -48,4 +48,66 @@ app('config')->default['site']['locale']; // en
 app('config')->default['site']['timezone']; // UTC
 ```
 
+## Custom configuration
+
+You can define your own custom configuration files as per your application needs. Say 
+for example, you want to have a new configuration file for your `Redis` server. For that,
+simply create a file `redis.php` in the `config` folder and put your configuration details
+as an **array** as show below.
+
+```php
+<?php
+
+return [
+    'host' => '127.0.0.1',
+    'port' => '6666',
+    'password' => '1234',
+];
+```
+
+Now you need to register this new `redis` config file in `bootstrap/services.php` file
+as shown.
+
+```php
+<?php
+
+...
+/**
+ * ------------------------------------------------------------
+ * Register Configuration Service Provider.
+ * ------------------------------------------------------------
+ */
+
+$container->register('config', function($container) {
+    return new Lightpack\Config\Config([
+        'default', 
+        'events', 
+        'filters', 
+        'cors', 
+        'redis'
+    ]);
+});
+...
+```
+
+**That's it**. Now you can easily access the config values as shown:
+
+```php
+<?php
+
+app('config')->redis['host']; // 127.0.0.1
+app('config')->redis['port']; // 6666
+```
+
+**Note:** You can also get the whole configuration array as shown in the example below.
+
+```php
+<?php
+
+$redis = app('config')->redis;
+
+$redis['host']; // 127.0.0.1
+$redis['port']; // 6666
+```
+
 `@todo` Documentation in progress...

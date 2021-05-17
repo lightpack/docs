@@ -14,6 +14,7 @@
   * [Cookies](cookies.md)
   * [Validation](validation.md)
   * [Filesystem](filesystem.md)
+  * [Configuration](configuration.md)
 
 * Databases
 

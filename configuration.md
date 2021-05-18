@@ -110,4 +110,13 @@ $redis['host']; // 127.0.0.1
 $redis['port']; // 6666
 ```
 
-`@todo` Documentation in progress...
+## Changing configuration
+
+You can dynamically set or change your application configuration at runtime by simply
+setting the config item value as show below.
+
+```php
+<?php
+
+app('config')->redis['host'] = 'localhost';
+```

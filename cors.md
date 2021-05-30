@@ -11,5 +11,3 @@ accessing your APIs.
 
 The class `App\Filters\CorsFilter` adds sufficient headers in the **before()**
 and **after()** methods to allow preflight requests made by browsers using `OPTIONS` request method.
-
-**Please Note:** This documentation is under progress.

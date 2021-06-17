@@ -7,7 +7,7 @@ To get started, simply create an instance of `Lightpack\File\File` class.
 ```php
 <?php
 
-$file = new Lightpackk\File\File();
+$file = new Lightpack\File\File();
 ```
 
 Now you can access following listed methods to work with files in your local system.

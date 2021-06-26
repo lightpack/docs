@@ -70,6 +70,12 @@ This command creates a controller class in `app/Controllers` folder. Simply pass
 php lucy create:controller ProductController
 ```
 
+You can also create a namespaced controller as shown:
+
+```terminal 
+php lucy create:controller 'Product\IndexController'
+```
+
 ## Build Your Own Command
 
 You can easily build your own custom command classes and register them to run from **PHP CLI** environment. Follow these steps as documented below.

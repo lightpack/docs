@@ -4,7 +4,7 @@ Routing is the process of mapping requested URLs with appropriate
 request handlers aka <code>controllers</code>.
 
 ```php
-$route->get('/users', 'UserController@index');
+$route->get('/products', ProductController::class);
 ```
 
 All your routes definitions goes in file: <code>config/routes.php</code> 
@@ -35,10 +35,10 @@ regex patterns out of the box to assist you for common cases.
 
 ```php
 // matches path: /users/23
-$route->get('/users/:num', 'UserController@find');
+$route->get('/users/:num', UserController::class, 'find');
 
 // matches path: /users/23/status/active
-$route->get('/users/:num/status/:str', 'UserController@filter');
+$route->get('/users/:num/status/:str', UserController::class, 'filter');
 ```
 
 Below is an explanation for pre-defined regex route placeholders.
@@ -77,7 +77,7 @@ Below is an explanation for pre-defined regex route placeholders.
 You can provide your own custom regular expression to match the path.
 
 ```php
-$route->get('/users/id/([0-9]{4})', 'UserController@findById');
+$route->get('/users/id/([0-9]{4})', UserController::class, 'findById');
 ```                
 
 ## Route Prefix
@@ -90,20 +90,6 @@ request paths that start with <code>/api/v1</code>.
 
 ```php
 $route->group(['prefix' => '/api/v1'], function($route) {
-    $route->get('/users', 'UserController@list');
-});
-```
-
-## Route Namespace
-
-In fact, the same <code>$route->group()</code> method also supports grouping
-controllers under common <code>namespace</code>.
-
-For example, the following route group definition will prefix all declared controllers
-with <code>Api\V1</code> namespace.
-
-```php
-$route->group(['namespace' => 'Api\V1'], function($route) {
-    $route->get('/users', 'UserController@list');
+    $route->get('/users', UserController::class, 'list');
 });
 ```

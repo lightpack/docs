@@ -25,7 +25,7 @@ For dynamic routes, you can access route parameters by defining them in the
 controller's action method signature. For example, for the following route definition:
 
 ```php
-$route->get('/page/:num/status/:str', 'PageController@index');
+$route->get('/page/:num/status/:str', PageController::class);
 ```
 
 Define your controller as:

@@ -146,9 +146,11 @@ Now if you refresh the browser, you should see tasks rendered.
 
 <img src="_media/tutorial/screen-3.png" style="width: 420px">
 
-### Adding database
+## Adding database
 
 Now that we have successfully rendered our fake tasks list, its time to prepare database.
+
+### Create Table
 
 > We are going to use `MySQL` as our database system for this tutorial.
 
@@ -164,6 +166,8 @@ CREATE TABLE tasks (
 ) ENGINE = InnoDB; 
 ```
 
+### Insert Data
+
 Execute this query to insert some tasks manually in the table for now. Later we will create task add/update form to do the same.
 
 ```sql
@@ -174,6 +178,8 @@ VALUES
     ('Eat Snacks', 'Pending'), 
     ('Learn PHP', 'Pending') 
 ```
+
+### Configure Application
 
 To work with the new database, you will need to configure database credentials. Copy the contents of `env.example.php` file into `env.php` inside your project root.
 
@@ -191,7 +197,7 @@ Look for **MySQL** settings. There you need to configure database credentials wi
 'DB_PSWD' => '',
 ```
 
-## TaskModel
+## List All Tasks
 
 To work with `tasks` table in database, we will create a `TaskModel` class. Fire following command inside terminal
 from project root.
@@ -209,6 +215,8 @@ Add following method in `TaskModel` class to fetch all tasks from database.
 ```php
 class TaskModel 
 {
+    // ...
+
     public function fetchAll()
     {
         return $this->query()->fetchAll();
@@ -360,6 +368,7 @@ namespace App\Controllers;
 class TaskController
 {
     // ...
+
     public function postAddForm()
     {
         (new TaskModel)->insert();
@@ -425,6 +434,8 @@ Now you need to create `fetchOne()` method in `TaskModel`.
 ```php
 class TaskModel
 {
+    // ...
+
     public function fetchOne($id)
     {
         return $this->query()->where('id', '=', $id)->fetchOne();
@@ -510,7 +521,7 @@ Add `update()` method in `Taskmodel` as shown:
 class TaskModel
 {
     // ...
-    
+
     public function update($id)
     {
         $this->query()->update(['id', $id], [
@@ -523,15 +534,77 @@ class TaskModel
 
 Now try to edit a task. It should successfully update the database to reflect changes.
 
+## Full Controller Code
+
+So here is the full `TaskController` class code that you have built so far.
+
+```php
+<?php
+
+namespace App\Controllers;
+
+use App\Models\TaskModel;
+
+class TaskController
+{
+    /**
+     * List all tasks.
+     */
+    public function index()
+    {
+        app('response')->render('tasks/home', [
+            'tasks' => (new TaskModel)->fetchAll()
+        ]);
+    }
+
+    /**
+     * Show new task form.
+     */
+    public function showAddForm()
+    {
+        app('response')->render('tasks/form');
+    }
+
+    /**
+     * Submit new task.
+     */
+    public function postAddForm()
+    {
+        (new TaskModel)->insert();
+        redirect('tasks');
+    }
+
+    /**
+     * Show task update form.
+     */
+    public function showEditForm($id)
+    {
+        app('response')->render('tasks/form', [
+            'task' => (new TaskModel)->fetchOne($id)
+        ]);
+    }
+
+    /**
+     * Save task update.
+     */
+    public function postEditForm($id)
+    {
+        (new TaskModel)->update($id);
+        redirect('tasks');
+    }
+}
+```
+
 ## Final Notes
 
 If you reached so far with this tutorial, you definitely have got acquainted with `Lightpack` framework. We could have extended this tutorial to introduce **filters**,
 **models**, **events**, **layouts**, and a couple of tips for much cleaner code. But to 
 keep things simple, we restricted it to only have an introduction about working with `Lightpack`.
 
-Performance benchmark shows `Lightpack` outshine some of the well known frameworks in PHP community. It even outshines **Codeigniter3** and **Codeigniter4** in our benchmark. But we do not want you take our word for granted.
+Performance benchmark shows `Lightpack` outshine some of the well known frameworks in PHP community. At the same time it has very small learning curve.
 
-We encourage you to evaluate `Ligtpack` with your own benchmarks and let us know about your experience. `Lightpack` is in its **alpha** version for now and is bound to change 
-in its architecture. This is the best time to support this framework and become a core contributor. 
+We encourage you to evaluate `Ligtpack` with your own benchmarks and let us know about your experience. `Lightpack` is in its **alpha** version for now and is bound to change in its architecture. 
 
-Open pull requests and issues if you find it good enough for your attention. 😀👍
+**This is the best time to support this framework and become a core contributor.**
+
+<p class="tip">Open <b>pull requests</b> and <b>issues</b> if you find it good enough for your attention. 😀</p>

@@ -1,16 +1,18 @@
 # Sample Tutorial
 
 In this tutorial, we are going to build a simple **tasks** application. The purpose of this
-tutorial is to give you a quick introduction of working with `Lightpack PHP` framework. This tutorial will not include working with **models**, **filters**, **events**, **validation**, **layouts** etc. It will be simple enough to get you a taste of this framework with a simple task management app.
+tutorial is to give you a quick introduction of working with `Lightpack PHP` framework. This tutorial will not include working with advanced features like **containers**, **logging**, **filters**, **events**, **validation**, **commands**, **layouts** etc. 
 
-[Browse tutorial repository link here.](https://github.com/lightpack/taskapp)
+It will be simple enough to get you a taste of this framework with a simple task management app.
 
-> **Note:** This tutorial has been tested on an **Ubuntu** dev server running **apache**.
+> [Browse tutorial repository link here.](https://github.com/lightpack/taskapp)
+
+<p class="tip">Note: This tutorial has been tested on an <b>Ubuntu</b> dev server running <b>Apache</b>.</p>
 
 
 So let's get started.
 
-## Install Framework
+## Create Project
 
 Installing `Lightpack` is dead simple. Just clone the framework's GitHub repository in your
 server root.
@@ -33,15 +35,15 @@ composer install --no-dev -vvv
 
 ## Running The App
 
-You can simply visit `http://localhost/lightpack` (or whatever IP address you have configured to run your PHP applications locally) in your browser to test your application. 
-
-Other option is to run PHP's built in web server to test your application.
-
 <p class="tip">You need to configure your server to serve this application from <code>public</code> folder as web root.</p>
+
+But for local development you can run PHP's built-in web server. For that move to `public` folder inside your project and fire this command from terminal.
 
 ```bash
 php -S 127.0.0.1:8080
 ```
+
+Please change the **IP adress** and **Port** as per your dev machine.
 
 Now you should see this screen below.
 
@@ -56,14 +58,20 @@ We first need to define a route for `GET /tasks` in `config/routes.php` file. Th
 Add a new route for **tasks** in `config/routes.php` file.
 
 ```php
-$route->get('/tasks', 'TaskController@index');
+$route->get('/tasks', TaskController::class);
 ```
 
-We have registered `/tasks` route specifying `index` method of `TaskController`. So we now need to define our controller.
+We have registered `/tasks` route specifying default method `index` of controller class `TaskController`. So we now need to define our controller.
 
 ### Defining tasks controller
 
-Create a new file in `app/Controllers` folder named `TaskController.php` with following code contents. 
+Inside your project root, from your terminal fire this command:
+
+```terminal
+php lucy create:controller TaskController
+```
+This should have created `TaskController` inside `app/Controllers` folder. Update `TaskController` with 
+following code contents. 
 
 ```php
 <?php
@@ -167,71 +175,67 @@ VALUES
     ('Learn PHP', 'Pending') 
 ```
 
-To work with the new database, you will need to configure database credentials. Open `config/default.php` file and look for 'connection' key. There you need to configure 'mysql` key with appropriate database credentials.
+To work with the new database, you will need to configure database credentials. Copy the contents of `env.example.php` file into `env.php` inside your project root.
+
+Look for **MySQL** settings. There you need to configure database credentials with appropriate values.
 
 ```php
-<?php
+/**
+ * MySQL settings.
+ */
 
-return [
-    // ...
-    'connection' => [
-        // ...
-        'mysql' => [
-            'host' => 'localhost',
-            'port' => 3306,
-            'username' => 'root',
-            'password' => 'root',
-            'database' => 'taskapp',
-            'options' => null,
-        ]
-    ],
-];
+'DB_HOST' => 'localhost',
+'DB_PORT' => 3306,
+'DB_NAME' => '',
+'DB_USER' => '',
+'DB_PSWD' => '',
 ```
 
-Now its time to update our `TaskController.php` file to fetch tasks from database. Replace `app/Controllers/TaskController.php` with following code.
+## TaskModel
+
+To work with `tasks` table in database, we will create a `TaskModel` class. Fire following command inside terminal
+from project root.
+
+```terminal
+php lucy create:model TaskModel --table=tasks
+```
+
+This should have created `TaskModel` in `app/Model` folder.
+
+### Fetch All Tasks
+
+Add following method in `TaskModel` class to fetch all tasks from database.
 
 ```php
-<?php
-
-namespace App\Controllers;
-
-class TaskController
+class TaskModel 
 {
-    public function index()
+    public function fetchAll()
     {
-        $data['tasks'] = app('db')->table('tasks')->fetchAll(true);
-
-        app('response')->render('tasks/home', $data);
+        return $this->query()->fetchAll();
     }
 }
 ```
 
-If you refresh your browser, you should see the tasks view as same as previous one before working with database.
+### Update Controller
 
-<img src="_media/tutorial/screen-3.png" style="max-width: 420px">
-
-Calling `app('db')` returns the database connection instance that defines a `table()` method. This methods takes the name of database table we are interested in querying. The `table()` method returns an instance of query builder. The `fetchAll()` method returns the result set as an array of objects by default. Passing it `true` returns the result set as an array.
-
-#### Using objects instead of arrays
-
-Before we go further with our **tasks** application, let us update `TaskController.php` to fetch tasks from database as an "array of objects". You will possibly find working with objects much cleaner than arrays in your view templates. Edit the contents of `app/Controllers/TaskController.php` as shown below.
+We will update our `TaskController` to use this model. Update your controller's `index()` method with following code.
 
 ```php
-<?php
-
-namespace App\Controllers;
-
 class TaskController
 {
+    /**
+     * List all tasks.
+     */
     public function index()
     {
-        // $data['tasks'] = app('db')->table('tasks')->fetchAll(true);
-        $data['tasks'] = app('db')->table('tasks')->fetchAll();
-
-        app('response')->render('tasks/home', $data);
+        app('response')->render('tasks/home', [
+            'tasks' => (new TaskModel)->fetchAll()
+        ]);
     }
 }
 ```
+
+### Update Tasks View
 
 In the view template file, you will need to update array keys with object keys. Open `app/views/tasks/home.php` to update the template.
 
@@ -297,15 +301,10 @@ We will first start with adding new task feature. Clicking on **new task** link 
 Open `config/routes.php` file and add a new route for `/tasks/add`
 
 ```php
-<?php
-
-$route->group(['namespace' => 'App\Controllers'], function($route) {
-    // ...
-    $route->get('/tasks/add', 'TaskController@add');
-});
+$route->get('/tasks/add', TaskController::class, 'showAddForm');
 ```
 
-Now create a method named `add()` in `TaskController.php` file.
+Now create a method named `showAddForm()` in `TaskController.php` file.
 
 ```php
 <?php
@@ -316,14 +315,14 @@ class TaskController
 {
     // ...
 
-    public function add()
+    public function showAddForm()
     {
         app('response')->render('tasks/form');
     }
 }
 ```
 
-We will need to create our task form template in `app/views/tasks/form.php` file.
+We will need to create our task form markup in `app/views/tasks/form.php` file.
 
 ```php
 <form method="post">
@@ -338,7 +337,7 @@ Refresh your browser to see the task form.
 
 <img src="_media/tutorial/screen-6.png" style="max-width:420px">
 
-#### Post task form
+#### Submit task form
 
 Try to add a new task and submit the form. You should see `RouetNotFoundException` because
 when the form is posted, the browser requests `POST /tasks/add` for which we have not registered any route in our routes definition file.
@@ -346,17 +345,12 @@ when the form is posted, the browser requests `POST /tasks/add` for which we hav
 Add a route for `POST /tasks/add` in `config/routes.php` file.
 
 ```php
-<?php
-
-$route->group(['namespace' => 'App\Controllers'], function($route) {
-    // ...
-    $route->post('/tasks/add', 'TaskController@add');
-});
+$route->post('/tasks/add', TaskController::class, 'postAddForm');
 ```
 
-Now try to re-submit the form. This time you should see the task form rendered with no exception. We now need to update `TaskController::add()` method to support inserting new data in database.
+We now need to update `TaskController::postAddForm()` method to support inserting new data in database.
 
-Update the `add()` method in `app/Controllers/TaskController.php` file as shown.
+Update the `TaskController` with following method:
 
 ```php
 <?php
@@ -366,20 +360,26 @@ namespace App\Controllers;
 class TaskController
 {
     // ...
-
-    public function add()
+    public function postAddForm()
     {
-        $request = app('request');
+        (new TaskModel)->insert();
+        redirect('tasks');
+    }
+}
+```
 
-        if($request->isPost()) {
-            app('db')->table('tasks')->insert([
-                'title' => $request->post('title')
-            ]);
+Now you need to create `insert()` method in `TaskModel`.
 
-            redirect('tasks');
-        }
+```php
+class Taskmodel
+{
+    // ...
 
-        app('response')->render('tasks/form');
+    public function insert()
+    {
+        $this->query()->insert([
+            'title' => app('request')->post('title')
+        ];
     }
 }
 ```
@@ -401,33 +401,38 @@ Click on **edit** task link to edit a task. You should see `RouteNotFoundExcepti
 Update `config/routes.php` file to support task edting.
 
 ```php
-<?php
-
-$route->group(['namespace' => 'App\Controllers'], function($route) {
-    // ...
-    $route->get('/tasks/edit/:num', 'TaskController@edit');
-});
+$route->get('/tasks/edit/:num', TaskController::class, 'showEditForm');
 ```
 
-In the `TaskController.php` file, add a new method named `edit()`.
+In the `TaskController.php` file, add a new method named `showEditForm()`.
 
 ```php
-<?php
-
-namespace App\Controllers;
-
 class TaskController
 {
     // ...
 
-    public function edit($id)
+   public function showEditForm($id)
     {
-        $data['task'] = app('db')->table('tasks')->where('id', '=', $id)->fetchOne();
-        
-        app('response')->render('tasks/form', $data);
+        app('response')->render('tasks/form', [
+            'task' => (new TaskModel)->fetchOne($id)
+        ]);
     }
 }
 ```
+
+Now you need to create `fetchOne()` method in `TaskModel`.
+
+```php
+class TaskModel
+{
+    public function fetchOne($id)
+    {
+        return $this->query()->where('id', '=', $id)->fetchOne();
+    }
+}
+```
+
+This method will search for the task with matching task ID and return the result.
 
 We are going to use the same form to edit a task. Update `app/views/tasks/form.php` as shown below.
 
@@ -481,42 +486,37 @@ Refresh your browser to see the task form populated with **status** field.
 Let us add a route for handling `POST` requests to edit our tasks. Update `config/routes.php` file a new route definition for posting task edit form.
 
 ```php
-<?php
-
-$route->group(['namespace' => 'App\Controllers'], function($route) {
-    // ...
-    $route->post('/tasks/edit/:num', 'TaskController@edit');
-});
+$route->post('/tasks/edit/:num', TaskController::class, 'postEditForm');
 ```
 
-Now update `edit()` method in `TaskController`.
+Now add `postEditForm()` method in `TaskController`.
 
 ```php
-<?php
-
-namespace App\Controllers;
-
 class TaskController
 {
     // ...
 
     public function edit($id)
     {
-        $data['task'] = app('db')->table('tasks')->where('id', '=', $id)->fetchOne();
-        $request = app('request');
+        (new TaskModel)->update($id);
+        redirect('tasks');
+    }
+}
+```
 
-        if($request->isPost()) {
-            app('db')->table('tasks')->update(['id', $id], [
-                    'title' => $request->post('title'),
-                    'status' => $request->post('status')
-                ]
-            );
+Add `update()` method in `Taskmodel` as shown:
 
-            redirect('tasks');
-        }
-
-
-        app('response')->render('tasks/form', $data);
+```php
+class TaskModel
+{
+    // ...
+    
+    public function update($id)
+    {
+        $this->query()->update(['id', $id], [
+            'title' => app('request')->post('title'),
+            'status' => app('request')->post('status'),
+        ]);
     }
 }
 ```

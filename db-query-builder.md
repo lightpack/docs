@@ -155,7 +155,7 @@ This methods returns the total number of rows in the table.
 $products->count();
 
 // SELECT count(* AS num FROM products WHERE price > 200
-$products->count()->where('price', '>', 200);
+$products->where('price', '>', 200)->count();
 ```
 
 ## Joins

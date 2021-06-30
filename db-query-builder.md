@@ -38,28 +38,13 @@ $products->fetchAll();
 
 To fetch only the first record, call <code>fetchOne()</code> method instead.</p>
 
-### Select Columns
+### Columns
 
 You can specify table columns you need.
 
 ```php
 // SELECT id, name FROM products
 $products->select(['id', 'name'])->fetchAll();
-```
-
-### Order By
-
-You can specify order of result set.
-
-```php
-// SELECT id, name FROM products ORDER BY id ASC
-$products->select(['id', 'name'])->orderBy('id')->fetchAll();
-
-// SELECT id, name FROM products ORDER BY id DESC
-$products->select(['id', 'name'])->orderBy('id', 'DESC')->fetchAll();
-
-// SELECT id, name FROM products ORDER BY name DESC, id DESC
-$products->select(['id', 'name'])->orderBy('name', 'DESC')->orderBy('id', 'DESC')->fetchAll();
 ```
 
 ### Distinct
@@ -99,6 +84,78 @@ $products->whereNotIn('id', [23, 24, 25])->fetchAll();
 
 // SELECT * FROM products WHERE 1=1 AND id NOT IN ?, ?, ? OR color NOT IN ?, ?
 $products->whereNotIn('id', [23, 24, 25])->orWhereNotIn('color', ['#000', '#FFF'])->fetchAll();
+
+// SELECT * FROM products WHERE 1=1 AND owner IS NULL
+$products->whereNull('owner')->fetchAll();
+
+// SELECT * FROM products WHERE 1=1 AND owner IS NOT NULL
+$products->whereNotNull('owner')->fetchAll();
+
+// SELECT * FROM products WHERE 1=1 AND owner IS NULL AND weight IS NULL
+$products->whereNull('owner')->andWhereNull('weight')->fetchAll();
+
+// SELECT * FROM products WHERE 1=1 AND owner IS NULL OR weight IS NULL
+$products->whereNull('owner')->orWhereNull('weight')->fetchAll();
+
+// SELECT * FROM products WHERE 1=1 AND owner IS NULL OR weight IS NOT NULL
+$products->whereNull('owner')->orWhereNotNull('weight')->fetchAll();
+```
+
+### Order By
+
+You can specify order of result set.
+
+```php
+// SELECT id, name FROM products ORDER BY id ASC
+$products->select(['id', 'name'])->orderBy('id')->fetchAll();
+
+// SELECT id, name FROM products ORDER BY id DESC
+$products->select(['id', 'name'])->orderBy('id', 'DESC')->fetchAll();
+
+// SELECT id, name FROM products ORDER BY name DESC, id DESC
+$products->select(['id', 'name'])->orderBy('name', 'DESC')->orderBy('id', 'DESC')->fetchAll();
+```
+
+### Group By
+
+```php
+// SELECT id, name FROM products GROUP BY color, size
+$products->select(['id', 'name'])->groupBy(['color', 'size'])->fetchAll();
+```
+
+### Limit
+
+```php
+// SELECT * FROM products LIMIT 10
+$products->limit(10)->fetchAll();
+```
+
+### Offset
+
+```php
+// SELECT * FROM products LIMIT 10 OFFSET 2
+$products->limit(10)->offset(2)->fetchAll();
+```
+
+### Paginate
+
+This method will select records with the given limit and current page. Passing second argunent is optional and in that case it will try to look for `page` query parameter from the URL string.
+
+```php
+// SELECT * FROM products LIMIT 10 OFFSET 2
+$products->paginate(10, 3);
+```
+
+### Count
+
+This methods returns the total number of rows in the table.
+
+```php
+// SELECT count(*) AS num FROM products
+$products->count();
+
+// SELECT count(* AS num FROM products WHERE price > 200
+$products->count()->where('price', '>', 200);
 ```
 
 ## Joins

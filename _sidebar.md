@@ -27,7 +27,7 @@
 * Lucid ORM
 
   * [Introduction](orm-introduction.md)
-  * [Active Record](active-record.md)
+  * [Models](models.md)
   * [Relationships](relationships.md)
 
 <!-- * Security -->

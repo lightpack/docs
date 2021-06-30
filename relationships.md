@@ -42,13 +42,17 @@ and <code>one-to-many</code> relationship between products and options table.
 
 Before relating our tables we first need to define their models as shown below.
 
+Fire these three model code generation commands from your terminal inside project root.
+
+```terminal
+php lucy create:model Seo --table=seo
+php lucy create:model Option --table=options
+php lucy create:model Product --table=products
+```
+
+It should have created three model classes inside `app/Models` folder.
+
 ```php
-<?php
-
-namespace App\Models;
-
-use Lightpack\Database\Lucid\Model;
-
 class Product extends Model
 {
     public function __construct()
@@ -60,12 +64,6 @@ class Product extends Model
 
 
 ```php
-<?php
-
-namespace App\Models;
-
-use Lightpack\Database\Lucid\Model;
-
 class Option extends Model
 {
     public function __construct()
@@ -77,12 +75,6 @@ class Option extends Model
 
 
 ```php
-<?php
-
-namespace App\Models;
-
-use Lightpack\Database\Lucid\Model;
-
 class Seo extends Model
 {
     public function __construct()
@@ -92,20 +84,20 @@ class Seo extends Model
 }
 ```
 
+Now let us understand how to use relationships among these three models.
+
 ## Has One
 
-It represent the <code>one-to-one</code> relationship between two models. To relate our 
+It represents the <code>one-to-one</code> relationship between two models. To relate our 
 <code>products</code> and <code>seo</code> table, define a method named <code>seo()</code>
 in the <code>product</code> model.
 
 ```php
-// ...
-
 class Product extends Model
 {
     public function seo()
     {
-        return $this->hasOne('Seo', 'product_id');
+        return $this->hasOne(Seo::class, 'product_id');
     }
 }
 ```
@@ -113,10 +105,11 @@ class Product extends Model
 Now you can easily fetch seo details for a given product as a property:
 
 ```php
-$product = Product::find(23);
+$product = (new Product)->find(23);
+$seo = $product->seo->fetchOne();
 
-echo $product->seo->meta_title;
-echo $product->seo->meta_description;
+echo $seo->meta_title;
+echo $seo->meta_description;
 ```
 
 It works because the <code>hasOne()</code> method actually joins the <code>products</code>
@@ -131,13 +124,11 @@ To relate the <code>Seo</code> model with <code>Product</code> model, use <code>
 method.
 
 ```php
-// ...
-
 class Seo extends Model
 {
     public function product()
     {
-        return $this->belongsTo('Product', 'product_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }
 ```
@@ -145,8 +136,10 @@ class Seo extends Model
 Now you can get the product for the given seo record using product as its property.
 
 ```php
-$seo = Seo::find(1);
-echo $seo->product->title;
+$seo = (new Seo)->find(23);
+$product = $seo->product->fetchOne();
+
+echo $product->title;
 ```
 
 ## Has Many
@@ -158,7 +151,7 @@ class Product extends Model
 {
     public function options()
     {
-        return $this->hasMany('Option', 'product_id');
+        return $this->hasMany(Option::class, 'product_id');
     }
 }
 ```
@@ -166,9 +159,10 @@ class Product extends Model
 Now you can fetch all options for a given products as its property.
 
 ```php
-$product = Product::find(23);
+$product = (new Product)->find(23);
+$options = $product->options->fetchAll();
 
-foreach($product->options as $option) {
+foreach($options as $option) {
     echo $option->name;
     echo $option->value;
 }
@@ -184,7 +178,7 @@ class Option extends Model
 {
     public function product()
     {
-        return $this->belongsTo('Product', 'product_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }
 ```
@@ -192,9 +186,7 @@ class Option extends Model
 Now you can access the product that belongs to an option as its property.
 
 ```php
-$option = Option::find(1);
-
-echo $option->product->title;
+$product = (new Option)->find(23)->product->fetchOne();
 ```
 
 ## Many to Many
@@ -244,9 +236,9 @@ class User extends Model
 Now you can access all the roles that a user may have as `$user->roles`.
 
 ```php
-$user->find(23);
+$user = (new User)->find(23);
 
-foreach($user->roles as $role) {
+foreach($user->roles->fetchAll() as $role) {
     echo $role->name;
 }
 ```

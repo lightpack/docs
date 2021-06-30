@@ -1,16 +1,16 @@
 # Models
 
 You should define your model classes in <code>app/models</code> folder.
-Simply call the parent constructor by explicitly passing it the <code>table</code>
-name that your model should represent.
+
+Fire this command to generate a model from your terminal inside your project root.
+
+```terminal
+php lucy create:model Product --table=products
+```
+
+This should have created `Product` model in `app/Models` folder.
 
 ```php
-<?php
-
-namespace App\Models;
-
-use Lightpack\Database\Lucid\Model;
-
 class Product extends Model
 {
     public function __construct()
@@ -21,12 +21,7 @@ class Product extends Model
 ```
 
 Defining your model in this manner gives you access to a number of utility
-methods for the most frequently used case scenarios. Simply create an instance of 
-<code>Product</code> to start accessing the available utility methods.
-
-```php
-$product = new Product();
-```
+methods for the most frequently used case scenarios. 
 
 ## Insert Data
 
@@ -34,6 +29,8 @@ Set properties on your model and simply call the inherited method <code>save()</
 to insert a new record.
 
 ```php
+$product = new Product;
+
 // Set product properties
 $product->title = 'ACME Shoes';
 $product->size = 10;
@@ -48,7 +45,7 @@ $product->save();
 Simply call the <code>find()</code> method passing it the record ID.
 
 ```php
-$product->find(23);
+$product = (new Product)->find(23);
 ```
 
 Now you can easily access the record properties.
@@ -67,7 +64,7 @@ same as inserting data.
 
 ```php
 // Find our product with ID
-$product->find(23);
+$product = (new Product)->find(23);
 
 // Set new properties to update
 $product->title = 'ACME Footwear';
@@ -82,5 +79,23 @@ $product->save();
 Simply call the <code>delete()</code> method.
 
 ```php
-$product->find(23)->delete();
+(new Product)->find(23)->delete();
+```
+
+## Querying Data
+
+Inside any method of your model, you can access SQL query builder by calling the `query()` method.
+
+```php
+class Product extends Model
+{
+    public function findActiveProducts()
+    {
+        return $this
+                ->query()
+                ->select(['price', 'title'])
+                ->where('active', '=', 1)
+                ->fetchAll();
+    }
+}
 ```

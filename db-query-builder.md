@@ -26,14 +26,19 @@ Now you can start building and executing queries as documented below.
 
 ## Select
 
+### Fetch All
+
 Call the <code>fetchAll()</code> method to fetch all the rows in a table.
 
 ```php
 // SELECT * FROM products
 $products->fetchAll();
 ```
+### Fetch One
 
-<p class="tip">Note: To fetch only the first record, call <code>fetchOne()</code> method instead.</p>
+To fetch only the first record, call <code>fetchOne()</code> method instead.</p>
+
+### Select Columns
 
 You can specify table columns you need.
 
@@ -41,6 +46,8 @@ You can specify table columns you need.
 // SELECT id, name FROM products
 $products->select(['id', 'name'])->fetchAll();
 ```
+
+### Order By
 
 You can specify order of result set.
 
@@ -55,12 +62,16 @@ $products->select(['id', 'name'])->orderBy('id', 'DESC')->fetchAll();
 $products->select(['id', 'name'])->orderBy('name', 'DESC')->orderBy('id', 'DESC')->fetchAll();
 ```
 
+### Distinct
+
 You can select distinct rows too.
 
 ```php
 // SELECT DISTINCT name FROM products
 $products->select(['name'])->distinct()->fetchAll();
 ```
+
+### Where
 
 You can narrow result set using where clauses.
 

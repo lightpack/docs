@@ -16,6 +16,7 @@
   * [Filesystem](filesystem.md)
   * [Configuration](configuration.md)
   * [Environments](environments.md)
+  * [Utilities](utilities.md)
 
 * Databases
 

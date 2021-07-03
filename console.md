@@ -26,6 +26,14 @@ create:command
 create:controller
 ```
 
+### create:env
+
+This command creates an environment file named `env.php` by copying the contents of `env.example.php` in project root directory.
+
+```terminal
+php lucy create:env
+```
+
 ### create:event
 
 This command creates an event class in `app/Events` folder. Simply pass it the name

@@ -19,6 +19,7 @@ Lightpack ships with a couple of console commands for code file generation to as
 rapid application development.
 
 ```terminal
+create:env
 create:event
 create:model
 create:filter

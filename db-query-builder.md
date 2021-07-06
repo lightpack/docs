@@ -24,9 +24,7 @@ Now you can start building and executing queries as documented below.
 
 <p class="tip">The constructor for <code>Query</code> class optionally takes a database connection as its second argument. If you do not provide one, it will fallback to default database connection connection configured in services <code>app('db')</code></p>
 
-## Select
-
-### Fetch All
+## Fetch All
 
 Call the <code>fetchAll()</code> method to fetch all the rows in a table.
 
@@ -34,11 +32,11 @@ Call the <code>fetchAll()</code> method to fetch all the rows in a table.
 // SELECT * FROM products
 $products->fetchAll();
 ```
-### Fetch One
+## Fetch One
 
 To fetch only the first record, call <code>fetchOne()</code> method instead.</p>
 
-### Columns
+## Columns
 
 You can specify table columns you need.
 
@@ -47,7 +45,7 @@ You can specify table columns you need.
 $products->select(['id', 'name'])->fetchAll();
 ```
 
-### Distinct
+## Distinct
 
 You can select distinct rows too.
 
@@ -56,7 +54,7 @@ You can select distinct rows too.
 $products->select(['name'])->distinct()->fetchAll();
 ```
 
-### Where
+## Where
 
 You can narrow result set using where clauses.
 
@@ -68,10 +66,10 @@ $products->where('id', '>', 2)->fetchAll();
 $products->where('id', '>', 2)->where('color', '=', '#000')->fetchAll();
 
 // SELECT * FROM products WHERE 1=1 AND id > ? AND color = ?
-$products->where('id', '>', 2)->and('color', '=', '#000')->fetchAll();
+$products->where('id', '>', 2)->andWhere('color', '=', '#000')->fetchAll();
 
 // SELECT * FROM products WHERE 1=1 AND id > ? AND color = ? OR color = ?
-$products->where('id', '>', 2)->and('color', '=', '#000')->or('color', '=', '#FFF')->fetchAll();
+$products->where('id', '>', 2)->andWhere('color', '=', '#000')->orWhere('color', '=', '#FFF')->fetchAll();
 
 // SELECT * FROM products WHERE 1=1 AND id IN ?, ?, ?
 $products->whereIn('id', [23, 24, 25])->fetchAll();
@@ -101,7 +99,7 @@ $products->whereNull('owner')->orWhereNull('weight')->fetchAll();
 $products->whereNull('owner')->orWhereNotNull('weight')->fetchAll();
 ```
 
-### Order By
+## Order By
 
 You can specify order of result set.
 
@@ -116,37 +114,39 @@ $products->select(['id', 'name'])->orderBy('id', 'DESC')->fetchAll();
 $products->select(['id', 'name'])->orderBy('name', 'DESC')->orderBy('id', 'DESC')->fetchAll();
 ```
 
-### Group By
+## Group By
 
 ```php
 // SELECT id, name FROM products GROUP BY color, size
 $products->select(['id', 'name'])->groupBy(['color', 'size'])->fetchAll();
 ```
 
-### Limit
+## Limit
 
 ```php
 // SELECT * FROM products LIMIT 10
 $products->limit(10)->fetchAll();
 ```
 
-### Offset
+## Offset
 
 ```php
 // SELECT * FROM products LIMIT 10 OFFSET 2
 $products->limit(10)->offset(2)->fetchAll();
 ```
 
-### Paginate
+## Paginate
 
-This method will select records with the given limit and current page. Passing second argunent is optional and in that case it will try to look for `page` query parameter from the URL string.
+This method will select records with the given limit and current page. 
+
+if you don't pass the second parameter, it will try to look for `page` query parameter from the URL string using `$_GET['page']` global.
 
 ```php
 // SELECT * FROM products LIMIT 10 OFFSET 2
 $products->paginate(10, 3);
 ```
 
-### Count
+## Count
 
 This methods returns the total number of rows in the table.
 

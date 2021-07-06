@@ -36,6 +36,11 @@ $products->fetchAll();
 
 To fetch only the first record, call <code>fetchOne()</code> method instead.</p>
 
+```php
+// SELECT * FROM products LIMIT 1
+$products->fetchAll();
+```
+
 ## Columns
 
 You can specify table columns you need.

@@ -5,7 +5,9 @@ Lightpack aims to provide a performant thin layer of abstraction for easing work
 
 ## Configuration
 
-Before you get set with a databse connection, you need to configure database credentials. For that, configure `env.php` and look for 'MySQL` settings to set your database credentials. For example:
+Before you get set with a databse connection, you need to configure database credentials. 
+
+You can set your database credentials in the [environment configuration](/environments) file.
 
 ```php
 /**
@@ -19,18 +21,29 @@ Before you get set with a databse connection, you need to configure database cre
 'DB_PSWD' => '',
 ``` 
 
-Now you can get a MySQL database connect by simply calling `app('db')`.
+Now you can get a MySQL database connection by simply calling `app('db')`.
 
 ```php
-app('db')
+$db = app('db');
 ```
 
 <p class="tip">Once you make a database connection, you can start querying against it using the <a href="https://www.php.net/manual/en/book.pdo.php" target="_blank">PHP PDO APIs</a>.
 </p>
 
+## Drivers
+
+You can change the database driver in [environment configuration](/environments) file. The two supported drivers are `mysql` and `sqlite`.
+
+```php
+DB_DRIVER => 'mysql';
+```
+
 ## Raw Queries
 
-Once you get a database connection, you can execute raw queries against it using the <code>query()</code>
+<p class="tip">Once you make a database connection, you can start querying against it using the <a href="https://www.php.net/manual/en/book.pdo.php" target="_blank">PHP PDO APIs</a>.
+</p>
+
+You can execute raw queries against the database connection using the <code>query()</code>
 method.
 
 ```php
@@ -43,18 +56,18 @@ This method optionally takes an array of parameters as its second argument to pr
 app('db')->query('SELECT * FROM products WHERE price > ?', [500]);
 ```
 
-Or you can also use named placeholders.
+Ofcourse you can also use named **placeholders** in your raw queries.
 
 ```php
-app('db')->query('SELECT * FROM products WHERE price > ?', [500]);
+app('db')->query('SELECT * FROM products WHERE id = :id', [':id' => 23]);
 ```
 
-## Adapters
-
-Lightpack supports `MySQL` and `Sqlite` adapters. To manually create a new connection, you can instantiate an adapter class passing it 
-the database connections options.
+You can also execute **insert** and **update** raw queries.
 
 ```php
-$mysql = new Lightpack\Database\Adapters\Mysql($options);
-$sqlite = new Lightpack\Database\Adapters\Sqlite($options);
-```       
+app('db')->query('INSERT INTO products (name) VALUES ('Blue Denim'));
+```
+
+```php
+app('db')->query('UPDATE articles SET status = ?', ['active']);
+```

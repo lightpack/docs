@@ -8,44 +8,38 @@ production database.
 `Lightpack` comes with a simple `array` based configuration approach which is lightweight
 yet extendible to meet complex configuration requirements as per project.
 
-`Lightpack` already registers your project configuration service provider with `config` key.
+## config()
+
+To access a config item, simply call `config()` function passing it the configuration key.
 
 ```php
-$config = app('config');
+config('key'); 
 ```
 
-All your project configurations goes under `config` folder in your app root.
+<p class="tip">All your project configurations goes in <b>config</b> folder in your app root.</p>
 
-## Default configuration
+## Accessing configuration
 
-To view default configurations for your application browse `config/default.php` file. It
+To view configurations for your application browse `config` folder. It
 lists some pre-defined configurations as an `array` of key-value pairs.
 
-Calling `app('config')->default` returns the complete array items defined as default configuration.
-
-For example, consider the following configuration array:
+For example, open `config/db.php` configuration file:
 
 ```php
-<?php
-
-return [
-    'environment' => 'development',
-    'site' => [
-        'url' => 'http://localhost',
-        'timezone' => 'UTC',
-        'locale' => 'en',
-        'default_locale' => 'en',
-    ],
-    ...
-];
+// ...
+'db.mysql.host' => get_env('DB_HOST'),
+'db.mysql.port' => get_env('DB_PORT'),
+'db.mysql.username' => get_env('DB_USER'),
+'db.mysql.password' => get_env('DB_PSWD'),
+'db.mysql.database' => get_env('DB_NAME'),
+// ...
 ```
 
-To access a config item, simply specify it as an array key.
+To access a config item, simply specify it as a key.
 
 ```php
-app('config')->default['environment']; // development
-app('config')->default['site']['locale']; // en
-app('config')->default['site']['timezone']; // UTC
+config('db.mysql.host');
+config('db.mysql.port');
 ```
 
 ## Custom configuration
@@ -59,9 +53,9 @@ as an **array** as show below.
 <?php
 
 return [
-    'host' => '127.0.0.1',
-    'port' => '6666',
-    'password' => '1234',
+    'redis.host' => '127.0.0.1',
+    'redis.port' => '6666',
+    'redis.password' => '1234',
 ];
 ```
 
@@ -80,11 +74,12 @@ as shown.
 
 $container->register('config', function($container) {
     return new Lightpack\Config\Config([
-        'default', 
+        // ...
         'events', 
         'filters', 
         'cors', 
         'redis'
+        // ...
     ]);
 });
 ...
@@ -93,30 +88,15 @@ $container->register('config', function($container) {
 **That's it**. Now you can easily access the config values as shown:
 
 ```php
-<?php
-
-app('config')->redis['host']; // 127.0.0.1
-app('config')->redis['port']; // 6666
-```
-
-**Note:** You can also get the whole configuration array as shown in the example below.
-
-```php
-<?php
-
-$redis = app('config')->redis;
-
-$redis['host']; // 127.0.0.1
-$redis['port']; // 6666
+config('redis.host'); // 127.0.0.1
+config('redis.port'); // 6666
 ```
 
 ## Changing configuration
 
-You can dynamically set or change your application configuration at runtime by simply
-setting the config item value as show below.
+You can dynamically add new configuration values at runtime by simply
+setting the config item key as show below.
 
 ```php
-<?php
-
-app('config')->redis['host'] = 'localhost';
+app('config')->set('key', 'value');
 ```

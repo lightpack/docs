@@ -41,7 +41,7 @@ From your terminal you can fire this command to create a `Mailerprovider`.
 php lucy create:provider MailerProvider
 ```
 
-This should have generated `MailerProvider` class in `app/providers` directory. 
+This should have generated `MailerProvider` class in `app/Providers` directory. 
 
 Inside that class you will find a `register()` method:
 
@@ -90,4 +90,4 @@ class ReportController
 }
 ```
 
-As you can the **providers** help binding services in container, you should read more about [containers](/containers) in Lightpack.
+As you can see that in **providers** you bind services in container, so you should read more about [containers](/containers) in Lightpack.

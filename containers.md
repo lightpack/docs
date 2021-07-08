@@ -10,6 +10,8 @@ into a class rather than hard coding into it.
 
 Note that **container** in `Lightpack` is a lightweight [service locator](https://en.wikipedia.org/wiki/Service_locator_pattern).
 
+<p class="tip">That means, it doesn't inject dependencies, it locates them for you.</p>
+
 ## Register Singleton
 
 To bind an instance of a class just once, call `register()` method.
@@ -70,4 +72,3 @@ To get a configured item from the **container**, call `get()` method passing it 
 ```php
 $container->get('service');
 ```
-

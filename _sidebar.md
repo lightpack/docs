@@ -43,6 +43,7 @@
   * [Modules](modules.md)
   * [Caching](caching.md)
   * [Logging](logging.md)
+  * [Providers](providers.md)
   * [Containers](containers.md)
   * [CORS](cors.md)
   * [Console](console.md)

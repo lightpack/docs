@@ -6,14 +6,14 @@ a controller action is executed.
 You can configure filters while defining app routes.
 
 ```php
-$route->get('/dashboard', 'DashboardController@index', ['auth']);
+$route->get('/dashboard', DashboardController::class, 'index', ['auth']);
 ```
 
 You can also group filters as:
 
 ```php
 $route->group(['filters' => ['csrf', 'auth']], function($route) {
-    $route->get('/dashboard', 'DashboardController@index');
+    $route->get('/dashboard', DashboardController::class, 'index');
 });
 ```
 

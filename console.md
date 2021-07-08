@@ -24,6 +24,7 @@ create:event
 create:model
 create:filter
 create:command
+create:provider
 create:controller
 ```
 
@@ -69,6 +70,21 @@ of the command class.
 
 ```terminal
 php lucy create:command HelloCommand
+```
+
+### create:provider
+
+This command creates a provider class in `app/Providers` folder. Simply pass it the name
+of the provider class.
+
+```terminal
+php lucy create:provider MailServiceProvider
+```
+
+You can optionally pass `--instance`` flag to create a provider that calls **factory()** method of the [container](/containers).
+
+```terminal
+php lucy create:provider MailServiceProvider --instance
 ```
 
 ### create:controller

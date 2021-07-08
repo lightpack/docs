@@ -8,10 +8,14 @@ IoC refers to the concept of inversion of control where dependencies are injecte
 into a class rather than hard coding into it.
 </p>
 
+Note that **container** in `Lightpack` is a lightweight [service locator](https://en.wikipedia.org/wiki/Service_locator_pattern).
+
 ## Register Singleton
 
-Lightpack provides <code>config/services.php</code> file where you will see some 
-services already registered into the container.
+To bind an instance of a class just once, call `register()` method.
+
+It takes an **alias** as string and a callback where you configure and return your class
+instance.
 
 ```php
 $container->register('service', function($container) {
@@ -39,9 +43,31 @@ $container->factory('service', function($container) {
 
 ## Accessing Service
 
-To access a registered service through the container, use <code>app('service')</code>
-utility function. 
+To access a registered service through the container, use <code>app()</code>
+utility function passing it the **alias** of the service you want to access from the container. 
 
 ```php
 app('service');
 ```
+
+## Other Methods
+
+There are few more methods that you should know about.
+
+### has()
+
+To check if a **service/class** is registered in container, call `has()` method
+passing it the **alias**. This method return a `boolean` value.
+
+```php
+$container->has('service'); // true
+```
+
+### get()
+
+To get a configured item from the **container**, call `get()` method passing it the **alias**.
+
+```php
+$container->get('service');
+```
+

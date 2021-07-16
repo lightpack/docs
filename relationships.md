@@ -21,7 +21,7 @@ Let us consider three tables for example: <code>products</code>, <code>options</
         <td>id</td>
         <td>product_id</td>
         <td>name</td>
-        <td>value</td>
+        <td>color</td>
     </tr>
 </table>
 <table>
@@ -50,41 +50,7 @@ php lucy create:model Option --table=options
 php lucy create:model Product --table=products
 ```
 
-It should have created three model classes inside `app/Models` folder.
-
-```php
-class Product extends Model
-{
-    public function __construct()
-    {
-        parent::construct('products');
-    }
-}
-```
-
-
-```php
-class Option extends Model
-{
-    public function __construct()
-    {
-        parent::construct('options');
-    }
-}
-```
-
-
-```php
-class Seo extends Model
-{
-    public function __construct()
-    {
-        parent::construct('seo');
-    }
-}
-```
-
-Now let us understand how to use relationships among these three models.
+It should have created three model classes inside `app/Models` folder. Now let us understand how to use relationships among these three models.
 
 ## Has One
 
@@ -102,12 +68,13 @@ class Product extends Model
 }
 ```
 
-Now you can easily fetch seo details for a given product as a property:
+Now you can easily fetch seo details for a given product as its **property**:
 
 ```php
-$product = (new Product)->find(23);
-$seo = $product->seo->fetchOne();
+// Find product seo data
+$seo = (new Product)->find(23)->seo;
 
+// Access the values
 echo $seo->meta_title;
 echo $seo->meta_description;
 ```
@@ -136,10 +103,12 @@ class Seo extends Model
 Now you can get the product for the given seo record using product as its property.
 
 ```php
-$seo = (new Seo)->find(23);
-$product = $seo->product->fetchOne();
+// Get the product details
+$product = (new Seo)->find(23)->product;
 
-echo $product->title;
+// Access the values
+echo $product->name;
+echo $product->color;
 ```
 
 ## Has Many
@@ -156,12 +125,13 @@ class Product extends Model
 }
 ```
 
-Now you can fetch all options for a given products as its property.
+Now you can fetch all options for a given product as its property.
 
 ```php
-$product = (new Product)->find(23);
-$options = $product->options->fetchAll();
+// Find product options
+$options = (new Product)->find(23)->options;
 
+// Access each option
 foreach($options as $option) {
     echo $option->name;
     echo $option->value;
@@ -186,7 +156,7 @@ class Option extends Model
 Now you can access the product that belongs to an option as its property.
 
 ```php
-$product = (new Option)->find(23)->product->fetchOne();
+$product = (new Option)->find(23)->product;
 ```
 
 ## Many to Many
@@ -236,9 +206,13 @@ class User extends Model
 Now you can access all the roles that a user may have as `$user->roles`.
 
 ```php
-$user = (new User)->find(23);
+$user = new User(23);
 
-foreach($user->roles->fetchAll() as $role) {
+foreach($user->roles as $role) {
     echo $role->name;
 }
 ```
+
+## Conditional Queries
+
+Documentation in progress...

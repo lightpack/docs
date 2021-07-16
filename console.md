@@ -48,10 +48,22 @@ php lucy create:event SubscribeEvent
 ### create:model
 
 This command creates a model class in `app/Models` folder. Simply pass it the name
-of the model class and provide the `--table` flag with database table name.
+of the model class. 
 
 ```terminal
-php lucy create:model ProductModel --table=products
+php lucy create:model Product
+```
+
+Optionally pass the `--table` flag to set the **table** name. 
+
+```terminal
+php lucy create:model Product --table=products 
+```
+
+Optionally pass the `--key` flag to set the **primary** key name. 
+
+```terminal
+php lucy create:model Product --key=product_id
 ```
 
 ### create:filter

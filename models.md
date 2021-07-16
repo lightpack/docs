@@ -137,4 +137,4 @@ $products->where('active', '=', 1)->all();
 
 <p class="tip">By inheriting the <code>query()</code> method, our models are violating the fact that a model class represents a single <b>record/row</b> in the corresponding database table. <br><br>Because if a model instance is capable of querying the whole table, then it ideally represents a collection of records, and not just a single record.</p>
 
-<p class="tip">This is where the <a href="https://en.wikipedia.org/wiki/Domain-driven_design">Repository Pattern</a> shines and promotes an aspect of <b>Domain Driven Design capabilities</b> for your domain objects.</p>
+<p class="tip">This is where the <a href="https://en.wikipedia.org/wiki/Domain-driven_design">Repository Pattern</a> shines and promotes an aspect of <b>Domain Driven Design capabilities</b> for your domain objects. But even they come with <b>disadvantages</b>. 😅</p>

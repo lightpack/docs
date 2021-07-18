@@ -10,7 +10,17 @@ route()->get('/products', ProductController::class);
 You can define your routes using `route()` function which returns 
 an instance of route object provided by **Lightpack**.
 
-<p class="tip">All your routes definitions goes in <code>routes</code> folder.</p> 
+## Route Files
+
+All the routes definitions goes into `routes` folder. There you will find two routes files already defined.
+
+```text
+routes
+  ├── web.php
+  ├── api.php
+```
+
+If you are defining routes for your APIs, you should define them in `routes/api.php` file.
 
 ## Route Methods
 
@@ -117,15 +127,3 @@ route()->group(['filters' => ['cors', 'trim']], function() {
     route()->get('/users', UserController::class);
 });
 ```
-
-## Route Files
-
-All the routes definitions goes into `routes` folder. There you will find two routes files already defined.
-
-```text
-routes
-  ├── web.php
-  ├── api.php
-```
-
-If you are defining routes for your APIs, you should define them in `routes/api.php` file.

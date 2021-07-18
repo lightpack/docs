@@ -1,25 +1,28 @@
 # Routing
 
 Routing is the process of mapping requested URLs with appropriate
-request handlers aka <code>controllers</code>.
+request handlers called **controllers**.
 
 ```php
-$route->get('/products', ProductController::class);
+route()->get('/products', ProductController::class);
 ```
 
-All your routes definitions goes in file: <code>config/routes.php</code> 
+You can define your routes using `route()` function which returns 
+an instance of route object provided by **Lightpack**.
+
+<p class="tip">All your routes definitions goes in <code>routes</code> folder.</p> 
 
 ## Route Methods
 
 Lightpack supports following routing methods for your convinience:
-* <code>$route->get()</code>
-* <code>$route->post()</code>
-* <code>$route->put()</code>
-* <code>$route->patch()</code>
-* <code>$route->delete()</code>
-* <code>$route->any()</code>
-* <code>$route->map()</code>
-* <code>$route->group()</code>
+* <code>route()->get()</code>
+* <code>route()->post()</code>
+* <code>route()->put()</code>
+* <code>route()->patch()</code>
+* <code>route()->delete()</code>
+* <code>route()->any()</code>
+* <code>route()->map()</code>
+* <code>route()->group()</code>
 
 ## Route Parameters
 
@@ -35,10 +38,10 @@ regex patterns out of the box to assist you for common cases.
 
 ```php
 // matches path: /users/23
-$route->get('/users/:num', UserController::class, 'find');
+route()->get('/users/:num', UserController::class, 'find');
 
 // matches path: /users/23/status/active
-$route->get('/users/:num/status/:str', UserController::class, 'filter');
+route()->get('/users/:num/status/:str', UserController::class, 'filter');
 ```
 
 Below is an explanation for pre-defined regex route placeholders.
@@ -77,19 +80,51 @@ Below is an explanation for pre-defined regex route placeholders.
 You can provide your own custom regular expression to match the path.
 
 ```php
-$route->get('/users/id/([0-9]{4})', UserController::class, 'findById');
-```                
+route()->get('/users/id/([0-9]{4})', UserController::class, 'findById');
+```   
 
-## Route Prefix
+## Route Filters
 
-If you have a bunch of routes that start with common path prefix,
-you can group them using <code>$route->group()</code> method.
+You can apply filters on a route by passing an array of filters aliases as last argument.
+
+```php
+route()->post('/users', UserController::class, 'index', ['cors', 'csrf']);
+```
+
+See more about filters [here](https://lightpack.github.io/docs/#/filters)
+
+## Route Groups
+
+If you have a bunch of routes that start with common path prefix, or apply common filters,
+you can group them using <code>route()->group()</code> method.
+
+This method takes an array as first argument and a callback function.
 
 For example, the following route group definition will match
 request paths that start with <code>/api/v1</code>.
 
 ```php
-$route->group(['prefix' => '/api/v1'], function($route) {
-    $route->get('/users', UserController::class, 'list');
+route()->group(['prefix' => '/api/v1'], function() {
+    route()->get('/users', UserController::class);
 });
 ```
+
+Similarly, you can also group filters.
+
+```php
+route()->group(['filters' => ['cors', 'trim']], function() {
+    route()->get('/users', UserController::class);
+});
+```
+
+## Route Files
+
+All the routes definitions goes into `routes` folder. There you will find two routes files already defined.
+
+```text
+routes
+  ├── web.php
+  ├── api.php
+```
+
+If you are defining routes for your APIs, you should define them in `routes/api.php` file.

@@ -108,7 +108,7 @@ $request->isSecure();
 
 Consider this file upload form:
 
-```php
+```html
 <form method="post" enctype="multipart/form-data">
     <input name="photo" type="file" />
     <button>Upload</button>
@@ -181,4 +181,29 @@ To get the file upload error:
 
 ```php
 $file->getError();
+```
+
+### Multiple File Uploads
+
+Consider this multiple file upload form:
+
+```html
+<form method="post" enctype="multipart/form-data">
+    <input name="photos[]" type="file" multiple/>
+    <button>Upload</button>
+</form>
+```
+
+To retrieve all the uploaded photos:
+
+```php
+$files = app('request')->files('photos');
+```
+
+Now all of the above mentioned file methods can be applied individually on each uploaded file. For example, here we loop each uploaded photo and store them:
+
+```php
+foreach($files as $file) {
+    $file->move(DIR_STORAGE . '/uploads');
+}
 ```

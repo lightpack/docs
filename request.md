@@ -174,7 +174,7 @@ $file->getExtension();
 To check if there was an error while uploading file:
 
 ```php
-$file->hasErrors(); // true|false
+$file->hasError(); // true|false
 ```
 
 To get the file upload error:
@@ -197,13 +197,13 @@ Consider this multiple file upload form:
 To retrieve all the uploaded photos:
 
 ```php
-$files = app('request')->files('photos');
+$photos = app('request')->files('photos');
 ```
 
 Now all of the above mentioned file methods can be applied individually on each uploaded file. For example, here we loop each uploaded photo and store them:
 
 ```php
-foreach($files as $file) {
-    $file->move(DIR_STORAGE . '/uploads');
+foreach($photos as $photo) {
+    $photo->move(DIR_STORAGE . '/uploads');
 }
 ```

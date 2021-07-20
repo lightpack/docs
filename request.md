@@ -103,3 +103,82 @@ To check if the incoming request is secure i.e. <code>https</code>:
 ```php
 $request->isSecure();
 ```
+
+## Uploads
+
+Consider this file upload form:
+
+```php
+<form method="post" enctype="multipart/form-data">
+    <input name="photo" type="file" />
+    <button>Upload</button>
+</form>
+```
+
+### Retrieve uploaded file
+
+To retrieve the uploaded file details:
+
+```php
+$file = app('request')->file('photo');
+```
+
+### Save uploaded file
+
+To **save/move** the uploaded file locally:
+
+```php
+$file->move(DIR_STORAGE . '/uploads');
+```
+
+You can also pass the filename as second argument:
+
+```php
+$file->move(DIR_STORAGE . '/uploads', 'filename.jpg');
+```
+
+### Uploaded file name
+
+To get the uploaded filename:
+
+```php
+$file->getName();
+```
+
+### Uploaded file size
+
+To get the uploaded filesize in bytes:
+
+```php
+$file->getSize();
+```
+
+### Uploaded file type
+
+To get the uploaded file type:
+
+```php
+$file->getType();
+```
+
+### Uploaded file extension
+
+To get the uploaded file extension:
+
+```php
+$file->getExtension();
+```
+
+### Uploaded file error
+
+To check if there was an error while uploading file:
+
+```php
+$file->hasErrors(); // true|false
+```
+
+To get the file upload error:
+
+```php
+$file->getError();
+```

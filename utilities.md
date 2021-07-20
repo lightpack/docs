@@ -103,3 +103,23 @@ This function is an HTML characters to entities converter.Use this function to e
 ```php
 _e('<script>alert("dangerous")</script>');
 ```
+
+## dd()
+
+Use this function as a quick alternate to `var_dump()`. It will pretty dump the variables and then exit the PHP execution.
+
+You can pass any number of variables to this function.
+
+```php
+var_dump($var1, $var2, ..., $varN);
+```
+
+## pp()
+
+Use this function as a quick alternate to `print_r()`. It will pretty print the variables and then exit the PHP execution.
+
+You can pass any number of variables to this function.
+
+```php
+print_r($var1, $var2, ..., $varN);
+```

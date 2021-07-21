@@ -169,6 +169,14 @@ To get the uploaded file extension:
 $file->getExtension();
 ```
 
+### Uploaded file temporary path
+
+To get the temporary path of uploaded file:
+
+```php
+$file->getTmpName();
+```
+
 ### Uploaded file error
 
 To check if there was an error while uploading file:

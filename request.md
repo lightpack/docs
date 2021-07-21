@@ -197,7 +197,7 @@ Consider this multiple file upload form:
 To retrieve all the uploaded photos:
 
 ```php
-$photos = app('request')->files('photos');
+$photos = app('request')->file('photos');
 ```
 
 Now all of the above mentioned file methods can be applied individually on each uploaded file. For example, here we loop each uploaded photo and store them:

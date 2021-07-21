@@ -71,3 +71,19 @@ app('db')->query('INSERT INTO products (name) VALUES ('Blue Denim'));
 ```php
 app('db')->query('UPDATE articles SET status = ?', ['active']);
 ```
+
+## Query Logging
+
+To log queries that got executed throught an application request lifecycle, there are two methods that you can work with.
+
+To get all the query logs as an array:
+
+```php
+app('db')->getQueryLogs();
+```
+
+To print all the query logs:
+
+```php
+app('db')->printQueryLogs();
+```

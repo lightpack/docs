@@ -38,6 +38,7 @@
 
 * Advanced
 
+  * [Password](password.md)
   * [Filters](filters.md)
   * [Events](events.md)
   * [Modules](modules.md)

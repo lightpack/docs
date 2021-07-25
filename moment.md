@@ -67,3 +67,11 @@ To get the date of last day of current month:
 ```php
 Moment::thisMonthEnd();
 ```
+
+## nextMonthEnd()
+
+To get the date of last day of next month:
+
+```php
+Moment::nextMonthEnd();
+```

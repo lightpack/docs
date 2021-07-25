@@ -10,7 +10,7 @@ Below we document all the utilities provided by **Moment**.
 
 ## now()
 
-To get current date and time:
+To get current **datetime**:
 
 ```php
 Moment::now();
@@ -44,7 +44,7 @@ Moment::travel('first day of april next year');
 
 ## today()
 
-To get today's date:
+To get **today's** date:
 
 ```php
 Moment::today();
@@ -52,7 +52,7 @@ Moment::today();
 
 ## tomorrow()
 
-To get tomorrow's date:
+To get **tomorrow's** date:
 
 ```php
 Moment::tomorrow();
@@ -60,7 +60,7 @@ Moment::tomorrow();
 
 ## yesterday()
 
-To get yesterday's date:
+To get **yesterday's** date:
 
 ```php
 Moment::yesterday();
@@ -68,7 +68,7 @@ Moment::yesterday();
 
 ## next()
 
-To get the date of upcoming next day by name:
+To get the date of **upcoming** next day by name:
 
 ```php
 Moment::next('monday');
@@ -82,7 +82,7 @@ Moment::next('sunday');
 
 ## last()
 
-To get the date of last day by name:
+To get the date of **last** day by name:
 
 ```php
 Moment::last('monday');
@@ -96,7 +96,7 @@ Moment::last('sunday');
 
 ## thisMonthEnd()
 
-To get the date of last day of current month:
+To get the date of last day of **current** month:
 
 ```php
 Moment::thisMonthEnd();
@@ -104,7 +104,7 @@ Moment::thisMonthEnd();
 
 ## nextMonthEnd()
 
-To get the date of last day of next month:
+To get the date of last day of **next** month:
 
 ```php
 Moment::nextMonthEnd();
@@ -112,7 +112,7 @@ Moment::nextMonthEnd();
 
 ## lastMonthEnd()
 
-To get the date of last day of last month:
+To get the date of **last day** of last month:
 
 ```php
 Moment::lastMonthEnd();
@@ -120,7 +120,7 @@ Moment::lastMonthEnd();
 
 ## daysBetween()
 
-To get the number of days between two dates:
+To get the **number** of days between two dates:
 
 ```php
 Moment::daysBetween('2021-07-23', '2021-05-18');
@@ -128,7 +128,7 @@ Moment::daysBetween('2021-07-23', '2021-05-18');
 
 ## diff()
 
-To get the difference between two datetimes as an interval:
+To get the difference between two **datetimes** as an interval:
 
 ```php
 $diff = Moment::diff('2021-07-23 14:25:45', '2019-03-14 08:23:12');
@@ -150,4 +150,30 @@ For example:
 ```php
 // 2 years, 4 months, 9 days
 "{$diff->y} years, {$diff->m} months, {$diff->d} days";
+```
+
+## fromNow()
+
+Use this function to get date and time as a friendly text like following:
+
+```text
+just now
+a minute ago
+5 minutes ago
+an hour ago
+10 hours ago
+yesterday
+5 days ago
+a week ago
+2 weeks ago
+a month ago
+5 months ago
+a year ago
+3 years ago
+```
+
+Pass it the **datetime** string you want to compare:
+
+```php
+Moment::fromNow('2021-07-20 11:30:45');
 ```

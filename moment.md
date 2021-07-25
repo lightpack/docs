@@ -23,3 +23,11 @@ To get tomorrow's date:
 ```php
 Moment::tomorrow();
 ```
+
+## yesterday()
+
+To get yesterday's date:
+
+```php
+Moment::yesterday();
+```

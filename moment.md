@@ -31,3 +31,17 @@ To get yesterday's date:
 ```php
 Moment::yesterday();
 ```
+
+## next()
+
+To get the date of upcoming next day by name:
+
+```php
+Moment::next('monday');
+Moment::next('tuesday');
+Moment::next('wednesday');
+Moment::next('thursday');
+Moment::next('friday');
+Moment::next('saturday');
+Moment::next('sunday');
+```

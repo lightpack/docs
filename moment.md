@@ -1,8 +1,17 @@
 # Moment
 
-> Moment is Lightpack's date and time utility class.
+<p class="tip">Moment is Lightpack's date and time utility class.</p>
 
 Designing a highly flexible date and time library can be daunting. At the same time it can become so big that it may demand its own separate project.
 
 **Moment** tries to solve some of the most frequently accessed date and time functions keeping its core dead simple and small. 
 
+Below we document all the utilities provided by **Moment**.
+
+## today()
+
+To get current date:
+
+```php
+Moment::today();
+```

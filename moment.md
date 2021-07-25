@@ -45,3 +45,17 @@ Moment::next('friday');
 Moment::next('saturday');
 Moment::next('sunday');
 ```
+
+## last()
+
+To get the date of last day by name:
+
+```php
+Moment::last('monday');
+Moment::last('tuesday');
+Moment::last('wednesday');
+Moment::last('thursday');
+Moment::last('friday');
+Moment::last('saturday');
+Moment::last('sunday');
+```

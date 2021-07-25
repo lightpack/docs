@@ -125,3 +125,29 @@ To get the number of days between two dates:
 ```php
 Moment::daysBetween('2021-07-23', '2021-05-18');
 ```
+
+## diff()
+
+To get the difference between two datetimes as an interval:
+
+```php
+$diff = Moment::diff('2021-07-23 14:25:45', '2019-03-14 08:23:12');
+```
+
+Now you can access a number of properties on `$diff` object:
+
+```php
+$diff->y; // Number of years.
+$diff->m; // Number of months.
+$diff->d; // Number of days.
+$diff->h; // Number of hours.
+$diff->i; // Number of minutes.
+$diff->s; // Number of seconds.
+```
+
+For example:
+
+```php
+// 2 years, 4 months, 9 days
+"{$diff->y} years, {$diff->m} months, {$diff->d} days";
+```

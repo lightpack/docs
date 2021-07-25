@@ -83,3 +83,11 @@ To get the date of last day of last month:
 ```php
 Moment::lastMonthEnd();
 ```
+
+## daysBetween()
+
+To get the number of days between two dates:
+
+```php
+Moment::daysBetween('2021-07-23', '2021-05-18');
+```

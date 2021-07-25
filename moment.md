@@ -6,9 +6,11 @@ Designing a highly flexible date and time library can be daunting. At the same t
 
 **Moment** tries to solve some of the most frequently accessed date and time functions keeping its core dead simple and small. 
 
+## Available methods:
+
 Below we document all the utilities provided by **Moment**.
 
-## now()
+### now()
 
 To get current **datetime**:
 
@@ -16,7 +18,7 @@ To get current **datetime**:
 Moment::now();
 ```
 
-## travel()
+### travel()
 
 To travel ahead of or behind of current date and time:
 
@@ -42,7 +44,7 @@ Moment::travel('first day of april last year');
 Moment::travel('first day of april next year');
 ```
 
-## today()
+### today()
 
 To get **today's** date:
 
@@ -50,7 +52,7 @@ To get **today's** date:
 Moment::today();
 ```
 
-## tomorrow()
+### tomorrow()
 
 To get **tomorrow's** date:
 
@@ -58,7 +60,7 @@ To get **tomorrow's** date:
 Moment::tomorrow();
 ```
 
-## yesterday()
+### yesterday()
 
 To get **yesterday's** date:
 
@@ -66,7 +68,7 @@ To get **yesterday's** date:
 Moment::yesterday();
 ```
 
-## next()
+### next()
 
 To get the date of **upcoming** next day by name:
 
@@ -80,7 +82,7 @@ Moment::next('saturday');
 Moment::next('sunday');
 ```
 
-## last()
+### last()
 
 To get the date of **last** day by name:
 
@@ -94,7 +96,7 @@ Moment::last('saturday');
 Moment::last('sunday');
 ```
 
-## thisMonthEnd()
+### thisMonthEnd()
 
 To get the date of last day of **current** month:
 
@@ -102,7 +104,7 @@ To get the date of last day of **current** month:
 Moment::thisMonthEnd();
 ```
 
-## nextMonthEnd()
+### nextMonthEnd()
 
 To get the date of last day of **next** month:
 
@@ -110,7 +112,7 @@ To get the date of last day of **next** month:
 Moment::nextMonthEnd();
 ```
 
-## lastMonthEnd()
+### lastMonthEnd()
 
 To get the date of **last day** of last month:
 
@@ -118,7 +120,7 @@ To get the date of **last day** of last month:
 Moment::lastMonthEnd();
 ```
 
-## daysBetween()
+### daysBetween()
 
 To get the **number** of days between two dates:
 
@@ -126,7 +128,7 @@ To get the **number** of days between two dates:
 Moment::daysBetween('2021-07-23', '2021-05-18');
 ```
 
-## diff()
+### diff()
 
 To get the difference between two **datetimes** as an interval:
 
@@ -152,7 +154,7 @@ For example:
 "{$diff->y} years, {$diff->m} months, {$diff->d} days";
 ```
 
-## fromNow()
+### fromNow()
 
 Use this function to get date and time as a friendly text like following:
 
@@ -178,7 +180,7 @@ Pass it the **datetime** string you want to compare:
 Moment::fromNow('2021-07-20 11:30:45');
 ```
 
-## create()
+### create()
 
 Use this function to create a `DateTime` object. Optionally pass it the **datetime** string as argument which default to `now`.
 

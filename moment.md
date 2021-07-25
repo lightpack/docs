@@ -8,6 +8,14 @@ Designing a highly flexible date and time library can be daunting. At the same t
 
 Below we document all the utilities provided by **Moment**.
 
+## now()
+
+To get current date and time:
+
+```php
+Moment::now();
+```
+
 ## travel()
 
 To travel ahead of or behind of current date and time:

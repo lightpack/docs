@@ -59,3 +59,11 @@ Moment::last('friday');
 Moment::last('saturday');
 Moment::last('sunday');
 ```
+
+## thisMonthEnd()
+
+To get the date of last day of current month:
+
+```php
+Moment::thisMonthEnd();
+```

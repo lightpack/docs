@@ -10,8 +10,16 @@ Below we document all the utilities provided by **Moment**.
 
 ## today()
 
-To get current date:
+To get today's date:
 
 ```php
 Moment::today();
+```
+
+## tomorrow()
+
+To get tomorrow's date:
+
+```php
+Moment::tomorrow();
 ```

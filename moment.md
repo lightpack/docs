@@ -8,6 +8,32 @@ Designing a highly flexible date and time library can be daunting. At the same t
 
 Below we document all the utilities provided by **Moment**.
 
+## travel()
+
+To travel ahead of or behind of current date and time:
+
+```php
+Moment::travel('+5 minutes'),
+Moment::travel('-5 minutes'),
+Moment::travel('+5 hours'),
+Moment::travel('-5 hours'),
+Moment::travel('+5 days'),
+Moment::travel('-5 days'),
+Moment::travel('+5 weeks'),
+Moment::travel('-5 weeks'),
+Moment::travel('2 AM'),
+Moment::travel('2 PM'),
+Moment::travel('noon'),
+Moment::travel('midnight'),
+Moment::travel('last day of this month'),
+Moment::travel('last day of next month'),
+Moment::travel('last day of previous month'),
+Moment::travel('first day of april'),
+Moment::travel('last day of april'),
+Moment::travel('first day of april last year'),
+Moment::travel('first day of april next year'),
+```
+
 ## today()
 
 To get today's date:

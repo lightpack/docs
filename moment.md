@@ -177,3 +177,25 @@ Pass it the **datetime** string you want to compare:
 ```php
 Moment::fromNow('2021-07-20 11:30:45');
 ```
+
+## create()
+
+Use this function to create a `DateTime` object. Optionally pass it the **datetime** string as argument which default to `now`.
+
+This return a `DateTime` object and hence you can apply all the methods exposed via `DateTime` class in **PHP**.
+
+```php
+// Add 2 hours in current datetime 
+// and return datetime in Y-m-d H:i:s format
+
+Moment::create()->modify('+2 hours')->format('Y-m-d H:i:s');
+```
+
+Another example:
+
+```php
+// Add 5 days in 23-July, 2021 and 
+// return datetime in Y-m-d format
+
+Moment::create('2021-07-23')->modify('+5 days')->format('Y-m-d'),
+```

@@ -26,6 +26,8 @@ create:filter
 create:command
 create:provider
 create:controller
+symlink:storage
+unlink:storage
 ```
 
 ### create:env
@@ -111,6 +113,24 @@ You can also create a namespaced controller as shown:
 
 ```terminal 
 php lucy create:controller 'Product\IndexController'
+```
+
+### symlink:storage
+
+This command creates a symbolic link from **public/uploads** to **storage/uploads/public**. 
+
+```terminal
+php lucy symlink:storage
+```
+
+Use this command to make files in **storage/uploads/public** publicly accessible.
+
+### unlink:storage
+
+This command removes the symbolic link from **public/uploads** to **storage/uploads/public**. 
+
+```terminal
+php lucy unlink:storage
 ```
 
 ## Build Your Own Command

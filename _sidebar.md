@@ -42,7 +42,6 @@
   * [Password](password.md)
   * [Filters](filters.md)
   * [Events](events.md)
-  * [Modules](modules.md)
   * [Caching](caching.md)
   * [Logging](logging.md)
   * [Providers](providers.md)

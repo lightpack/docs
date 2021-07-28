@@ -79,9 +79,9 @@ To set rules for multiple fields together, call `setRules()` method:
 
 ```php
 $validator->setRules([
-    'email', 'required|email',
-    'password', 'required|min:8',
-];
+    'email' => 'required|email',
+    'password' => 'required|min:8',
+]);
 ```
 
 ## Running Validation

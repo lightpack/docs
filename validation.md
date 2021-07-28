@@ -212,6 +212,28 @@ Now this will produce error message with provided label.
 echo $validator->getError('fname'); // First name is required
 ```
 
+## Callbacks as rules
+
+There might be cases when you might want to set your own custom rules. You can do so using **callbacks** as rules.
+
+Pass a `closure` and define your own rule logic that should return a `boolean` value.
+
+```php
+$validator->setRule('visibility', function($status) {
+    return $status === 'active'; 
+});
+```
+
+You can also explicitly specify the **callback** in `rules` key:
+
+```php
+$validator->setRule('visibility', [
+    'rules' => function($status) { 
+        return $status === 'active'; 
+    }
+]);
+```
+
 ## Available Validation Rules
 
 Lightpack provides a good number of validation rules for most frequently

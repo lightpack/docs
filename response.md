@@ -132,3 +132,31 @@ Method chaining is supported to assist you in preparing the appropriate response
 ```php
 $response->setCode(200)->setMessage('OK')->setType('text/html')->setBody('Hello World')
 ```
+
+## Download
+
+To download the file in the user's browser as response:
+
+```php
+$response->download('path/to/my/file');
+```
+
+You can additionally pass a custom name for download file as second parameter:
+
+```php
+$response->download('path/to/my/file', 'profile.png');
+```
+
+You can also pass additional headers as an array in the third argument:
+
+```php
+$response->download('path/to/my/file', 'profile.png', ['Content-type' => 'image/png']);
+```
+
+## File
+
+This method is same as `download()` method. The only difference is instead of downloading, `file()` method displays the file in the user's browser:
+
+```php
+$response->file('path/to/my/file');
+```

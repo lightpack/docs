@@ -24,7 +24,7 @@
   * [Connection](db-connection.md)
   * [Query Builder](db-query-builder.md)
   <!-- * [Pagination](db-pagination.md) -->
-  <!-- * [Migrations](db-pagination.md) -->
+  * [Migrations](migrations.md)
 
 * Lucid ORM
 

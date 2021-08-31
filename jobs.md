@@ -14,6 +14,23 @@ Although `Lightpack` will solve background jobs processing needs for most of the
 
 <p class="tip">Meanwhile, a <b>beanstalkd</b> powered job processor is in progress which will be integrated in the core framework once done.</p>
 
+## Jobs Table
+
+Currently, jobs processing is powered by `MySQL/MariaDB` database. So you will need to migrate a `jobs` table in your app database. So please create this table in your database:
+
+```SQL
+CREATE TABLE jobs (
+    id int NOT NULL AUTO_INCREMENT,
+    name varchar(55) COLLATE utf8_unicode_ci NOT NULL,
+    payload text COLLATE utf8_unicode_ci NOT NULL,
+    status varchar(55) COLLATE utf8_unicode_ci NOT NULL,
+    scheduled_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY status (status,scheduled_at)
+) ENGINE=InnoDB
+```
+
 ## Creating Jobs
 
 Jobs are simply classes that implement `execute()` method. To create a new job class, fire this command in your terminal from project root:
@@ -22,5 +39,4 @@ Jobs are simply classes that implement `execute()` method. To create a new job c
 php lucy create:job SendMail
 ```
 
-This should have created a `SendMail.php` class file in `app/Jobs` folder.
-
+This should have created a `SendMail.php` class file in `app/Jobs` folder. You can implement your job logic in the `execute()` method.

@@ -1,6 +1,6 @@
 # Background Jobs
 
-Ideally some time consuming job should be performed behind the scenes out of the main HTTP request context. For example, sending email to a user blocks the application untill the processing finishes and this may provide a bad experience to your application users. 
+Ideally, a time consuming job should be performed behind the scenes out of the main HTTP request context. For example, sending email to a user blocks the application untill the processing finishes and this may provide a bad experience to your application users. 
 
 What if you could perform time consuming tasks, such as sending emails, in the background without blocking the actual request? 
 
@@ -72,3 +72,40 @@ If the job throws an exception that can be caught and fails, you should see a te
 ```
 
 **NOTE:** All jobs that failed processing will have status `failed` in the `jobs` table.
+
+## Supervising Jobs
+
+When testing your jobs locally, it fine to inspect them in terminal but in production, the processing of jobs should be **deamonized**. What this means is that the job **worker** should keep running in the background as a system process and in case it stops, it should start automatically.
+
+There are various process monitoring solutions available like **upstart**, **systemd**, **supervisor**. Here is a solution using `supervisor` as job process monitor.
+
+First, you will have to install `supervisor`:
+
+```terminal
+sudo apt-get install supervisor
+```
+
+Let us assume that your project root path is `/var/www/lightpack-app`.
+
+Create a file named `lightpack-worker.conf` in `/etc/supervisor/conf.d` directory with following contents:
+
+```text
+[program:lightshop-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/lightpack-app/lucy process:jobs
+autostart=true
+autorestart=true
+stopasgroup=true
+user=www-data
+numprocs=4
+redirect_stderr=true
+stdout_logfile=/var/www/lightpack-app/worker.log
+```
+
+Finally, fire these commands to start supervisor:
+
+```terminal
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start laravel-worker:*
+```

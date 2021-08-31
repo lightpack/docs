@@ -40,3 +40,35 @@ php lucy create:job SendMail
 ```
 
 This should have created a `SendMail.php` class file in `app/Jobs` folder. You can implement your job logic in the `execute()` method.
+
+## Dispatching Jobs
+
+Once you have implemented your job class, you can **dispatch** them by simply invoking its `dispatch()` method passing it a payload as an array as shown:
+
+```php
+(new SendMail)->dispatch();
+```
+
+This will push the job into the database for processing in background and will not block the request.
+
+## Processing Jobs
+
+Once you have dispatched your jobm its time to run them. Fire this command from the terminal in your project root:
+
+```terminal
+php lucy process:jobs
+```
+
+This will hang your terminal prompt and will wait for any jobs to process. If a job is processed successfully, you should see a terminal message something like this for example:
+
+```terminal
+✔ Job processed successfully: 123
+```
+
+If the job throws an exception that can be caught and fails, you should see a terminal message something like this for example:
+
+```terminal
+✖ Error dispatching job: 123 - Recipient email address is missing
+```
+
+**NOTE:** All jobs that failed processing will have status `failed` in the `jobs` table.

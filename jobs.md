@@ -13,3 +13,14 @@ Although `Lightpack` will solve background jobs processing needs for most of the
 <p class="tip">Lightpack provides a <b>MySQL/MariaDB</b> powered background job processor. Although, some of you might be concerned with its performance, in my experience it has worked fine and scales really well for most of the application needs out there.</p>
 
 <p class="tip">Meanwhile, a <b>beanstalkd</b> powered job processor is in progress which will be integrated in the core framework once done.</p>
+
+## Creating Jobs
+
+Jobs are simply classes that implement `execute()` method. To create a new job class, fire this command in your terminal from project root:
+
+```terminal
+php lucy create:job SendMail
+```
+
+This should have created a `SendMail.php` class file in `app/Jobs` folder.
+

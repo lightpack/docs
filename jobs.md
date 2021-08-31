@@ -84,6 +84,19 @@ If the job throws an exception that can be caught and fails, you should see a te
 
 **NOTE:** All jobs that failed processing will have status `failed` in the `jobs` table.
 
+## Delaying Jobs
+
+By default, a job is processed as soon as it is available for processing. However, you can delay job processing by a specified amount of time. For that, set the `$delay` property with any `strtotime` compatible string value. 
+
+For example, following job will be processed after a delay of `30 seconds`. 
+
+```php
+class SendMail
+{
+    protected $delay = '+30 seconds';
+}
+```
+
 ## Supervising Jobs
 
 When testing your jobs locally, it fine to inspect them in terminal but in production, the processing of jobs should be **deamonized**. What this means is that the job **worker** should keep running in the background as a system process and in case it stops, it should start automatically.

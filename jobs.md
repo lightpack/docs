@@ -4,10 +4,12 @@ Ideally some time consuming job should be performed behind the scenes out of the
 
 What if you could perform time consuming tasks, such as sending emails, in the background without blocking the actual request? 
 
-**Welcome to background job processing.**
+*Welcome to background job processing.*
 
-While there are highly capable solutions available like **RabbitMQ**, **ZeroMQ**, **ActiveMQ**, and many others, `Lightpack` provides background jobs processing capabilities that is super easy to use and understand. 
+While there are highly capable solutions available like **RabbitMQ**, **ZeroMQ**, **ActiveMQ**, **RocketMQ**, and many others, `Lightpack` provides background jobs processing capabilities that is super easy to use and understand. 
 
 Although `Lightpack` will solve background jobs processing needs for most of the applications, it never aims to be a **full-fledged** message queue broker like those mentioned above.
 
-`
+<p class="tip">Lightpack provides a <b>MySQL/MariaDB</b> powered background job processor. Although, some of you might be concerned with its performance, in my experience it has worked fine and scales really well for most of the application needs out there.</p>
+
+<p class="tip">Meanwhile, a <b>beanstalkd</b> powered job processor is in progress which will be integrated in the core framework once done.</p>

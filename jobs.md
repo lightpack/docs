@@ -43,10 +43,21 @@ This should have created a `SendMail.php` class file in `app/Jobs` folder. You c
 
 ## Dispatching Jobs
 
-Once you have implemented your job class, you can **dispatch** them by simply invoking its `dispatch()` method passing it a payload as an array as shown:
+Once you have implemented your job class, you can **dispatch** them by simply invoking its `dispatch()` method:
 
 ```php
 (new SendMail)->dispatch();
+```
+
+You can optionally pass it an array as payload:
+
+```php
+$payload = [
+    'to' => 'bob@example.com',
+    'message' => 'Hello Bob'
+];
+
+(new SendMail)->dispatch($payload);
 ```
 
 This will push the job into the database for processing in background and will not block the request.

@@ -64,7 +64,7 @@ This will push the job into the database for processing in background and will n
 
 ## Processing Jobs
 
-Once you have dispatched your jobm its time to run them. Fire this command from the terminal in your project root:
+Once you have dispatched your job its time to run them. Fire this command from the terminal in your project root:
 
 ```terminal
 php lucy process:jobs

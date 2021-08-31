@@ -28,6 +28,7 @@ create:provider
 create:controller
 link:storage
 unlink:storage
+process:jobs
 ```
 
 ### create:env
@@ -131,6 +132,22 @@ This command removes the symbolic link from **public/uploads** to **storage/uplo
 
 ```terminal
 php lucy unlink:storage
+```
+
+### process:jobs
+
+To process background jobs created in `Lightpack`, fire this command:
+
+```terminal
+php lucy process:jobs
+```
+
+The background job worker sleeps for `5 seconds` by default in case it finds no jobs to process and polls again. You can change this by passing the `--sleep` flag.
+
+For example, here we are specifying the job worker to poll for jobs every `30 seconds`:
+
+```terminal
+php lucy process:jobs --sleep=30
 ```
 
 ## Build Your Own Command

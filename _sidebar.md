@@ -39,6 +39,7 @@
 
 * Advanced
 
+  * [Jobs](jobs.md)
   * [Password](password.md)
   * [Filters](filters.md)
   * [Events](events.md)

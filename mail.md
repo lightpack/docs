@@ -58,6 +58,8 @@ Use this method to configure the `sender` email address and name.
 $this->from('joe@example.com', 'Bob');
 ```
 
+**Note:** Use `MAIL_FROM_ADDRESS` and `MAIL_FROM_NAME` to set the global `from` address and name of the email sender. In case when you do not explicitly specify the sender in the mail class using `from()` method, this email will be used.
+
 ### to()
 
 Use this method to configure the `recipient` email address and name.

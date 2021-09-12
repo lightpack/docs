@@ -39,7 +39,7 @@
 
 * Advanced
 
-  * [Mail](mail.md)
+  * [Mails](mails.md)
   * [Jobs](jobs.md)
   * [Password](password.md)
   * [Filters](filters.md)

@@ -44,8 +44,6 @@ public function execute(array $payload = [])
 }
 ```
 
-> Lightpack depends on [PHPMailer](https://github.com/PHPMailer/PHPMailer) for mail sending facility and all the mail classes extend this library. So you can utilize all the possible methods in your mail class as documented by **PHPMailer** project.</p>
-
 ## Sending Mail
 
 To send the mail, simply instantiate the call and call its `execute()` method:
@@ -287,7 +285,7 @@ Use this method to set a rich `HTML` email message.
 $this->body('<p>Hello Devs</p>');
 ```
 
-However, it is recommended to create and send [rich HTML](/mail?id=html-templates)  email templates for a better email templates management.
+However, it is recommended to create and send [rich HTML](/mails?id=html-templates)  email templates for a better email templates management.
 
 ### altBody()
 
@@ -304,3 +302,7 @@ Use this method to finally send the mail.
 ```php
 $this->send();
 ```
+
+## Final Note
+
+Lightpack depends on the awesome [PHPMailer](https://github.com/PHPMailer/PHPMailer) library for mail sending facility and all the mail classes extend this library. So you can utilize all the possible methods in your mail class as documented by **PHPMailer** project.</p>

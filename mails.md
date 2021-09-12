@@ -46,7 +46,7 @@ public function execute(array $payload = [])
 
 ## Sending Mail
 
-To send the mail, simply instantiate the call and call its `execute()` method:
+To send the mail, simply instantiate the mail class and call its `execute()` method:
 
 ```php
 (new TestMail)->execute();

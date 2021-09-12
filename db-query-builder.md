@@ -34,7 +34,7 @@ Call the <code>get()</code> method to retrieve all the rows in a table.
 
 ```php
 // SELECT * FROM products
-$products->get();
+$products->fetchAll();
 ```
 ## Fetch one
 
@@ -42,7 +42,7 @@ To retrieve only the first record, call <code>first()</code> method instead.</p>
 
 ```php
 // SELECT * FROM products LIMIT 1
-$products->first();
+$products->fetchOne();
 ```
 
 ## Select

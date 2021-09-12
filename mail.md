@@ -46,6 +46,112 @@ public function execute(array $payload = [])
 
 > Lightpack depends on [PHPMailer](https://github.com/PHPMailer/PHPMailer) for mail sending facility and all the mail classes extend this library. So you can utilize all the possible methods in your mail class as documented by **PHPMailer** project.</p>
 
+## Sending Mail
+
+To send the mail, simply instantiate the call and call its `execute()` method:
+
+```php
+(new TestMail)->execute();
+```
+
+You can optionally pass it an array as data payload which you can use inside the `execute()` method:
+
+```php
+(new TestMail)->execute([
+    'to' => 'devs@example.com',
+    'from' => 'lightpack@example.com',
+]);
+```
+
+## HTML Templates
+
+You can create an `HTML` email template inside `app/views` folder and use that as your email body.
+
+For example, create a folder named `mails` inside `app/views` with following two files.
+
+```
+./app
+    └── views
+        └── mails
+            ├── welcome.html.php
+            ├── welcome.text.php
+```
+
+As you can see, we have two files named **welcome.html.php** and **welcome.text.php** because it is recommended to also send plain text version of your email for *non-HTML* compliant inboxes.
+
+### Creating Message
+
+Create your HTML email message markup in **welcome.html.php**.
+
+```php
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1>Hello Devs,</h1>
+        <p>Welcome to Lightpack PHP web framework.</p>
+    </body>
+</html>
+```
+
+And here is the plain text version in **welcome.text.php**.
+
+```php
+Hello Devs, welcome to Lightpack PHP web framework.
+```
+
+### Setting View Templates
+
+Now in the mail class, specify those two templates as class properties:
+
+```php
+class WelcomeMail extends Mail
+{
+    protected $this->textView = 'mails/welcome.text';
+    
+    protected $this->htmlView = 'mails/welcome.html';
+
+    // ...
+}
+```
+
+**Thats it!!** Now you can simply send the mail:
+
+```php
+public function execute(array $payload = [])
+{
+   $this->from('lightpack@example.com')
+        ->to('devs@example.com')
+        ->subject('Hello Devs')
+        ->send();
+}
+```
+
+### Passing View Data
+
+In case you need to pass data to your templates, simply set the `data` attribute as an array inside `execute()` method:
+
+```php
+public function execute(array $payload = [])
+{
+    $this->data = [
+        'title' => 'Hello Devs',
+        'content' => 'Welcome to Lightpack PHP web framework.',
+    ];
+}
+```
+
+Now you can access the data inside your templates with keys as variables:
+
+```php
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1><?= $title ?></h1>
+        <p><?= $content ?></p>
+    </body>
+</html>
+```
+
 ## Available Methods
 
 Below we document the most important methods that will help you send emails.
@@ -181,7 +287,7 @@ Use this method to set a rich `HTML` email message.
 $this->body('<p>Hello Devs</p>');
 ```
 
-However, read the document below to create and send [rich HTML](/mail?id=html-templates)  email template.
+However, it is recommended to create and send [rich HTML](/mail?id=html-templates)  email templates for a better email templates management.
 
 ### altBody()
 
@@ -197,93 +303,4 @@ Use this method to finally send the mail.
 
 ```php
 $this->send();
-```
-
-## HTML Templates
-
-You can create an `HTML` email template inside `app/views` folder and use that as your email body.
-
-For example, create a folder named `mails` inside `app/views` with following two files.
-
-```
-./app
-    └── views
-        └── mails
-            ├── welcome.html.php
-            ├── welcome.text.php
-```
-
-As you can see, we have two files named **welcome.html.php** and **welcome.text.php** because it is recommended to also send plain text version of your email for *non-HTML* compliant inboxes.
-
-### Creating Message
-
-Create your HTML email message markup in **welcome.html.php**.
-
-```php
-<!DOCTYPE html>
-<html>
-    <body>
-        <h1>Hello Devs,</h1>
-        <p>Welcome to Lightpack PHP web framework.</p>
-    </body>
-</html>
-```
-
-And here is the plain text version in **welcome.text.php**.
-
-```php
-Hello Devs, welcome to Lightpack PHP web framework.
-```
-
-### Setting View Templates
-
-Now inside the `execute()` method of the mail class, specify those two templates as class properties:
-
-```php
-class WelcomeMail extends Mail
-{
-    protected $this->textView = 'mails/welcome.text';
-    
-    protected $this->htmlView = 'mails/welcome.html';
-
-    // ...
-}
-```
-
-Thats it. Now you can simply send the mail:
-
-```php
-public function execute(array $payload = [])
-{
-   $this->from('lightpack@example.com')
-        ->to('devs@example.com')
-        ->subject('Hello Devs')
-        ->send();
-}
-```
-
-### Passing View Data
-
-In case you need to pass data to your templates, simply set the `data` attribute as an array inside `execute()` method:
-
-```php
-public function execute(array $payload = [])
-{
-    $this->data = [
-        'title' => 'Hello Devs',
-        'content' => 'Welcome to Lightpack PHP web framework.',
-    ];
-}
-```
-
-Now you can access the data inside your templates with keys as variables:
-
-```php
-<!DOCTYPE html>
-<html>
-    <body>
-        <h1><?= $title ?></h1>
-        <p><?= $content ?></p>
-    </body>
-</html>
 ```

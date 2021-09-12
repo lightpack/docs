@@ -66,6 +66,109 @@ Use this method to configure the `recipient` email address and name.
 $this->to('joe@example.com', 'Joe');
 ```
 
+### cc()
 
+Use this method to `cc` a recipient email address and name.
 
+```php
+$this->cc('rob@example.com', 'Rob');
+$this->cc('john@example.com', 'John');
+```
 
+You can `cc` multiple recipients at once by passing it an array of email address and name as **key-value** pairs.
+
+```php
+$this->cc([
+    'rob@example.com' => 'Rob',
+    'john@example.com' => 'John'
+]);
+```
+
+Note that the name is optional. For example:
+
+```php
+$this->cc([
+    'rob@example.com'
+    'john@example.com'
+]);
+```
+
+### bcc()
+
+Use this method to `bcc` a recipient email address and name.
+
+```php
+$this->bcc('rob@example.com', 'Rob');
+$this->bcc('john@example.com', 'John');
+```
+
+You can `bcc` multiple recipients at once by passing it an array of email address and name as **key-value** pairs.
+
+```php
+$this->bcc([
+    'rob@example.com' => 'Rob',
+    'john@example.com' => 'John'
+]);
+```
+
+Note that the name is optional. For example:
+
+```php
+$this->bcc([
+    'rob@example.com'
+    'john@example.com'
+]);
+```
+
+### replyTo()
+
+Use this method to add a `reply-to` header.
+
+```php
+$this->replyTo('support@example.com', 'Support Team');
+```
+
+You can `replyTo` multiple recipients at once by passing it an array of email address and name as **key-value** pairs.
+
+```php
+$this->replyTo([
+    'support1@example.com' => 'Support Team1',
+    'support2@example.com' => 'Support Team2'
+]);
+```
+
+Note that the name is optional. For example:
+
+```php
+$this->replyTo([
+    'support1@example.com',
+    'support2@example.com',
+]);
+```
+
+### attach()
+
+Use this method to send a file `attachment`.
+
+```php
+$this->attach('/path/to/file');
+```
+
+You can `attach` multiple files at once by passing it an array of filepath and optional name as **key-value** pairs.
+
+```php
+$this->attach([
+    '/path/to/file1' => 'filename1',
+    '/path/to/file2' => 'filename2',
+]);
+```
+
+### subject()
+
+Use this method to set the `subject` of the mail.
+
+```php
+$this->subject('My Email Subject');
+```
+
+### body()

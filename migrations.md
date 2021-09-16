@@ -2,6 +2,11 @@
 
 **Lightpack** supports the concept of pure `SQL` based database migrations. So except learning a couple of migration commands to run, you need to learn nothing else.
 
+**The goal is to:**
+
+* reduce learning curve by not introducing another layer of classes and method APIs
+* and not make awesome tools like MySQL Workbench, Sequel Pro, phpMyAdmin, MyJetBrains DataGrip, etc. worthless.
+
 <p class="tip">Please note that only <b>MySQL/MariaDB</b> based migrations are supported.</p>
 
 ## Creating Migrations

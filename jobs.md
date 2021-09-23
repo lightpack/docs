@@ -131,5 +131,5 @@ Finally, fire these commands to start supervisor:
 ```terminal
 sudo supervisorctl reread
 sudo supervisorctl update
-sudo supervisorctl start laravel-worker:*
+sudo supervisorctl start lightshop-worker:*
 ```

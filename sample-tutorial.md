@@ -58,7 +58,7 @@ We first need to define a route for `GET /tasks` in `config/routes.php` file. Th
 Add a new route for **tasks** in `config/routes.php` file.
 
 ```php
-$route->get('/tasks', TaskController::class);
+route()->get('/tasks', TaskController::class);
 ```
 
 We have registered `/tasks` route specifying default method `index` of controller class `TaskController`. So we now need to define our controller.
@@ -309,7 +309,7 @@ We will first start with adding new task feature. Clicking on **new task** link 
 Open `config/routes.php` file and add a new route for `/tasks/add`
 
 ```php
-$route->get('/tasks/add', TaskController::class, 'showAddForm');
+route()->get('/tasks/add', TaskController::class, 'showAddForm');
 ```
 
 Now create a method named `showAddForm()` in `TaskController.php` file.
@@ -353,7 +353,7 @@ when the form is posted, the browser requests `POST /tasks/add` for which we hav
 Add a route for `POST /tasks/add` in `config/routes.php` file.
 
 ```php
-$route->post('/tasks/add', TaskController::class, 'postAddForm');
+route()->post('/tasks/add', TaskController::class, 'postAddForm');
 ```
 
 We now need to update `TaskController::postAddForm()` method to support inserting new data in database.
@@ -410,7 +410,7 @@ Click on **edit** task link to edit a task. You should see `RouteNotFoundExcepti
 Update `config/routes.php` file to support task edting.
 
 ```php
-$route->get('/tasks/edit/:num', TaskController::class, 'showEditForm');
+route()->get('/tasks/edit/:num', TaskController::class, 'showEditForm');
 ```
 
 In the `TaskController.php` file, add a new method named `showEditForm()`.
@@ -497,7 +497,7 @@ Refresh your browser to see the task form populated with **status** field.
 Let us add a route for handling `POST` requests to edit our tasks. Update `config/routes.php` file a new route definition for posting task edit form.
 
 ```php
-$route->post('/tasks/edit/:num', TaskController::class, 'postEditForm');
+route()->post('/tasks/edit/:num', TaskController::class, 'postEditForm');
 ```
 
 Now add `postEditForm()` method in `TaskController`.

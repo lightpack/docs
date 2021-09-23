@@ -71,6 +71,29 @@ public function register(Container $container)
 }
 ```
 
+## Configuring Provider
+
+You need to register the provider class in order to access the service.
+
+Open `config/providers.php` class where you will find a number of providers already present. Just add your provider class at the **end** of the providers array.
+
+```php
+<?php
+
+/**
+ * ------------------------------------------------------------
+ * List service providers here.
+ * ------------------------------------------------------------
+ */
+
+return [
+    'providers' => [
+        // ...
+        App\Providers\MailerProvider::class,
+    ],
+];
+```
+
 ## Using Provider
 
 Now you can access this service using the alias **mailer** by calling `app('mailer')` function in your controller.

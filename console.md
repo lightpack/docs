@@ -169,7 +169,7 @@ This command should have created the `TestCommand` class inside `app/Commands` f
 
 ### Register New Command
 
-To register a new command, open `config/console.php` file. There in the array,
+To register a new command, open `config/commands.php` file. There in the array,
 put your **command name** as key and **command handler** as a new key-value pair.
 
 For example:

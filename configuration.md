@@ -59,32 +59,6 @@ return [
 ];
 ```
 
-Now you need to register this new `redis` config file in `bootstrap/services.php` file
-as shown.
-
-```php
-<?php
-
-...
-/**
- * ------------------------------------------------------------
- * Register Configuration Service Provider.
- * ------------------------------------------------------------
- */
-
-$container->register('config', function($container) {
-    return new Lightpack\Config\Config([
-        // ...
-        'events', 
-        'filters', 
-        'cors', 
-        'redis'
-        // ...
-    ]);
-});
-...
-```
-
 **That's it**. Now you can easily access the config values as shown:
 
 ```php

@@ -113,7 +113,7 @@ To send a <code>JSON</code> response, use the <code>json() method.</code> Pass i
 to be sent as JSON response body. It takes care of setting content-type header to <code>application/json</code>.
 
 ```php
-$response->json(['name' => 'Bob'])->send();
+$response->json(['name' => 'Bob']);
 ```
 
 ## XML
@@ -122,7 +122,7 @@ To send an <code>XML</code> response, use the <code>xml()</code> method. Pass it
 XML formatted string to send as response. It takes care of setting content-type header to <code>text/xml</code>.
 
 ```php
-$response->xml('xml-string')->send();
+$response->xml('xml-string');
 ```
 
 ## Chaining

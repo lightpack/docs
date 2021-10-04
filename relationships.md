@@ -213,6 +213,10 @@ foreach($user->roles as $role) {
 }
 ```
 
+## Eager Loading
+
+
+
 ## Conditional Queries
 
 Documentation in progress...

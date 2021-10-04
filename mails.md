@@ -104,9 +104,9 @@ Now in the mail class, specify those two templates as class properties:
 ```php
 class WelcomeMail extends Mail
 {
-    protected $this->textView = 'mails/welcome.text';
+    protected $textView = 'mails/welcome.text';
     
-    protected $this->htmlView = 'mails/welcome.html';
+    protected $htmlView = 'mails/welcome.html';
 
     // ...
 }

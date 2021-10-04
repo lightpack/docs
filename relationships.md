@@ -215,7 +215,39 @@ foreach($user->roles as $role) {
 
 ## Eager Loading
 
+Once again let us consider these three tables:
 
+<table>
+    <tr>
+        <td class="token title important">products</td>
+        <td>id</td>
+        <td>title</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td class="token title important">options</td>
+        <td>id</td>
+        <td>product_id</td>
+        <td>name</td>
+        <td>color</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td class="token title important">seo</td>
+        <td>id</td>
+        <td>product_id</td>
+        <td>meta_title</td>
+        <td>meta_description</td>
+    </tr>
+</table>
+
+A **product** can have multiple **options** and only one **seo** details.
+
+So there is a `1:1` relation between `products` and `seo` and `1:N` relation between `products` and `options`.
+
+Documentation in progress...
 
 ## Conditional Queries
 

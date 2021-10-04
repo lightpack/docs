@@ -30,19 +30,19 @@ Now you can start building and executing queries as documented below.
 
 ## Fetch all
 
-Call the <code>get()</code> method to retrieve all the rows in a table.
+Call the <code>all()</code> method to retrieve all the rows in a table.
 
 ```php
 // SELECT * FROM products
-$products->fetchAll();
+$products->all();
 ```
 ## Fetch one
 
-To retrieve only the first record, call <code>first()</code> method instead.</p>
+To retrieve only a single record, call <code>one()</code> method instead.</p>
 
 ```php
 // SELECT * FROM products LIMIT 1
-$products->fetchOne();
+$products->one();
 ```
 
 ## Select
@@ -51,7 +51,7 @@ You can specify table columns you need.
 
 ```php
 // SELECT id, name FROM products
-$products->select('id', 'name')->get();
+$products->select('id', 'name')->all();
 ```
 
 ## Distinct
@@ -60,7 +60,7 @@ You can select distinct rows too.
 
 ```php
 // SELECT DISTINCT name FROM products
-$products->select('name')->distinct()->get();
+$products->select('name')->distinct()->all();
 ```
 
 ## Where
@@ -69,43 +69,43 @@ You can narrow result set using where clauses.
 
 ```php
 // SELECT * FROM products WHERE id > ?
-$products->where('id', '>', 2)->get();
+$products->where('id', '>', 2)->all();
 
 // SELECT * FROM products WHERE id > ? AND color = ?
-$products->where('id', '>', 2)->where('color', '=', '#000')->get();
+$products->where('id', '>', 2)->where('color', '=', '#000')->all();
 
 // SELECT * FROM products WHERE id > ? AND color = ?
-$products->where('id', '>', 2)->andWhere('color', '=', '#000')->get();
+$products->where('id', '>', 2)->andWhere('color', '=', '#000')->all();
 
 // SELECT * FROM products WHERE id > ? AND color = ? OR color = ?
-$products->where('id', '>', 2)->andWhere('color', '=', '#000')->orWhere('color', '=', '#FFF')->get();
+$products->where('id', '>', 2)->andWhere('color', '=', '#000')->orWhere('color', '=', '#FFF')->all();
 
 // SELECT * FROM products WHERE id IN ?, ?, ?
-$products->whereIn('id', [23, 24, 25])->get();
+$products->whereIn('id', [23, 24, 25])->all();
 
 // SELECT * FROM products WHERE id IN ?, ?, ? OR color IN ?, ?
-$products->whereIn('id', [23, 24, 25])->orWhereIn('color', ['#000', '#FFF'])->get();
+$products->whereIn('id', [23, 24, 25])->orWhereIn('color', ['#000', '#FFF'])->all();
 
 // SELECT * FROM products WHERE id NOT IN ?, ?, ?
-$products->whereNotIn('id', [23, 24, 25])->get();
+$products->whereNotIn('id', [23, 24, 25])->all();
 
 // SELECT * FROM products WHERE id NOT IN ?, ?, ? OR color NOT IN ?, ?
-$products->whereNotIn('id', [23, 24, 25])->orWhereNotIn('color', ['#000', '#FFF'])->get();
+$products->whereNotIn('id', [23, 24, 25])->orWhereNotIn('color', ['#000', '#FFF'])->all();
 
 // SELECT * FROM products WHERE owner IS NULL
-$products->whereNull('owner')->get();
+$products->whereNull('owner')->all();
 
 // SELECT * FROM products WHERE owner IS NOT NULL
-$products->whereNotNull('owner')->get();
+$products->whereNotNull('owner')->all();
 
 // SELECT * FROM products WHERE owner IS NULL AND weight IS NULL
-$products->whereNull('owner')->andWhereNull('weight')->get();
+$products->whereNull('owner')->andWhereNull('weight')->all();
 
 // SELECT * FROM products WHERE owner IS NULL OR weight IS NULL
-$products->whereNull('owner')->orWhereNull('weight')->get();
+$products->whereNull('owner')->orWhereNull('weight')->all();
 
 // SELECT * FROM products WHERE owner IS NULL OR weight IS NOT NULL
-$products->whereNull('owner')->orWhereNotNull('weight')->get();
+$products->whereNull('owner')->orWhereNotNull('weight')->all();
 ```
 
 ## Order By
@@ -114,13 +114,13 @@ You can specify order of result set.
 
 ```php
 // SELECT id, name FROM products ORDER BY id ASC
-$products->select('id', 'name')->orderBy('id')->get();
+$products->select('id', 'name')->orderBy('id')->all();
 
 // SELECT id, name FROM products ORDER BY id DESC
-$products->select('id', 'name')->orderBy('id', 'DESC')->get();
+$products->select('id', 'name')->orderBy('id', 'DESC')->all();
 
 // SELECT id, name FROM products ORDER BY name DESC, id DESC
-$products->select('id', 'name')->orderBy('name', 'DESC')->orderBy('id', 'DESC')->get();
+$products->select('id', 'name')->orderBy('name', 'DESC')->orderBy('id', 'DESC')->all();
 ```
 
 ## Group By
@@ -129,21 +129,21 @@ You can group rows together.
 
 ```php
 // SELECT id, name FROM products GROUP BY color, size
-$products->select('id', 'name')->groupBy(['color', 'size'])->get();
+$products->select('id', 'name')->groupBy(['color', 'size'])->all();
 ```
 
 ## Limit
 
 ```php
 // SELECT * FROM products LIMIT 10
-$products->limit(10)->get();
+$products->limit(10)->all();
 ```
 
 ## Offset
 
 ```php
 // SELECT * FROM products LIMIT 10 OFFSET 2
-$products->limit(10)->offset(2)->get();
+$products->limit(10)->offset(2)->all();
 ```
 
 ## Paginate
@@ -154,14 +154,14 @@ So if the request URL is `http://domain.com?page=3`,
 
 ```php
 // SELECT * FROM products LIMIT 10 OFFSET 2
-$products->paginate(10);
+$products->paginate(10)->all();
 ```
 
 By default it will try to look for `page` query parameter from the URL string. But, you can also pass the current page value manually as second parameter.
 
 ```php
 // SELECT * FROM products LIMIT 10 OFFSET 2
-$products->paginate(10, 3);
+$products->paginate(10, 3)->all();
 ```
 
 ## Count
@@ -182,16 +182,16 @@ You can also join multiple tables.
 
 ```php
 // SELECT * FROM products INNER JOIN options ON products.id = options.product_id
-$products->join('options', 'products.id', 'options.product_id')->get();
+$products->join('options', 'products.id', 'options.product_id')->all();
 
 // SELECT * FROM products LEFT JOIN options ON products.id = options.product_id
-$products->leftJoin('options', 'options.product_id', 'products.id')->get();
+$products->leftJoin('options', 'options.product_id', 'products.id')->all();
 
 // SELECT * FROM products RIGHT JOIN options ON products.id = options.product_id
-$products->rightJoin('options', 'products.id', 'options.product_id')->get();
+$products->rightJoin('options', 'products.id', 'options.product_id')->all();
 
 // SELECT products.*, options.name AS oname FROM products INNER JOIN options ON products.id = options.product_id
-$products->select('products.*', 'options.name AS oname')->join('options', 'products.id', 'options.product_id')->get();
+$products->select('products.*', 'options.name AS oname')->join('options', 'products.id', 'options.product_id')->all();
 ```
 
 ## Insert

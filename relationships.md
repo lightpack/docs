@@ -274,6 +274,12 @@ select * from products;
 select * from seo where product_id in (1,2,3,4,5,...,N)
 ```
 
+**Note:** You could have achieved the same result with just one `join` for fetching **products** along with its **seo** data if you used `query-builder` rather than `eager-loading`.
+
+```php
+$products = (new Product)->query()->join('seo', 'seo.product_id', 'products.id')->all();
+```
+
 ### One-to-many Associations
 
 To eager load `1:N` associations, use the same `with` method passing it the associated method name as string:
@@ -307,8 +313,6 @@ Once you have got the products, you can eager load its **associated** relations 
 ```
 
 This will automatically populate `seo` data for each product in `$products` array.
-
-Documentation in progress...
 
 ## Conditional Queries
 

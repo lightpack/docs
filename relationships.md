@@ -213,6 +213,107 @@ foreach($user->roles as $role) {
 }
 ```
 
+## Eager Loading
+
+Once again let us consider these three tables:
+
+<table>
+    <tr>
+        <td class="token title important">products</td>
+        <td>id</td>
+        <td>title</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td class="token title important">options</td>
+        <td>id</td>
+        <td>product_id</td>
+        <td>name</td>
+        <td>color</td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td class="token title important">seo</td>
+        <td>id</td>
+        <td>product_id</td>
+        <td>meta_title</td>
+        <td>meta_description</td>
+    </tr>
+</table>
+
+Suppose we have **20** **products** and correspondingly **20 seo** records. To display `products` along with their `seo` details, you can simply loop each product:
+
+```php
+$products = (new Product)->query()->all();
+
+foreach($products as $product) {
+    echo $product->seo->meta_title;
+}
+```
+
+ The problem with above approach is that it will fire one query for fetching all `products`
+and **20** extra queries per product to fetch `seo` data. This will result in a total of `21 queries` which can be expensive.
+
+This is called `N+1` queries problem. To resolve such issue, the concept of **eager loading** exists that helps resolve `N+1` issues. 
+
+### Single-ended Associations
+
+To eager load **single-ended** associations aka `1:1` mapping, use `with()` method:
+
+```php
+$products = (new Product)->with('seo')->eagerLoad();
+```
+
+This will fetch all products and corresponding seo records with just two queries:
+
+```sql
+select * from products;
+
+select * from seo where product_id in (1,2,3,4,5,...,N)
+```
+
+**Note:** You could have achieved the same result with just one `join` for fetching **products** along with its **seo** data if you used `query-builder` rather than `eager-loading`.
+
+```php
+$products = (new Product)->query()->join('seo', 'seo.product_id', 'products.id')->all();
+```
+
+### One-to-many Associations
+
+To eager load `1:N` associations, use the same `with` method passing it the associated method name as string:
+
+```php
+$products = (new Product)->with('options')->eagerLoad();
+```
+
+### Loading multiple associations
+
+To eager load multiple associations, pass associated method names in the `with` method:
+
+```php
+$products = (new Product)->with('seo', 'options')->eagerLoad();
+```
+
+### Deferred eager loading
+
+Suppose that we have `100` records in products table. Eager loading `seo` and `options` for `100` products will be a huge performance miss.
+
+In such cases, you might be interested in **paginating** `products` and then eager load associated relations.
+
+```php
+$products = (new Product)->query()->paginate(10)->all();
+```
+
+Once you have got the products, you can eager load its **associated** relations by passing it into the `eagerLoad` method:
+
+```php
+(new Product)->with('seo')->eagerLoad($products);
+```
+
+This will automatically populate `seo` data for each product in `$products` array.
+
 ## Conditional Queries
 
 Documentation in progress...

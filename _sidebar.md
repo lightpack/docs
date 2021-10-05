@@ -25,6 +25,7 @@
   * [Query Builder](db-query-builder.md)
   <!-- * [Pagination](db-pagination.md) -->
   * [Migrations](migrations.md)
+  * [Seeding](seeding.md)
 
 * Lucid ORM
 

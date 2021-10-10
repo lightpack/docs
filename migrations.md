@@ -51,3 +51,5 @@ php lucy migrate:down --steps=2
 ```
 
 This will rollback last two migrations.
+
+## Syntax Reference

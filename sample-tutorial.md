@@ -524,7 +524,7 @@ class TaskModel
 
     public function update($id)
     {
-        $this->query()->update(['id', $id], [
+        $this->query()->where('id', '=', $id)->update([
             'title' => app('request')->post('title'),
             'status' => app('request')->post('status'),
         ]);

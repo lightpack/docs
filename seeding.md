@@ -32,7 +32,7 @@ For example, here we populate **25 fake products** as shown:
 ```php
 public function seed()
 {
-    for(range(1, 25) as $index) {
+    foreach(range(1, 25) as $index) {
         $product = new Product;
         $product->title = "Product {$index}";
         $product->description = "Product description {$index}";

@@ -50,4 +50,4 @@ To rollback a limited number of migrations, provide the `steps` flag:
 php lucy migrate:down --steps=2
 ```
 
-This will rollback last two migrations.
+This will rollback last two **batches** of migrations if present.

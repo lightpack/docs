@@ -1,8 +1,6 @@
 # Models
 
-Models are classes that represent a **record/row** in a database table. For this reason, models are also called **Entities**.
-
-Consider that you have a `products` table in your database.
+Models are classes that represent a table in your database. Consider that you have a `products` table in your database.
 
 ```table
 Table: products
@@ -38,7 +36,7 @@ class Product extends Model
 ```
 
 Defining your model in this manner gives you access to a number of utility
-methods to deal with a record in your `products` table.
+methods to deal with records in your `products` table.
 
 ## Read Data
 
@@ -46,12 +44,6 @@ You can easily find a record by its **ID** when constructing the model.
 
 ```php
 $product = new Product(23);
-```
-
-Or you can also call the <code>find()</code> method passing it the record ID.
-
-```php
-$product = (new Product)->find(23);
 ```
 
 Now you can easily access the column values as model properties.
@@ -80,6 +72,12 @@ $product->color = 'black'
 $product->save();
 ```
 
+If your table's primary key is an **auto-incrementing** field, you can get the last insert id:
+
+```php
+$product->lastInsertId();
+```
+
 ## Update Data
 
 You can only update a record that exists in the database table, right? So you first need
@@ -104,25 +102,44 @@ $product->save();
 Simply call the <code>delete()</code> method.
 
 ```php
-$product = new Product(23);
+(new Product)->delete(23);
+```
 
+If you already have an existing instance of model, you can call `delete()` method there too.
+
+```php
+$product = new Product(23);
 $product->delete();
 ```
 
-You can also do this:
+## Timestamps
 
-```php
-(new Product)->find(23)->delete();
+Consider **products** table:
+
+```table
+Table: products
+-------------------------------------------------
+id, name, price, created_at, updated_at
+-------------------------------------------------
 ```
 
-## Querying Data
+Setting `$timestamps` property to `true` automatically sets values for **created_at** and **updated_at** columns in your table. So
+when you create a new product or update an existing product, you don't have to manually set values for these columns.
 
-Every model instance inehrits `query()` method that returns a query builder object on the current model.
+<p class="tip">In order for timestamps to work, the table must have <b>created_at</b> and <b>updated_at</b> columns both.</p>
 
-For example, to get all the products with active status:
+## Query Builder
+
+Every model instance inehrits `query()` method that returns a query builder object on the current model. This means you can utilizes all the methods of query builder.
 
 ```php
-$product->query()->where('active', '=', 1)->all();
+$query = (new Product)->query();
+```
+
+Now you can call all the methods defined on [query builder](/db-query-builder). For example, to get all the products with active status:
+
+```php
+$products = (new Product)->query()->where('active', '=', 1)->all();
 ```
 
 This gives a convinience that otherwise you would have done using [query builder](/db-query-builder) from `Query` class as shown.
@@ -134,15 +151,4 @@ $products = new Query('products');
 // Query all active products
 $products->where('active', '=', 1)->all();
 ```
-
-<p class="tip">By inheriting the <code>query()</code> method, our models are violating the fact that a model class represents a single <b>record/row</b> in the corresponding database table. <br><br>Because if a model instance is capable of querying the whole table, then it ideally represents a collection of records, and not just a single record.</p>
-
-<p class="tip">This is where the <a href="https://en.wikipedia.org/wiki/Domain-driven_design">Repository Pattern</a> shines and promotes an aspect of <b>Domain Driven Design capabilities</b> for your domain objects. But even they come with <b>disadvantages</b>. 😅</p>
-
-## Timestamps
-
-Document in progress...
-
-## Hooks
-
-Document in progress...
+**But there is a catch!!**

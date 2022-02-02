@@ -9,7 +9,7 @@ id, name, size, color, status
 -------------------------------------------------
 ```
 
-Then you should define a `Product` model in <code>app/models</code> folder.
+Then you should define a `Product` model in <code>app/Models</code> folder.
 
 ## Creating Model
 
@@ -130,25 +130,19 @@ when you create a new product or update an existing product, you don't have to m
 
 ## Query Builder
 
-Every model instance inehrits `query()` method that returns a query builder object on the current model. This means you can utilizes all the methods of query builder.
+**Lightpack** models are capable [query builders](/query-builder) too. Below are some example for use query builder on a model.
 
+> Fetch all products
 ```php
-$query = (new Product)->query();
+$products = Product::query()->all();
 ```
 
-Now you can call all the methods defined on [query builder](/db-query-builder). For example, to get all the products with active status:
-
+> Fetch all active products
 ```php
-$products = (new Product)->query()->where('active', '=', 1)->all();
+$products = Product::query()->where('active', '=', '1')->all();
 ```
 
-This gives a convinience that otherwise you would have done using [query builder](/db-query-builder) from `Query` class as shown.
-
+> Fetch products with matching ids
 ```php
-// Get the query builder 
-$products = new Query('products');
-
-// Query all active products
-$products->where('active', '=', 1)->all();
+$products = Product::query()->whereIn('id', [1,2,3])->all();
 ```
-**But there is a catch!!**

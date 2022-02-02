@@ -134,3 +134,10 @@ $products->loadCount('options');
 ```
 
 This will automatically populate `seo` data along with `options` count for each product in `$products` collection.
+
+```php
+foreach($products as $product) {
+    $product->seo; 
+    $product->options_count;
+}
+```

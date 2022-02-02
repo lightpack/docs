@@ -130,7 +130,16 @@ when you create a new product or update an existing product, you don't have to m
 
 ## Query Builder
 
-**Lightpack** models are capable [query builders](/query-builder) too. Below are some example for use query builder on a model.
+**Lightpack** models are capable [query builders](/query-builder) too. 
+
+To get a query builder on a model, call the static method `query()`:
+
+```php
+$productQuery = Product::query();
+```
+
+Now you can access all the methods on [query builders](/query-builder). Below are some example for using query builder on a model.
+
 
 > Fetch all products
 ```php

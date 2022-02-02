@@ -20,7 +20,7 @@ which you might like though for its simplicity and performance.
 
 **Lucid ORM** is fast because of two major aspects in its design:
 
-* It doesn't hydrate records into a collection of objects.
+* It has a very small layer of abstraction.
 * It doesn't use inflectors at run-time to make intelligent guesses about table names and primary keys. 
 
 ## Models
@@ -44,3 +44,9 @@ Following relationships are supported:
 * N:N (Many-to-many)
 
 Learn more about relationships [here](/relationships).
+
+## Eager Loading
+
+**Lucid ORM** supports eager loading for associated models to avoid the `N+1` query performance issue. 
+
+Learn more about relationships [here](/eager-loading).

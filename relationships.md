@@ -72,11 +72,11 @@ Now you can easily fetch seo details for a given product as its **property**:
 
 ```php
 // Find product seo data
-$seo = (new Product)->find(23)->seo;
+$product = new Product(23);
 
 // Access the values
-echo $seo->meta_title;
-echo $seo->meta_description;
+echo $product->seo->meta_title;
+echo $product->seo->meta_description;
 ```
 
 It works because the <code>hasOne()</code> method actually joins the <code>products</code>
@@ -104,11 +104,11 @@ Now you can get the product for the given seo record using product as its proper
 
 ```php
 // Get the product details
-$product = (new Seo)->find(23)->product;
+$seo = new Seo(23);
 
 // Access the values
-echo $product->name;
-echo $product->color;
+echo $seo->product->name;
+echo $seo->product->color;
 ```
 
 ## Has Many
@@ -129,10 +129,10 @@ Now you can fetch all options for a given product as its property.
 
 ```php
 // Find product options
-$options = (new Product)->find(23)->options;
+$product = new Product(23);
 
 // Access each option
-foreach($options as $option) {
+foreach($product->options as $option) {
     echo $option->name;
     echo $option->value;
 }
@@ -156,7 +156,10 @@ class Option extends Model
 Now you can access the product that belongs to an option as its property.
 
 ```php
-$product = (new Option)->find(23)->product;
+$option = new Option(23);
+
+// Access product name
+echo $option->product->name
 ```
 
 ## Many to Many
@@ -246,7 +249,7 @@ Once again let us consider these three tables:
 Suppose we have **20** **products** and correspondingly **20 seo** records. To display `products` along with their `seo` details, you can simply loop each product:
 
 ```php
-$products = (new Product)->query()->all();
+$products = Product::query()->all();
 
 foreach($products as $product) {
     echo $product->seo->meta_title;
@@ -263,7 +266,7 @@ This is called `N+1` queries problem. To resolve such issue, the concept of **ea
 To eager load **single-ended** associations aka `1:1` mapping, use `with()` method:
 
 ```php
-$products = (new Product)->with('seo')->eagerLoad();
+$products = Product::query()->with('seo')->all();
 ```
 
 This will fetch all products and corresponding seo records with just two queries:
@@ -274,10 +277,12 @@ select * from products;
 select * from seo where product_id in (1,2,3,4,5,...,N)
 ```
 
-**Note:** You could have achieved the same result with just one `join` for fetching **products** along with its **seo** data if you used `query-builder` rather than `eager-loading`.
+So you can loop each product and access its seo data:
 
 ```php
-$products = (new Product)->query()->join('seo', 'seo.product_id', 'products.id')->all();
+foreach($products as $product) {
+    echo $product->seo->meta_title;
+}
 ```
 
 ### One-to-many Associations
@@ -285,7 +290,7 @@ $products = (new Product)->query()->join('seo', 'seo.product_id', 'products.id')
 To eager load `1:N` associations, use the same `with` method passing it the associated method name as string:
 
 ```php
-$products = (new Product)->with('options')->eagerLoad();
+$products = Product::query()->with('options')->all();
 ```
 
 ### Loading multiple associations
@@ -293,7 +298,7 @@ $products = (new Product)->with('options')->eagerLoad();
 To eager load multiple associations, pass associated method names in the `with` method:
 
 ```php
-$products = (new Product)->with('seo', 'options')->eagerLoad();
+$products = Product::query()->with('seo', 'options')->all();
 ```
 
 ### Deferred eager loading
@@ -303,17 +308,13 @@ Suppose that we have `100` records in products table. Eager loading `seo` and `o
 In such cases, you might be interested in **paginating** `products` and then eager load associated relations.
 
 ```php
-$products = (new Product)->query()->paginate(10)->all();
+$products = Product::query()->paginate(10);
 ```
 
 Once you have got the products, you can eager load its **associated** relations by passing it into the `eagerLoad` method:
 
 ```php
-(new Product)->with('seo')->eagerLoad($products);
+$products->load('seo');
 ```
 
 This will automatically populate `seo` data for each product in `$products` array.
-
-## Conditional Queries
-
-Documentation in progress...

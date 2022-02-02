@@ -318,3 +318,36 @@ $products->load('seo');
 ```
 
 This will automatically populate `seo` data for each product in `$products` array.
+
+### Counting associations
+
+To count the associated relations, use `withCount()` method:
+
+```php
+$categories = Category::query()->withCount('products')->all();
+```
+
+This will find all categories along with their products count which you can access using `{relation_key}_count` property on individual object. For example:
+
+```php
+$categories = Category::query()->withCount('products')->all();
+
+foreach($categories as $category) {
+    echo $category->products_count;
+}
+```
+
+You can also use with() and withCount() methods together. For example, this query finds all **projects** along with **manager** data and count of **tasks**.
+
+```php
+$projects = ProjectModel::query()->with('manager')->withCount('tasks')->all();
+```
+
+So you can loop each **projects** and access the **manager** data along with **task** count on each project:
+
+```php
+foreach($projects as $project) {
+    $manager = $project->manager; // manager
+    $tasksCount = $project->tasks_count; // tasks count
+}
+```

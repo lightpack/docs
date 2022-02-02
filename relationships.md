@@ -337,7 +337,7 @@ foreach($categories as $category) {
 }
 ```
 
-You can also use with() and withCount() methods together. For example, this query finds all **projects** along with **manager** data and count of **tasks**.
+You can also use `with()` and `withCount()` methods together. For example, this query finds all **projects** along with **manager** data and count of **tasks**.
 
 ```php
 $projects = ProjectModel::query()->with('manager')->withCount('tasks')->all();

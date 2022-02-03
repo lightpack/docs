@@ -141,3 +141,10 @@ foreach($products as $product) {
     $product->options_count;
 }
 ```
+
+**Note:** You can also chain `load()` and `loadCount()` methods together. For example:
+
+```php
+$products = Product::query()->paginate(10);
+$products->load('seo')->loadCount('options');
+```

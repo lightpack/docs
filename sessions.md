@@ -97,7 +97,7 @@ method. This returns boolean TRUE if the token has been tampered otherwise false
 
 ```php
 if(session()->hasInvalidToken()) {
-    // Ask the user to retry form submission, right?
+    // May be block the request, right?
 }
 ```
 

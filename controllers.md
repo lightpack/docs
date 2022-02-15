@@ -25,7 +25,7 @@ For dynamic routes, you can access route parameters by defining them in the
 controller's action method signature. For example, for the following route definition:
 
 ```php
-$route->get('/page/:num/status/:str', PageController::class);
+route()->get('/page/:num/status/:str', PageController::class);
 ```
 
 Define your controller as:
@@ -46,7 +46,7 @@ class PageController
 ## Rendering Views
 
 Define your view templates in <code>app/views</code> folder. To render a view template, 
-call the <code>render()</code> method of <code>app('response')</code>. This method
+call the <code>render()</code> method of <code>response()</code>. This method
 takes a view template name and an optional array of view data as arguments.
 
 ```php
@@ -56,7 +56,7 @@ namespace App\Controllers;
 
 class PageController
 {
-    app('response')->render('page');
+    response()->render('page');
 }
 ```
 
@@ -67,7 +67,7 @@ class PageController
 {
     public function index()
     {
-        app('response')->render('users', [
+        response()->render('users', [
             'title' => 'Lightpack PHP',
         ]);
     }
@@ -85,7 +85,7 @@ You can also organize your view templates in folder within <code>app/views</code
 example, to render the template <code>app/views/page/home.php</code>,
 
 ```php
-app('response')->render('page/home');
+response()->render('page/home');
 ```
 
 ## JSON Response
@@ -94,7 +94,7 @@ For APIs, you may be interested in sending JSON response instead of view templat
 simply call the <code>json()</code> method inherited from parent class.
 
 ```php
-app('response')->json(['framework' => 'Lighpack']);
+response()->json(['framework' => 'Lighpack']);
 ```
 
 ## XML Response
@@ -103,10 +103,12 @@ For sending XML response, simply call the <code>xml()</code> method inherited fr
 passing it the XML formatted string data.
 
 ```php
-app('response')->xml('xml_data_string');
+response()->xml('xml_data_string');
 ```
 
 <p class="tip">
 Calling methods <code>render()</code>, or <code>json()</code>, or <code>xml()</code> automatically takes care of setting appropriate response content type and status code <code>200</code>,
 thereby saving you some typing.
 </p>
+
+Read more about using [response()](/response) function.

@@ -133,7 +133,7 @@ $validator->getError('email');
 
 ### Custom error messages
 
-By default the validation will create custom error messages for fields
+By default the validation will create error messages for fields
 which will be sufficient enough in most cases. But if you want to customize an error
 message for a field, you can do that too.
 

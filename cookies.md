@@ -1,16 +1,16 @@
 # Cookies
 
-<p class="tip">Lightpack provides <code>app('cookie')</code> function to work with cookies.</p>
+<p class="tip">Lightpack provides <code>cookie()</code> function to work with cookies.</p>
 
 Note that all the cookies created by Lightpack is <code>encrypted</code> for better security. You can access
 following functions to deal with cookies:
 
 ```php
-app('cookie')->set()
-app('cookie')->get()
-app('cookie')->has()
-app('cookie')->forever()
-app('cookie')->delete()
+cookie()->set()
+cookie()->get()
+cookie()->has()
+cookie()->forever()
+cookie()->delete()
 ```
 
 ## Set
@@ -18,19 +18,19 @@ app('cookie')->delete()
 This sets a cookie that expires at the end of current session:
 
 ```php
-app('cookie')->set('key', 'value');
+cookie()->set('key', 'value');
 ```
 
 You can pass the number of seconds as expiry time for the cookie:
 
 ```php
-app('cookie')->set('key', 'value', 5*60);
+cookie()->set('key', 'value', 5*60);
 ```
 
 You can pass an array as fourth parameter to provide cookie options <code>path</code>, <code>domain</code>, <code>secure</code>, <code>http_only</code>.
 
 ```php
-app('cookie')->set('key', 'value', 5*60, ['path' => $path, 'domain' => $domain]);
+cookie()->set('key', 'value', 5*60, ['path' => $path, 'domain' => $domain]);
 ```
 
 ## Get
@@ -38,20 +38,20 @@ app('cookie')->set('key', 'value', 5*60, ['path' => $path, 'domain' => $domain])
 To access all the set cookies together, simply call <code>get()</code> method.
 
 ```php
-app('cookie')->get();
+cookie()->get();
 ```
 
 To access a specific cookie, call it's <code>get()</code> method passing it name 
 of the cookie. It returns <code>null</code> if cookie not found.
 
 ```php
-app('cookie')->get('key');
+cookie()->get('key');
 ```
 
 You can specify a default value for a specific cookie if not found.
 
 ```php
-app('cookie')->get('key', 'default');
+cookie()->get('key', 'default');
 ```            
 
 ## Has
@@ -59,7 +59,7 @@ app('cookie')->get('key', 'default');
 To check if a cookie is set, call it's <code>has()</code> method. It returns a boolean TRUE or FALSE.
 
 ```php
-app('cookie')->has('key');
+cookie()->has('key');
 ```
 
 ## Forever
@@ -70,13 +70,13 @@ sets an expiry time long enough to set a non-expiring cookie.
 
 
 ```php
-app('cookie')->forever('key', 'value');
+cookie()->forever('key', 'value');
 ```
 
 You can also pass an array as third parameter to pass other cookie options.
 
 ```php
-app('cookie')->set('key', 'value', ['path' => $path, 'domain' => $domain]);
+cookie()->set('key', 'value', ['path' => $path, 'domain' => $domain]);
 ```
 
 ## Delete
@@ -84,5 +84,5 @@ app('cookie')->set('key', 'value', ['path' => $path, 'domain' => $domain]);
 To delete a specific cookie, call <code>delete()</code> method.
 
 ```php
-app('cookie')->delete();
+cookie()->delete();
 ```

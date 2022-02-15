@@ -4,24 +4,20 @@ The <code>Lightpack\Http\Response</code> class provides few utility methods to h
 generating appropriate response to output.
 
 An instance of this class has already been configured in service container. So you can access
-it anywhere using <code>app('response')</code> function.
-
-```php
-$response = app('response');
-```
+it anywhere using <code>response()</code> function.
 
 ## Code
 
 To set the response status code, use <code>setCode()</code> method.
 
 ```php
-$reponse->setCode(404);
+response()->setCode(404);
 ```
 
 To get the set response code, use <code>getCode()</code> method.
 
 ```php
-$rsponse->getCode();
+response()->getCode();
 ```
 
 <p class="tip">By default, the response code is set to <code>200</code>.</p>
@@ -31,13 +27,13 @@ $rsponse->getCode();
 To set the resonse content type, use <code>setType()</code> method.
 
 ```php
-$reponse->setType('application/json');
+response()->setType('application/json');
 ```
 
 To get the set reponse content type, use <code>getType()</code> method.
 
 ```php
-$response->getType();
+response()->getType();
 ```
 
 <p class="tip">By default, the response content type is set to <code>text/html</code></p>
@@ -47,13 +43,13 @@ $response->getType();
 To set the reponse status message, use <code>setMessage()</code> method.
 
 ```php
-$response->setMessage('Not Found');
+response()->setMessage('Not Found');
 ```
 
 To get the set response status message, use <code>geMessage()</code> method.
 
 ```php
-$response->getMessage();
+response()->getMessage();
 ```
 
 <p class="tip">By default, the response status message is set to <code>OK</code></p>
@@ -63,14 +59,14 @@ $response->getMessage();
 To set a response header, use <code>setHeader()</code> method.
 
 ```php
-$response->setHeader('Server', 'Apache/2.4.1 (Unix)');
-$response->setHeader('X-Frame-Options', 'SAMEORIGIN');
+response()->setHeader('Server', 'Apache/2.4.1 (Unix)');
+response()->setHeader('X-Frame-Options', 'SAMEORIGIN');
 ```
 
 To set multiple response headers at once, use <code>setHeaders</code> method.
 
 ```php
-$response->setHeaders([
+response()->setHeaders([
     'Server' => 'Apache/2.4.1 (Unix)',
     'X-Frame-Options' => 'SAMEORIGIN'
 ]);
@@ -79,7 +75,7 @@ $response->setHeaders([
 To get all the set response headers, use <code>getHeaders()</code> method.
 
 ```php
-$response->getHeaders();
+response()->getHeaders();
 ```
 
 ## Body
@@ -87,13 +83,13 @@ $response->getHeaders();
 To set the response content body, use <code>setBody()</code> method.
 
 ```php
-$response->setBody('Hello World');
+response()->setBody('Hello World');
 ```            
 
 To get the set response body, use <code>getBody()</code> method.
 
 ```php
-$response->getBody();
+response()->getBody();
 ```        
 
 ## Send
@@ -104,7 +100,7 @@ formatting the response output for you without you having to worry about prepari
 output.
 
 ```php
-$response->send();
+response()->send();
 ```
 
 ## JSON
@@ -113,7 +109,7 @@ To send a <code>JSON</code> response, use the <code>json() method.</code> Pass i
 to be sent as JSON response body. It takes care of setting content-type header to <code>application/json</code>.
 
 ```php
-$response->json(['name' => 'Bob']);
+response()->json(['name' => 'Bob']);
 ```
 
 ## XML
@@ -122,7 +118,7 @@ To send an <code>XML</code> response, use the <code>xml()</code> method. Pass it
 XML formatted string to send as response. It takes care of setting content-type header to <code>text/xml</code>.
 
 ```php
-$response->xml('xml-string');
+response()->xml('xml-string');
 ```
 
 ## Chaining
@@ -130,7 +126,7 @@ $response->xml('xml-string');
 Method chaining is supported to assist you in preparing the appropriate response.
 
 ```php
-$response->setCode(200)->setMessage('OK')->setType('text/html')->setBody('Hello World')
+response()->setCode(200)->setMessage('OK')->setType('text/html')->setBody('Hello World')
 ```
 
 ## Download
@@ -138,19 +134,19 @@ $response->setCode(200)->setMessage('OK')->setType('text/html')->setBody('Hello 
 To download the file in the user's browser as response:
 
 ```php
-$response->download('path/to/my/file');
+response()->download('path/to/my/file');
 ```
 
 You can additionally pass a custom name for download file as second parameter:
 
 ```php
-$response->download('path/to/my/file', 'profile.png');
+response()->download('path/to/my/file', 'profile.png');
 ```
 
 You can also pass additional headers as an array in the third argument:
 
 ```php
-$response->download('path/to/my/file', 'profile.png', ['Content-type' => 'image/png']);
+response()->download('path/to/my/file', 'profile.png', ['Content-type' => 'image/png']);
 ```
 
 ## File
@@ -158,5 +154,5 @@ $response->download('path/to/my/file', 'profile.png', ['Content-type' => 'image/
 This method is same as `download()` method. The only difference is instead of downloading, `file()` method displays the file in the user's browser:
 
 ```php
-$response->file('path/to/my/file');
+response()->file('path/to/my/file');
 ```

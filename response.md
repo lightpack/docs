@@ -126,7 +126,12 @@ response()->xml('xml-string');
 Method chaining is supported to assist you in preparing the appropriate response.
 
 ```php
-response()->setCode(200)->setMessage('OK')->setType('text/html')->setBody('Hello World')
+response()
+    ->setCode(200)
+    ->setMessage('OK')
+    ->setType('text/html')
+    ->setBody('Hello World')
+    ->send();
 ```
 
 ## Download

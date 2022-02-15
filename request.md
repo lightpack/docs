@@ -4,10 +4,7 @@ The <code>Lightpack\Http\Request</code> class provides utility methods to deal w
 incoming HTTP request. 
 
 Lightpack already configures an instance of <code>Request</code> in IoC container.
-So you can simply access it anywhere in your project using helper function <code>app()</code>.
-```php
-$request = app('request');
-```
+So you can simply access it anywhere in your project using helper function <code>request()</code>.
 
 ## URL
 
@@ -17,19 +14,19 @@ request methods might be of help for you.
 
 ```php
 // Gives: /app/users/editors
-$request->uri();
+request()->uri();
 
 // Gives: /users/editors
-$request->path();
+request()->path();
 
 // Gives: /app
-$request->basepath();
+request()->basepath();
 
 // Gives: status=active
-$request->query();
+request()->query();
 
 // Gives: /app/users/editors?status=active
-$request->fullUri();
+request()->fullUri();
 ```
 
 ## Verbs
@@ -39,19 +36,19 @@ Following methods are available to access common HTTP verbs:
 ```php
 
 // Return true if HTTP method is GET
-$request->isGet(); 
+request()->isGet(); 
 
 // Return true if HTTP method is POST
-$request->isPost();
+request()->isPost();
 
 // Return true if HTTP method is PUT
-$request->isPut();
+request()->isPut();
 
 // Return true if HTTP method is PATCH
-$request->isPatch();
+request()->isPatch();
 
 // Return true if HTTP method is DELETE
-$request->isDelete();
+request()->isDelete();
 ```
 
 ## Input
@@ -60,22 +57,28 @@ To access form input values submitted via HTTP <code>GET</code> or <code>POST</c
 request:
 
 ```php
-$request->get('key');
-$request->post('key');
+request()->get('key');
+request()->post('key');
 ```
 
 Provide second parameter for default input value:
 
 ```php
-$request->get('key', 'default');
-$request->post('key', 'default');
+request()->get('key', 'default');
+request()->post('key', 'default');
 ```
 
 Passing no key will return global $_GET/$_POST arrays.
 
 ```php
-$request->get(); // returns $_GET
-$request->post(); // returns $_POST
+request()->get(); // returns $_GET
+request()->post(); // returns $_POST
+```
+
+To get JSON payload from incoming request:
+
+```php
+request()->json();
 ```
 
 ## AJAX
@@ -83,7 +86,7 @@ $request->post(); // returns $_POST
 To check if the incoming request is an AJAX request:
 
 ```php
-$request->isAjax();
+request()->isAjax();
 ```
 
 > Note: This method relies on <code>X-Requested-With</code> header.
@@ -93,7 +96,7 @@ $request->isAjax();
 To check if the incoming request has asked for JSON data:
 
 ```php
-$request->isJson();
+request()->isJson();
 ```
 
 ## Secure
@@ -101,7 +104,7 @@ $request->isJson();
 To check if the incoming request is secure i.e. <code>https</code>:
 
 ```php
-$request->isSecure();
+request()->isSecure();
 ```
 
 ## Uploads
@@ -120,7 +123,7 @@ Consider this file upload form:
 To retrieve the uploaded file details:
 
 ```php
-$file = app('request')->file('photo');
+$file = request()->file('photo');
 ```
 
 ### Save uploaded file
@@ -205,7 +208,7 @@ Consider this multiple file upload form:
 To retrieve all the uploaded photos:
 
 ```php
-$photos = app('request')->file('photos');
+$photos = request()->file('photos');
 ```
 
 Now all of the above mentioned file methods can be applied individually on each uploaded file. For example, here we loop each uploaded photo and store them:

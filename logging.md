@@ -2,19 +2,19 @@
 
 **Lightpack** ships with a PSR-3 compatible looger that is already configured as a service for you.
 
-You can access the logger instance as service using `app('logger')` which gives an instance of `Lightpack\Logger\Logger`. 
+You can access the logger instance as service using `logger()` which gives an instance of `Lightpack\Logger\Logger`. 
 
 This class exposes following logging methods:
 
 ```php
-app('logger')->log();
-app('logger')->info();
-app('logger')->alert();
-app('logger')->debug();
-app('logger')->notice();
-app('logger')->warning();
-app('logger')->critical();
-app('logger')->emergency();
+logger()->log();
+logger()->info();
+logger()->alert();
+logger()->debug();
+logger()->notice();
+logger()->warning();
+logger()->critical();
+logger()->emergency();
 ```
 
 ## Log Driver
@@ -52,7 +52,7 @@ To **disable** logging messages, you can set the log driver to null in `env.php`
 This method takes a log level and a message string to log.
 
 ```php
-app('logger')->log('level', 'message');
+logger()->log('level', 'message');
 ```
 
 ### info()
@@ -60,7 +60,7 @@ app('logger')->log('level', 'message');
 This method sets the log level to `info` and takes a message string to log.
 
 ```php
-app('logger')->info('message');
+logger()->info('message');
 ```
 
 ### alert()
@@ -68,7 +68,7 @@ app('logger')->info('message');
 This method sets the log level to `alert` and takes a message string to log.
 
 ```php
-app('logger')->alert('message');
+logger()->alert('message');
 ```
 
 ### debug()
@@ -76,7 +76,7 @@ app('logger')->alert('message');
 This method sets the log level to `debug` and takes a message string to log.
 
 ```php
-app('logger')->debug('message');
+logger()->debug('message');
 ```
 
 ### notice()
@@ -84,7 +84,7 @@ app('logger')->debug('message');
 This method sets the log level to `notice` and takes a message string to log.
 
 ```php
-app('logger')->notice('message');
+logger()->notice('message');
 ```
 
 ### warning()
@@ -92,7 +92,7 @@ app('logger')->notice('message');
 This method sets the log level to `warning` and takes a message string to log.
 
 ```php
-app('logger')->warning('message');
+logger()->warning('message');
 ```
 
 ### critical()
@@ -100,7 +100,7 @@ app('logger')->warning('message');
 This method sets the log level to `critical` and takes a message string to log.
 
 ```php
-app('logger')->critical('message');
+logger()->critical('message');
 ```
 
 ### emergency()
@@ -108,5 +108,5 @@ app('logger')->critical('message');
 This method sets the log level to `emergency` and takes a message string to log.
 
 ```php
-app('logger')->emergency('message');
+logger()->emergency('message');
 ```

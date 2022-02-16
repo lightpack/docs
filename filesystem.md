@@ -178,7 +178,7 @@ To create a new folder, call `makeDir()` method. This method returns `true` on s
 $file->makeDir('/path/to/file');
 ```
 
-By default it tries to create the directory with a permission value `0777`. You can pass the permission assecond parameter to this method.
+By default it tries to create the directory with a permission value `0777`. You can pass the permission as second parameter to this method.
 
 ```php
 $file->makeDir('/path/to/file', 0775);

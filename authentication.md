@@ -25,6 +25,18 @@ auth()->recall();
 
 // Attempt login once without starting session
 auth()->attempt();
+
+// Verify incoming request bearer token in database
+auth()->viaToken();
+
+// Redirect URL after successful login
+auth()->redirectLogin();
+
+// Redirect URL after logout
+auth()->redirectLogout();
+
+// Redirect to login URL
+auth()->redirectLoginUrl();
 ```
 
 Also the configuration for authentication is present in `config/auth.php` file. In most cases, you can use these methods without any configurations needed.

@@ -5,10 +5,10 @@
 **Lightpack** supports **user/api** authentication in a very friendly manner. It exposes a couple of authentication methods using `auth()` function.
 
 ```php
-// get logged in user id
+// Returns logged in user id
 auth()->id();
 
-// Gets logged in user 
+// Returns logged in user 
 auth()->user();
 
 // Attempt login and start session

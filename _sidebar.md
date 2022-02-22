@@ -4,6 +4,10 @@
   * [Quick Install](install.md)
   * [Sample Tutorial](sample-tutorial.md)
 
+* Auth
+
+  * [Authentication](authentication.md)
+
 * Basics
 
   * [Routing](routing.md)

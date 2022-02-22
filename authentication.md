@@ -28,9 +28,3 @@ auth()->attempt();
 ```
 
 Also the configuration for authentication is present in `config/auth.php` file. In most cases, you can use these methods without any configurations needed.
-
-Let's understand what each of these methods are and when to use them.
-
-## login()
-
-This method will verify that the provided credentials match the user in database. If successful, it will regenerate the session with verified user details.

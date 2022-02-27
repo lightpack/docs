@@ -58,4 +58,14 @@ Behind the scenes, this method performs following actions:
 
 ### API Based Login
 
-When trying to authenticate a user via API requests, use `verify()` method.
+When trying to authenticate a user via API requests, use `attempt()` method.
+
+```php
+auth()->attempt();
+```
+
+Behind the scenes, this method performs following actions:
+
+* Check if `email/password` credentials match in **users** table.
+* On **success**, returns an API **token** in JSON response.
+* On **failure**, returns a **failure** response as JSON.

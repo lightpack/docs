@@ -40,3 +40,22 @@ auth()->redirectLoginUrl();
 ```
 
 Also the configuration for authentication is present in `config/auth.php` file. In most cases, you can use these methods without any configurations needed.
+
+## Logging In
+
+### Web Based Login
+To login a user via **session-cookie** mechanism, call the `login()` method on **auth** object.
+
+```php
+auth()->login();
+```
+
+Behind the scenes, this method performs following actions:
+
+* Check if `email/password` credentials match in **users** table.
+* On **success**, start a new session and redirect to **post-login** url.
+* On **failure**, redirect to the login page again with **error** message in session.
+
+### API Based Login
+
+When trying to authenticate a user via API requests, use `verify()` method.

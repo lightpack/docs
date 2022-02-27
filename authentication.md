@@ -80,14 +80,24 @@ auth()->logout();
 
 ## Authenticated User
 
-To access currently authenticated **user id**, call `id()` method.
+To access currently authenticated user's **id**, call `id()` method.
 
 ```php
 auth()->id();
 ```
 
-To access currently authenticated user, call `user()` method.
+To access currently authenticated **user**, call `user()` method.
 
 ```php
 auth()->user();
 ```
+
+To access currently authenticated user's **api token** , call `token()` method.
+
+```php
+auth()->token();
+```
+
+This method will return `null` when logged-in via **session-cookie** mechanism. So use this
+method only when logged-in with `attempt()` method for API based login requests.
+

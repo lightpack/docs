@@ -58,13 +58,13 @@ Behind the scenes, this method performs following actions:
 
 ### API Based Login
 
-When trying to authenticate a user via API requests, use `attempt()` method.
+To authenticate a user without maintaining **session-cookie**, use `attempt()` method.
 
 ```php
 auth()->attempt();
 ```
 
-Behind the scenes, this method performs following actions:
+This is useful when authenticating user via API requests. Behind the scenes, this method performs following actions:
 
 * Check if `email/password` credentials match in **users** table.
 * On **success**, returns an API **token** in JSON response.

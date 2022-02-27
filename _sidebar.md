@@ -7,6 +7,7 @@
 * Auth
 
   * [Authentication](authentication.md)
+  * [Configuration](auth-configuration.md)
 
 * Basics
 

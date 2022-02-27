@@ -18,3 +18,16 @@ route()->group(['filters' => 'auth:web'], function() {
 
 Use `auth:web` filter for **session-cookie** based routes authentication.
 
+## ApiFilter
+
+Used as `auth:api` alias, this filter should be used to protect API routes. This filter will look for **Bearer** token in authorization header and attempt to match it in **users** table `api_token` column. 
+
+If authentication fails, it will abort the request and return a `401` unauthorized JSON response. 
+
+For example:
+
+```php
+route()->group(['filters' => 'auth:api'], function() {
+    // protected routes list here
+});
+```

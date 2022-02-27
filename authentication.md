@@ -64,11 +64,19 @@ To authenticate a user without maintaining **session-cookie**, use `attempt()` m
 auth()->attempt();
 ```
 
-This is useful when authenticating user via API requests. Behind the scenes, this method performs following actions:
+This is useful when authenticating user via API requests based on **username/password** credentials. Behind the scenes, this method performs following actions:
 
 * Check if `email/password` credentials match in **users** table.
 * On **success**, returns an API **token** in JSON response.
 * On **failure**, returns a **failure** response as JSON.
+
+#### Bearer Token
+
+To authenticate an API request containing **Bearer** token in authorization header, use:
+
+```php
+auth()->viaToken();
+```
 
 ## Logging Out
 

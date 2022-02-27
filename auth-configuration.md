@@ -36,3 +36,7 @@ You can create your own custom user data service providers to implement your own
 ## login.url
 
 This key represents the **login** page url for session-cookie based authentication. This is the page where the client is redirected after successful login.
+
+## logout.url
+
+This key represents the **logout** url for session-cookie based authentication. This is the page where the client is redirected after successful logout.

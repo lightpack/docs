@@ -35,8 +35,28 @@ You can create your own custom user data service providers to implement your own
 
 ## login.url
 
-This key represents the **login** page url for session-cookie based authentication. This is the page where the client is redirected after successful login.
+This key represents the **login** page route for session-cookie based authentication. 
 
 ## logout.url
 
-This key represents the **logout** url for session-cookie based authentication. This is the page where the client is redirected after successful logout.
+This key represents the **logout** route for session-cookie based authentication. 
+
+## login.redirect
+
+This is the route where the client is **redirected** post successful login.
+
+## logout.redirect
+
+This is the page where the client is **redirected** post successful logout.
+
+## fields.username
+
+This key is the form-field name for **username** input which by default, it is set to `email`.
+
+## fields.password
+
+This key is the form-field name for **password** input.
+
+## flash_error
+
+This key contains the default error message for **failed** login attempts.

@@ -9,6 +9,7 @@
   * [Authentication](authentication.md)
   * [Configuration](auth-configuration.md)
   * [Extending Auth](custom-auth.md)
+  * [Route Filters](auth-filters.md)
 
 * Basics
 

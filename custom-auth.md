@@ -64,3 +64,43 @@ class CustomIdentifier implements Identifier
     }
 }
 ```
+
+## Configuration
+
+Now the final step remains is to configure your custom authentication provider. Add a new key in `config/auth.php` file
+with a value that identifies your authentication privider.
+
+```php
+<?php
+
+return [
+    'auth' => [
+        'default' => [
+            // ...
+        ],
+        'custom' => [
+            'identifier' => CustomIdentifier::class,
+        ],
+    ]
+];
+```
+
+Once configured, call the `extend()` method on `auth()` in your login controller or wherever you want to use this custom authentication. For example:
+
+```php
+<?php 
+
+namespace App\Controllers;
+
+class LoginController
+{
+    public function authenticate()
+    {
+        // Use custom authentication
+        auth()->extend('custom');
+
+        // Try to validate login
+        auth()->login();
+    }
+}
+```

@@ -69,3 +69,25 @@ This is useful when authenticating user via API requests. Behind the scenes, thi
 * Check if `email/password` credentials match in **users** table.
 * On **success**, returns an API **token** in JSON response.
 * On **failure**, returns a **failure** response as JSON.
+
+## Logging Out
+
+To logout, simply call `logout()` method.
+
+```php
+auth()->logout();
+```
+
+## Authenticated User
+
+To access currently authenticated **user id**, call `id()` method.
+
+```php
+auth()->id();
+```
+
+To access currently authenticated user, call `user()` method.
+
+```php
+auth()->user();
+```

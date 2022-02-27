@@ -4,13 +4,6 @@
   * [Quick Install](install.md)
   * [Sample Tutorial](sample-tutorial.md)
 
-* Auth
-
-  * [Authentication](authentication.md)
-  * [Configuration](auth-configuration.md)
-  * [Extending Auth](custom-auth.md)
-  * [Route Filters](auth-filters.md)
-
 * Basics
 
   * [Routing](routing.md)
@@ -45,6 +38,13 @@
 
   <!-- * [XSS](more-pages.md) -->
   <!-- * [CSRF](custom-navbar.md) -->
+
+  * Authentication
+
+    * [Introduction](authentication.md)
+    * [Configuration](auth-configuration.md)
+    * [Extending Auth](custom-auth.md)
+    * [Route Filters](auth-filters.md)
 
 * Advanced
 

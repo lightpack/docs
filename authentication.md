@@ -2,7 +2,7 @@
 
 > Session-cookie or token based authentication made easy.
 
-**Lightpack** supports **user/api** authentication in a very friendly manner. It exposes a couple of authentication methods using `auth()` function.
+**Lightpack** supports authentication in a very friendly manner. It exposes a couple of authentication methods using `auth()` function.
 
 ```php
 // Returns logged in user id

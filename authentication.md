@@ -101,3 +101,18 @@ auth()->token();
 This method will return `null` when logged-in via **session-cookie** mechanism. So use this
 method only when logged-in with `attempt()` method for API based login requests.
 
+## Remember Me
+
+If the user checks the **remember** functionality while logging in, you can use `recall()` method.
+
+```php
+auth()->recall();
+```
+
+Behind the scenes, this method will perform following actions.
+
+* Check if **session** has logged in.
+* On **success**, redirect to **post-login** url.
+* On **failure**, check if `remember_me` cookie is set and valid.
+* If **cookie** is valid, redirect to **post-login** url.
+* Else, redirect to **login** page.

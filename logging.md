@@ -1,6 +1,6 @@
 # Logging
 
-**Lightpack** ships with a PSR-3 compatible looger that is already configured as a service for you.
+**Lightpack** ships with a PSR-3 compatible logger that is already configured as a service for you.
 
 You can access the logger instance as service using `logger()` which gives an instance of `Lightpack\Logger\Logger`. 
 

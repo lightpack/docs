@@ -11,6 +11,9 @@ auth()->id();
 // Returns logged in user 
 auth()->user();
 
+// Returns true if user is logged in
+auth()->isLoggedIn();
+
 // Attempt login and start session
 auth()->login();
 

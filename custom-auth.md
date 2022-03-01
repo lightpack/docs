@@ -6,9 +6,9 @@ Understanding these two aspects will help you customize and implement your own a
 
 ## Authenticators
 
-Authenticators are classes that implement `Lightpack\Auth\Authenticator` interface. 
+Authenticators are classes that extend `Lightpack\Auth\AbstractAuthenticator` class. 
 
-These classes are responsible for authenticating a request. You can create your own authenticator by implementing this interface. For example:
+These classes are responsible for authenticating a request. You can create your own authenticator by extending this class. For example:
 
 ```php
 <?php
@@ -16,19 +16,18 @@ These classes are responsible for authenticating a request. You can create your 
 namespace App\Security;
 
 use Lightpack\Auth\Result;
-use Lightpack\Auth\Identifier;
-use Lightpack\Auth\Authenticator;
+use Lightpack\Auth\AbstractAuthenticator;
 
-class CustomAuthenticator implements Authenticator
+class CustomAuthenticator extends AbstractAuthenticator
 {
-    public function verify(Identifier $identifier, array $config)
+    public function verify(): Result
     {
         // custom auth logic goes here
     }
 }
 ```
 
-The `verify()` method should return **null** on failed authentication. If authentication succeeds, it should return authenticated user details.
+The `verify()` method should return an instantce of **\Lightpack\Auth\Result**. 
 
 ## Identifiers
 
@@ -41,19 +40,22 @@ These classes are responsible for **fetching** users and they act as user reposi
 
 namespace App\Security;
 
+use Lightpack\Auth\Identity;
+use Lightpack\Auth\Identifier;
+
 class CustomIdentifier implements Identifier
 {
-    public function findByAuthToken(string $token)
+    public function findByAuthToken(string $token): ?Identity
     {
         // fetch user with matching api_token
     }
 
-    public function findByRememberToken($id, string $token)
+    public function findByRememberToken($id, string $token): ?Identity
     {
         // fetch user with matching remember_me token
     }
 
-    public function findByCredentials(array $credentials)
+    public function findByCredentials(array $credentials): ?Identity
     {
         // fetch user by username/password credentials
     }

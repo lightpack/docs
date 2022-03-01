@@ -17,7 +17,10 @@ auth()->isLoggedIn();
 // Attempt login and start session
 auth()->login();
 
-// Delete current session and logout the user 
+// Attempt login once without starting session
+auth()->attempt();
+
+// Logout the user 
 auth()->logout();
 
 // Returns auth token when logged in via api
@@ -26,16 +29,13 @@ auth()->token();
 // Attempts to automatically login based on remember me cookie
 auth()->recall();
 
-// Attempt login once without starting session
-auth()->attempt();
-
-// Verify incoming request bearer token in database
+// Verify incoming request bearer token
 auth()->viaToken();
 
-// Redirect URL after successful login
+// Redirect URL post successful login
 auth()->redirectLogin();
 
-// Redirect URL after logout
+// Redirect URL post logout
 auth()->redirectLogout();
 
 // Redirect to login URL

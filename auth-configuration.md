@@ -7,14 +7,18 @@ by the framework itself.
 
 ```php
 'default' => [
-    'identifier'      => DefaultIdentifier::class,
-    'login.url'       => '/login',
-    'logout.url'      => '/logout',
-    'login.redirect'  => '/',
-    'logout.redirect' => '/login',
+    'identifier' => DefaultIdentifier::class,
+    'login.url' => 'dashboard/login',
+    'logout.url' => 'dashboard/logout',
+    'login.redirect' => 'dashboard/home',
+    'logout.redirect' => 'dashboard/login',
+    'fields.id' => 'id',
     'fields.username' => 'email',
     'fields.password' => 'password',
-    'flash_error'     => 'Invalid account credentials.',
+    'fields.api_token' => 'api_token',
+    'fields.remember_token' => 'remember_token',
+    'fields.last_login_at' => 'last_login_at',
+    'flash_error' => 'Invalid account credentials.',
 ],
 ```
 
@@ -49,6 +53,10 @@ This is the route where the client is **redirected** post successful login.
 
 This is the page where the client is **redirected** post successful logout.
 
+## fields.id
+
+This key is the name for **user id** which by default, it is set to `id`.
+
 ## fields.username
 
 This key is the form-field name for **username** input which by default, it is set to `email`.
@@ -56,6 +64,14 @@ This key is the form-field name for **username** input which by default, it is s
 ## fields.password
 
 This key is the form-field name for **password** input.
+
+## fields.api_token
+
+This key is the name for **api_token** column in users table.
+
+## fields.remember_token
+
+This key is the name for cookie **remember_token** column in users table.
 
 ## flash_error
 

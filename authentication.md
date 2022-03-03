@@ -14,6 +14,9 @@ auth()->user();
 // Returns true if user is logged in
 auth()->isLoggedIn();
 
+// Returns true if a user is not logged in
+auth()->isGuest();
+
 // Attempt login and start session
 auth()->login();
 

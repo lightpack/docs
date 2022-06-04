@@ -10,8 +10,7 @@ class HomeTest extends HttpTestCase
 {
     public function testItRendersHomePage()
     {
-        $response = $this->request('GET', '/');
-
+        $this->request('GET', '/');
         $this->assertResponseStatus(200);
     }
 }

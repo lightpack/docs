@@ -207,3 +207,46 @@ public function testItFetchesProductsJson()
     $this->assertResponseHasHeader('/login');
 }
 ```
+
+## Testing Databases
+
+> Note: This section applies only in case of MariaDB, MySQl based relational databases.
+
+**Lightpack** ships with `phpunit.xml` file in the project's root directory. You can specify the database name you will use for testing:
+
+```xml
+<env name="DB_NAME" value="test_lightpack" />
+```
+
+### Migrations
+
+Before you start testing database application, you should run all your migrations in the test database so that it contains upto date schema for testing:
+
+```cli
+php lucy migrate:up
+```
+
+### Seeding
+
+In case you want to seed some test data, execute all your seeder classes:
+
+```cli
+php lucy db:seed
+```
+
+### Transactions
+
+You should wrap your test methods in transactions so that once the method is tested, it should rollback any changes made in database. For that, simply wrap your statements within a transaction:
+
+```php
+public function testItStoresNewProduct()
+{
+    app('db')->begin();
+
+    $this->request('POST', '/products', ['name' => 'Lightpack']);
+    
+    $this->assertResponseStatus(201);
+    
+    app('db')->rollback();
+}
+```

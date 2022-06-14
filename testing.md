@@ -220,7 +220,7 @@ public function testItFetchesProductsJson()
 
 ### Migrations
 
-Before you start testing database application, you should run all your migrations in the test database so that it contains upto date schema for testing:
+Before you start testing database applications, you should run all your migrations in the test database so that it contains the latest schema for testing:
 
 ```cli
 php lucy migrate:up
@@ -244,9 +244,79 @@ public function testItStoresNewProduct()
     app('db')->begin();
 
     $this->request('POST', '/products', ['name' => 'Lightpack']);
-    
     $this->assertResponseStatus(201);
     
     app('db')->rollback();
+}
+```
+
+## Test Cookies
+
+Use `withCookies()` method to pass custom cookies in request.
+
+```php
+public function testItSetsCookies()
+{
+    $this->withCookies(['test' => 'test']);
+    $this->requestJson('get', '/api/test');
+
+    $this->assertTrue(cookie()->has('test'));
+    $this->assertEquals('test', cookie()->get('test'));
+}
+```                    
+
+## Test Session
+
+Use `withSession()` method to set custom session data.
+
+```php
+public function testItSetsSession()
+{
+    $this->withSession(['test' => 'test']);
+    $this->requestJson('get', '/api/test');
+
+    $this->assertTrue(session()->has('test'));
+    $this->assertEquals('test', session()->get('test'));
+}
+```
+
+## Test Headers
+
+Use `withHeaders()` method to pass custom request headers.
+
+```php
+public function testItSetsRequestHeaders()
+{
+    $this->withHeaders([
+        'Accept' => 'application/json',
+        'X-Requested-With' => 'XMLHttpRequest',
+    ]);
+
+    $this->request('get', '/test');
+
+    $this->assertTrue(request()->hasHeader('Accept'));
+    $this->assertTrue(request()->hasHeader('X-Requested-With'));
+
+    $this->assertEquals('application/json', request()->header('Accept'));
+    $this->assertEquals('XMLHttpRequest', request()->header('X-Requested-With'));
+}
+```
+
+## Testing File Uploads
+
+Use `withFiles()` method to test file uploads. This method accepts an array of one or more files to test upload.
+
+```php
+public function testItUploadsFile() 
+{
+    $file = [
+        'name' => 'profile.png',
+        'type' => 'text/plain',
+        'tmp_name' => __DIR__ . '/../tmp/profile.png',
+        'error' => UPLOAD_ERR_OK,
+        'size' => filesize(__DIR__ . '/../tmp/profile.png'),
+    ];
+
+    $this->withFiles(['photo' => $file])->request('post', '/test/upload');
 }
 ```

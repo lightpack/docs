@@ -167,7 +167,7 @@ $products->whereNotExists(function($q) {
 });
 ```
 
-### Where raw
+### Raw queries
 
 Sometimes it's handy to write complex `where` clauses using **raw** query strings. For such cases, use `whereRaw()` and `orWhereRaw()` methods.
 

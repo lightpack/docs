@@ -45,6 +45,14 @@ To retrieve only a single record, call <code>one()</code> method instead.</p>
 $products->one();
 ```
 
+## Fetch column
+
+To retrieve a specific column value from a record:
+
+```php
+$products->column('name');
+```
+
 ## Select
 
 You can specify table columns you need.
@@ -52,6 +60,26 @@ You can specify table columns you need.
 ```php
 // SELECT id, name FROM products
 $products->select('id', 'name')->all();
+```
+
+```php
+// SELECT id AS product_id, name FROM products
+$products->select('id AS product_id', 'name')->all();
+```
+
+
+```php
+// SELECT count(*) as total_products FROM products
+$products->select('count(*) AS total_products')->all();
+```
+
+## Alias
+
+You can alias a table name using `alias()` method.
+
+```php
+// SELECT * FROM products AS p
+$products->alias('p')->all();
 ```
 
 ## Distinct
@@ -68,18 +96,22 @@ $products->select('name')->distinct()->all();
 You can narrow result set using where clauses.
 
 ```php
+// SELECT * FROM products WHERE id = ?
+$products->where('id', '=', 2)->all();
+
 // SELECT * FROM products WHERE id > ?
 $products->where('id', '>', 2)->all();
 
 // SELECT * FROM products WHERE id > ? AND color = ?
 $products->where('id', '>', 2)->where('color', '=', '#000')->all();
 
-// SELECT * FROM products WHERE id > ? AND color = ?
-$products->where('id', '>', 2)->andWhere('color', '=', '#000')->all();
+// SELECT * FROM products WHERE id > ? OR color = ?
+$products->where('id', '>', 2)->orWhere('color', '=', '#000')->all();
+```
 
-// SELECT * FROM products WHERE id > ? AND color = ? OR color = ?
-$products->where('id', '>', 2)->andWhere('color', '=', '#000')->orWhere('color', '=', '#FFF')->all();
+### Where in
 
+```php
 // SELECT * FROM products WHERE id IN ?, ?, ?
 $products->whereIn('id', [23, 24, 25])->all();
 
@@ -91,7 +123,11 @@ $products->whereNotIn('id', [23, 24, 25])->all();
 
 // SELECT * FROM products WHERE id NOT IN ?, ?, ? OR color NOT IN ?, ?
 $products->whereNotIn('id', [23, 24, 25])->orWhereNotIn('color', ['#000', '#FFF'])->all();
+```
 
+### Where null
+
+```php
 // SELECT * FROM products WHERE owner IS NULL
 $products->whereNull('owner')->all();
 
@@ -99,13 +135,105 @@ $products->whereNull('owner')->all();
 $products->whereNotNull('owner')->all();
 
 // SELECT * FROM products WHERE owner IS NULL AND weight IS NULL
-$products->whereNull('owner')->andWhereNull('weight')->all();
+$products->whereNull('owner')->whereNull('weight')->all();
 
 // SELECT * FROM products WHERE owner IS NULL OR weight IS NULL
 $products->whereNull('owner')->orWhereNull('weight')->all();
 
 // SELECT * FROM products WHERE owner IS NULL OR weight IS NOT NULL
 $products->whereNull('owner')->orWhereNotNull('weight')->all();
+```
+
+### Where between
+
+```php
+// SELECT * FROM products WHERE price BETWEEN ? AND ?';
+$products->whereBetween('price', [10, 20]);
+```
+
+```php
+// SELECT * FROM products WHERE price NOT BETWEEN ? AND ?';
+$products->whereNotBetween('price', [10, 20])
+```
+
+```php
+// SELECT * FROM products WHERE price BETWEEN ? AND ? OR size BETWEEN ? AND ?';
+$products->whereBetween('price', [10, 20])->orWhereBetween('size', ['M', 'L']);
+```
+
+```php
+// SELECT * FROM products WHERE price NOT BETWEEN ? AND ? OR size NOT BETWEEN ? AND ?';
+$products->whereNotBetween('price', [10, 20])->orWhereNotBetween('size', ['M', 'L']);
+```
+
+### Logical Grouping
+
+You can group `where` conditions logically by passing a callback. This callback will recieve an instance of query builder.
+
+```php
+// SELECT * FROM products WHERE (color = ? OR size = ?)
+$products->where(function($q) {
+    $q->where('color', '=', '#000')->orWhere('size', '=', 'XL');
+})->all();
+```
+
+```php
+// SELECT * FROM products WHERE id = ? AND (color = ? OR color = ?)
+$products->where('id', '=', 1)->where(function($q) {
+    $q->where('color', '=', '#000')->orWhere('color', '=', '#FFF');
+})->all();
+```
+
+### Subqueries
+
+You can specify subqueries as callback functions in `where` clauses.
+
+```php
+// SELECT * FROM products WHERE size IN (SELECT id FROM sizes WHERE size = ?)
+$products->whereIn('size', function($q) {
+    $q->from('sizes')->select('id')->where('size', '=', 'XL');
+})->all();
+```
+
+### Where exists
+
+To specify `WHERE EXISTS` subquery, use `whereExists()` method.
+
+```php
+// SELECT * FROM products WHERE EXISTS (SELECT id FROM sizes WHERE size = ?)';
+$products->whereExists(function($q) {
+    $q->from('sizes')->select('id')->where('size', '=', 'XL');
+});
+```
+
+To specify `WHERE NOT EXISTS` subquery, use `whereExists()` method.
+
+```php
+// SELECT * FROM products WHERE NOT EXISTS (SELECT id FROM sizes WHERE size = ?)';
+$products->whereNotExists(function($q) {
+    $q->from('sizes')->select('id')->where('size', '=', 'XL');
+});
+```
+
+### Raw queries
+
+Sometimes it's handy to write complex `where` clauses using **raw** query strings. For such cases, use `whereRaw()` and `orWhereRaw()` methods.
+
+```php
+// SELECT * FROM products WHERE color = '#000' AND size = 'XL';
+$products->whereRaw("color = '#000' AND size = 'XL'");
+```
+
+To protect **raw** where queries against SQL injection attacks, you can pass an array of parameters as the second argument.
+
+```php
+// SELECT * FROM products WHERE color = ? AND size = ?';
+$products->whereRaw('color = ? AND size = ?', ['#000', 'XL']);
+```
+
+```php
+// SELECT * FROM products WHERE color = ? OR status = 'active'";
+$products->where('color', '=', '#000')->orWhereRaw("status = 'active'");
 ```
 
 ## Order By
@@ -128,8 +256,13 @@ $products->select('id', 'name')->orderBy('name', 'DESC')->orderBy('id', 'DESC')-
 You can group rows together.
 
 ```php
-// SELECT id, name FROM products GROUP BY color, size
-$products->select('id', 'name')->groupBy(['color', 'size'])->all();
+// SELECT * FROM products GROUP BY color
+$products->groupBy('color')->all();
+```
+
+```php
+// SELECT * FROM products GROUP BY color, size
+$products->groupBy('color', 'size')->all();
 ```
 
 ## Limit
@@ -153,15 +286,24 @@ Use `paginate()` method to fetch the records page wise.
 So if the request URL is `http://domain.com?page=3`,
 
 ```php
-// SELECT * FROM products LIMIT 10 OFFSET 2
-$products->paginate(10)->all();
+// SELECT * FROM products LIMIT 10 OFFSET 20
+$rows = $products->paginate(10);
 ```
 
-By default it will try to look for `page` query parameter from the URL string. But, you can also pass the current page value manually as second parameter.
+By default it will try to look for `page` query parameter from the URL string. But, you can also pass the current page value manually as second parameter. For example, following query will paginate the result with `10` results for `3rd` page.
 
 ```php
-// SELECT * FROM products LIMIT 10 OFFSET 2
-$products->paginate(10, 3)->all();
+// SELECT * FROM products LIMIT 10 OFFSET 20
+$rows = $products->paginate(10, 3);
+```
+
+Now you can iterate the result as an array.
+
+```php
+foreach($rows as $product) {
+    $product->name;
+    $product->color;
+}
 ```
 
 ## Count
@@ -206,6 +348,18 @@ $products->insert([
 ]);
 ```
 
+### Bulk Insert
+
+Use `bulkInsert()` method to insert more than one record.
+
+```php
+$products->bulkInsert([
+    ['name' => 'Product 1', 'color' => '#CCC'],
+    ['name' => 'Product 2', 'color' => '#DDD'],
+    ['name' => 'Product 3', 'color' => '#EEE'],
+]);
+```
+
 ## Update
 
 Use `update()` method to modify an existing record.
@@ -226,3 +380,21 @@ Use `delete()` method to delete an existing record.
 // DELETE FROM products WHERE id = 23
 $products->where('id', '=', 23)->delete();
 ```
+
+# toSql
+
+To inspect the generated `SQL` query as string, use `toSql()` method:
+
+```php
+$products->toSql(); // SELECT * FROM PRODUCTS
+```
+
+Note that when you call `toSql()`, you cannot use methods that execute the query. For example, this is wrong to do:
+
+```php
+$products->all()->toSql(); // Error
+$products->one()->toSql(); // Error
+$products->where('id', '=', 23)->delete()->toSql(); // Error
+```
+
+This is because those methods actually execute the `SQL` query. So calling `toSql()` will result in error.

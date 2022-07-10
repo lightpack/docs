@@ -286,15 +286,24 @@ Use `paginate()` method to fetch the records page wise.
 So if the request URL is `http://domain.com?page=3`,
 
 ```php
-// SELECT * FROM products LIMIT 10 OFFSET 2
-$products->paginate(10)->all();
+// SELECT * FROM products LIMIT 10 OFFSET 20
+$rows = $products->paginate(10);
 ```
 
-By default it will try to look for `page` query parameter from the URL string. But, you can also pass the current page value manually as second parameter.
+By default it will try to look for `page` query parameter from the URL string. But, you can also pass the current page value manually as second parameter. For example, following query will paginate the result with `10` results for `3rd` page.
 
 ```php
-// SELECT * FROM products LIMIT 10 OFFSET 2
-$products->paginate(10, 3)->all();
+// SELECT * FROM products LIMIT 10 OFFSET 20
+$rows = $products->paginate(10, 3);
+```
+
+Now you can iterate the result as an array.
+
+```php
+foreach($rows as $product) {
+    $product->name;
+    $product->color;
+}
 ```
 
 ## Count

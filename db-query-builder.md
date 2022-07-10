@@ -214,6 +214,18 @@ $products->insert([
 ]);
 ```
 
+### Bulk Insert
+
+Use `bulkInsert()` method to insert more than one record.
+
+```php
+$products->bulkInsert([
+    ['name' => 'Product 1', 'color' => '#CCC'],
+    ['name' => 'Product 2', 'color' => '#DDD'],
+    ['name' => 'Product 3', 'color' => '#EEE'],
+]);
+```
+
 ## Update
 
 Use `update()` method to modify an existing record.

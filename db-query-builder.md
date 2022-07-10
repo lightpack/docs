@@ -136,6 +136,22 @@ $products->whereNull('owner')->orWhereNull('weight')->all();
 $products->whereNull('owner')->orWhereNotNull('weight')->all();
 ```
 
+### Where in
+
+```php
+// SELECT * FROM products WHERE id IN ?, ?, ?
+$products->whereIn('id', [23, 24, 25])->all();
+
+// SELECT * FROM products WHERE id IN ?, ?, ? OR color IN ?, ?
+$products->whereIn('id', [23, 24, 25])->orWhereIn('color', ['#000', '#FFF'])->all();
+
+// SELECT * FROM products WHERE id NOT IN ?, ?, ?
+$products->whereNotIn('id', [23, 24, 25])->all();
+
+// SELECT * FROM products WHERE id NOT IN ?, ?, ? OR color NOT IN ?, ?
+$products->whereNotIn('id', [23, 24, 25])->orWhereNotIn('color', ['#000', '#FFF'])->all();
+```
+
 ### Logical Grouping
 
 You can group `where` conditions logically by passing a callback. This callback will recieve an instance of query builder.

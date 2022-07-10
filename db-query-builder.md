@@ -45,6 +45,14 @@ To retrieve only a single record, call <code>one()</code> method instead.</p>
 $products->one();
 ```
 
+## Fetch column
+
+To retrieve a specific column value from a record:
+
+```php
+$products->column('name');
+```
+
 ## Select
 
 You can specify table columns you need.
@@ -226,3 +234,21 @@ Use `delete()` method to delete an existing record.
 // DELETE FROM products WHERE id = 23
 $products->where('id', '=', 23)->delete();
 ```
+
+# toSql
+
+To inspect the generated `SQL` query as string, use `toSql()` method:
+
+```php
+$products->toSql(); // SELECT * FROM PRODUCTS
+```
+
+Note that when you call `toSql()`, you cannot use methods that execute the query. For example, this is wrong to do:
+
+```php
+$products->all()->toSql(); // Error
+$products->one()->toSql(); // Error
+$products->where('id', '=', 23)->delete()->toSql(); // Error
+```
+
+This is because those methods actually execute the `SQL` query. So calling `toSql()` will result in error.

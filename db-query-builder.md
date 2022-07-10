@@ -156,6 +156,17 @@ $products->whereExists(function($q) {
 });
 ```
 
+### Where not exists
+
+To specify `WHERE NOT EXISTS` subquery, use `whereExists()` method.
+
+```php
+// SELECT * FROM products WHERE NOT EXISTS (SELECT id FROM sizes WHERE size = ?)';
+$products->whereNotExists(function($q) {
+    $q->from('sizes')->select('id')->where('size', '=', 'XL');
+});
+```
+
 ## Order By
 
 You can specify order of result set.

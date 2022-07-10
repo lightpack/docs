@@ -73,6 +73,15 @@ $products->select('id AS product_id', 'name')->all();
 $products->select('count(*) AS total_products')->all();
 ```
 
+## Alias
+
+You can alias a table name using `alias()` method.
+
+```php
+// SELECT * FROM products AS p
+$products->alias('p')->all();
+```
+
 ## Distinct
 
 You can select distinct rows too.

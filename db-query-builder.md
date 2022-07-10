@@ -96,18 +96,17 @@ $products->select('name')->distinct()->all();
 You can narrow result set using where clauses.
 
 ```php
+// SELECT * FROM products WHERE id = ?
+$products->where('id', '=', 2)->all();
+
 // SELECT * FROM products WHERE id > ?
 $products->where('id', '>', 2)->all();
 
 // SELECT * FROM products WHERE id > ? AND color = ?
 $products->where('id', '>', 2)->where('color', '=', '#000')->all();
 
-// SELECT * FROM products WHERE id > ? AND color = ?
-$products->where('id', '>', 2)->andWhere('color', '=', '#000')->all();
-
-// SELECT * FROM products WHERE id > ? AND color = ? OR color = ?
-$products->where('id', '>', 2)->andWhere('color', '=', '#000')->orWhere('color', '=', '#FFF')->all();
-
+// SELECT * FROM products WHERE id > ? OR color = ?
+$products->where('id', '>', 2)->orWhere('color', '=', '#000')->all();
 ```
 
 ### Where in

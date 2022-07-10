@@ -116,6 +116,37 @@ $products->whereNull('owner')->orWhereNull('weight')->all();
 $products->whereNull('owner')->orWhereNotNull('weight')->all();
 ```
 
+### Logical Grouping
+
+You can group `where` conditions logically by passing a callback. This callback will recieve an instance of query builder.
+
+```php
+// SELECT * FROM products WHERE (color = ? OR size = ?)
+$products->where(function($q) {
+    $q->where('color', '=', '#000')->orWhere('size', '=', 'XL');
+})->all();
+```
+
+```php
+// SELECT * FROM products WHERE id = ? AND (color = ? OR color = ?)
+$products->where('id', '=', 1)->where(function($q) {
+    $q->where('color', '=', '#000')->orWhere('color', '=', '#FFF');
+})->all();
+```
+
+### Subqueries
+
+You can specify subqueries as callback functions in `where` clauses.
+
+```php
+// SELECT * FROM products WHERE size IN (SELECT id FROM sizes WHERE size = ?)
+$products->whereIn('size', function($q) {
+    $q->from('sizes')
+        ->select('id')
+        ->where('size', '=', 'XL');
+})->all();
+```
+
 ## Order By
 
 You can specify order of result set.

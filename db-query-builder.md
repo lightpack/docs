@@ -144,6 +144,28 @@ $products->whereNull('owner')->orWhereNull('weight')->all();
 $products->whereNull('owner')->orWhereNotNull('weight')->all();
 ```
 
+### Where between
+
+```php
+// SELECT * FROM products WHERE price BETWEEN ? AND ?';
+$products->whereBetween('price', [10, 20]);
+```
+
+```php
+// SELECT * FROM products WHERE price NOT BETWEEN ? AND ?';
+$products->whereNotBetween('price', [10, 20])
+```
+
+```php
+// SELECT * FROM products WHERE price BETWEEN ? AND ? OR size BETWEEN ? AND ?';
+$products->whereBetween('price', [10, 20])->orWhereBetween('size', ['M', 'L']);
+```
+
+```php
+// SELECT * FROM products WHERE price NOT BETWEEN ? AND ? OR size NOT BETWEEN ? AND ?';
+$products->whereNotBetween('price', [10, 20])->orWhereNotBetween('size', ['M', 'L']);
+```
+
 ### Logical Grouping
 
 You can group `where` conditions logically by passing a callback. This callback will recieve an instance of query builder.

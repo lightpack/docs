@@ -206,8 +206,6 @@ $products->whereExists(function($q) {
 });
 ```
 
-### Where not exists
-
 To specify `WHERE NOT EXISTS` subquery, use `whereExists()` method.
 
 ```php

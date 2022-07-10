@@ -228,8 +228,13 @@ $products->select('id', 'name')->orderBy('name', 'DESC')->orderBy('id', 'DESC')-
 You can group rows together.
 
 ```php
-// SELECT id, name FROM products GROUP BY color, size
-$products->select('id', 'name')->groupBy(['color', 'size'])->all();
+// SELECT * FROM products GROUP BY color
+$products->groupBy('color')->all();
+```
+
+```php
+// SELECT * FROM products GROUP BY color, size
+$products->groupBy('color', 'size')->all();
 ```
 
 ## Limit

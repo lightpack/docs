@@ -136,7 +136,7 @@ $products->whereNull('owner')->all();
 $products->whereNotNull('owner')->all();
 
 // SELECT * FROM products WHERE owner IS NULL AND weight IS NULL
-$products->whereNull('owner')->andWhereNull('weight')->all();
+$products->whereNull('owner')->whereNull('weight')->all();
 
 // SELECT * FROM products WHERE owner IS NULL OR weight IS NULL
 $products->whereNull('owner')->orWhereNull('weight')->all();

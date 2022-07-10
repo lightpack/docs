@@ -141,10 +141,19 @@ You can specify subqueries as callback functions in `where` clauses.
 ```php
 // SELECT * FROM products WHERE size IN (SELECT id FROM sizes WHERE size = ?)
 $products->whereIn('size', function($q) {
-    $q->from('sizes')
-        ->select('id')
-        ->where('size', '=', 'XL');
+    $q->from('sizes')->select('id')->where('size', '=', 'XL');
 })->all();
+```
+
+### Where exists
+
+To specify `WHERE EXISTS` subquery, use `whereExists()` method.
+
+```php
+// SELECT * FROM products WHERE EXISTS (SELECT id FROM sizes WHERE size = ?)';
+$products->whereExists(function($q) {
+    $q->from('sizes')->select('id')->where('size', '=', 'XL');
+});
 ```
 
 ## Order By

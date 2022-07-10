@@ -62,6 +62,17 @@ You can specify table columns you need.
 $products->select('id', 'name')->all();
 ```
 
+```php
+// SELECT id AS product_id, name FROM products
+$products->select('id AS product_id', 'name')->all();
+```
+
+
+```php
+// SELECT count(*) as total_products FROM products
+$products->select('count(*) AS total_products')->all();
+```
+
 ## Distinct
 
 You can select distinct rows too.

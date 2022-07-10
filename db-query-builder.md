@@ -167,6 +167,27 @@ $products->whereNotExists(function($q) {
 });
 ```
 
+### Where raw
+
+Sometimes it's handy to write complex `where` clauses using **raw** query strings. For such cases, use `whereRaw()` and `orWhereRaw()` methods.
+
+```php
+// SELECT * FROM products WHERE color = '#000' AND size = 'XL';
+$products->whereRaw("color = '#000' AND size = 'XL'");
+```
+
+To protect **raw** where queries against SQL injection attacks, you can pass an array of parameters as the second argument.
+
+```php
+// SELECT * FROM products WHERE color = ? AND size = ?';
+$products->whereRaw('color = ? AND size = ?', ['#000', 'XL']);
+```
+
+```php
+// SELECT * FROM products WHERE color = ? OR status = 'active'";
+$products->where('color', '=', '#000')->orWhereRaw("status = 'active'");
+```
+
 ## Order By
 
 You can specify order of result set.

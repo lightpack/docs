@@ -108,32 +108,6 @@ $products->where('id', '>', 2)->andWhere('color', '=', '#000')->all();
 // SELECT * FROM products WHERE id > ? AND color = ? OR color = ?
 $products->where('id', '>', 2)->andWhere('color', '=', '#000')->orWhere('color', '=', '#FFF')->all();
 
-// SELECT * FROM products WHERE id IN ?, ?, ?
-$products->whereIn('id', [23, 24, 25])->all();
-
-// SELECT * FROM products WHERE id IN ?, ?, ? OR color IN ?, ?
-$products->whereIn('id', [23, 24, 25])->orWhereIn('color', ['#000', '#FFF'])->all();
-
-// SELECT * FROM products WHERE id NOT IN ?, ?, ?
-$products->whereNotIn('id', [23, 24, 25])->all();
-
-// SELECT * FROM products WHERE id NOT IN ?, ?, ? OR color NOT IN ?, ?
-$products->whereNotIn('id', [23, 24, 25])->orWhereNotIn('color', ['#000', '#FFF'])->all();
-
-// SELECT * FROM products WHERE owner IS NULL
-$products->whereNull('owner')->all();
-
-// SELECT * FROM products WHERE owner IS NOT NULL
-$products->whereNotNull('owner')->all();
-
-// SELECT * FROM products WHERE owner IS NULL AND weight IS NULL
-$products->whereNull('owner')->andWhereNull('weight')->all();
-
-// SELECT * FROM products WHERE owner IS NULL OR weight IS NULL
-$products->whereNull('owner')->orWhereNull('weight')->all();
-
-// SELECT * FROM products WHERE owner IS NULL OR weight IS NOT NULL
-$products->whereNull('owner')->orWhereNotNull('weight')->all();
 ```
 
 ### Where in

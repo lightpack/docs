@@ -298,7 +298,7 @@ foreach($category->orders as $order) {
 
 ### has()
 
-Suppose you want to find **products** with atleast one **order**, use `has()` method. For example, below we query only those **products** that has atleast one **order**.
+Suppose you want to find **products** with at least one **order**, use `has()` method. For example, below we query only those **products** that has at least one **order**.
 
 ```php
 $products = Product::query()->has('orders')->all();
@@ -318,7 +318,7 @@ To fetch products with no orders:
 $products = Product::query()->has('orders', '=', 0)->all();
 ```
 
-To fetch products with atleast **2** orders:
+To fetch products with at least **2** orders:
 
 ```php
 $products = Product::query()->has('orders', '>', 1)->all();

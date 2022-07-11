@@ -190,3 +190,19 @@ foreach($products as $product) {
 $products = Product::query()->paginate(10);
 $products->load('seo')->loadCount('options');
 ```
+
+**Note:** All the capabilities that `with()` and `withCount()` methods have also applies to `load()` and `loadCount()` methods.
+
+For example, you can pass provide **callbacks** to restric eager loading:
+
+```php
+$products->load(['reviews' => function($q) {
+    $q->where('status', '=', 'approved');
+}]);
+```
+
+```php
+$products->loadCount(['reviews' => function($q) {
+    $q->where('status', '=', 'approved');
+}]);
+```

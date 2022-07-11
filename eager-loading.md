@@ -126,7 +126,29 @@ $projects = Project::query()->with('tasks.comments')->all();
 
 Note that such convinience can become a performance issue if there are too many `comments` for `tasks` for a given project.
 
+### Conditional Eager Loading
 
+You can restrict **eager loading** relations via `callback` functions. For example, to eager load all pending `tasks` for `projects`:
+
+```php
+$projects = Project::query()->with(['tasks' => function($q) {
+    $q->where('status', '=', 'pending');
+})->all();
+```
+
+You can also restrict **nested** eager loading. For example. to eager load `projects` with **pending** `tasks` and **approved** `comments`:
+
+```php
+$projects = Project::query()->with(['tasks' => function($q) {
+    // Load tasks with pending status
+    $q->where('status', '=', 'pending');
+    
+    // Load comments with approved status
+    $q->with(['comments' => function($q) {
+        $q->where('status', =, 'approved');
+    }]);
+})->all();
+```
 
 ### Deferred eager loading
 

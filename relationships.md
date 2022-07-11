@@ -215,3 +215,125 @@ foreach($user->roles as $role) {
     echo $role->name;
 }
 ```
+
+## Has Many Through
+
+Consider **categories**, **products**, and **orders** tables:
+
+<table>
+    <tr>
+        <td class="token title important">categories</td>
+        <td>id</td>
+        <td>name</td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <td class="token title important">products</td>
+        <td>id</td>
+        <td>category_id</td>
+        <td>name</td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <td class="token title important">orders</td>
+        <td>id</td>
+        <td>product_id</td>
+        <td>details</td>
+    </tr>
+</table>
+
+A **category** has many **products** and a **product** has many **orders**. 
+
+<p class="tip">We can find <b>orders</b> for a <b>category</b> through <b>products</b>.</p>
+
+**Lightpack** supports `hasManyThrough()` method for the same. Consider these **models** described below:
+
+```php
+class Product extends Model
+{
+    // ...
+}
+```
+
+```php
+class Order extends Model
+{
+    // ...
+}
+```
+
+```php
+class Category extends Model
+{
+    public function orders()
+    {
+        return $this->hasManyThrough(
+            Order::class, 
+            Product::class, 
+            'category_id', // Foreign key on the products table
+            'product_id' // Foreign key on the orders table...
+        );
+    }
+}
+```
+
+Now you can access orders in a category:
+
+```php
+$category = new Category(23);
+
+foreach($category->orders as $order) {
+    $order->id;
+    $order->details;
+}
+```
+
+## Conditional Relationship
+
+Suppose you want to find **products** with at least one **order**, use `has()` method. For example, below we query only those **products** that has at least one **order**.
+
+```php
+$products = Product::query()->has('orders')->all();
+```
+
+The above is same as:
+
+```php
+$products = Product::query()->has('orders', '>', 0)->all();
+// or
+$products = Product::query()->has('orders', '>=', 1)->all();
+```
+
+To fetch products with no orders:
+
+```php
+$products = Product::query()->has('orders', '=', 0)->all();
+```
+
+To fetch products with at least **2** orders:
+
+```php
+$products = Product::query()->has('orders', '>', 1)->all();
+// or
+$products = Product::query()->has('orders', '>=', 2)->all();
+```
+
+To fetch products with atmost **2** orders:
+
+```php
+$products = Product::query()->has('orders', '<', 3)->all();
+// or
+$products = Product::query()->has('orders', '<=', 2)->all();
+```
+
+You can even pass a callback as **4th** parameter to `has()` method to add more constraints on relationship. For example, suppose you want to fetch **products** with atleast **2 paid orders**.
+
+```php
+$products = Product::query()->has('orders', '>=', 2, function($q) {
+    $q->where('paid', '=', true);
+});
+```

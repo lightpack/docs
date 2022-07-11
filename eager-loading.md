@@ -116,6 +116,48 @@ foreach($projects as $project) {
 }
 ```
 
+### Nested Eager Loading
+
+Suppose we have table `projects` with many `tasks` and each task can have many `comments`. We can **eager load** `projects` with their `tasks` and `comments` together:
+
+```php
+$projects = Project::query()->with('tasks.comments')->all();
+```
+
+Note that such convinience can become a performance issue if there are too many `comments` for `tasks` for a given project.
+
+### Conditional Eager Loading
+
+You can restrict **eager loading** relations via `callback` functions. For example, to eager load all pending `tasks` for `projects`:
+
+```php
+$projects = Project::query()->with(['tasks' => function($q) {
+    $q->where('status', '=', 'pending');
+})->all();
+```
+
+You can also restrict **nested** eager loading. For example. to eager load `projects` with **pending** `tasks` and **approved** `comments`:
+
+```php
+$projects = Project::query()->with(['tasks' => function($q) {
+    // Load tasks with pending status
+    $q->where('status', '=', 'pending');
+
+    // Load comments with approved status
+    $q->with(['comments' => function($q) {
+        $q->where('status', =, 'approved');
+    }]);
+})->all();
+```
+
+**Note:** You can apply the same constraints on `withCount()` method too:
+
+```php
+$projects = Project::query()->withCount(['tasks' => function($q) {
+    $q->where('status', '=', 'pending');
+})->all();
+```
+
 ### Deferred eager loading
 
 Suppose that we have `100` records in products table. Eager loading `seo` and `options` for `100` products will be a huge performance miss.
@@ -147,4 +189,20 @@ foreach($products as $product) {
 ```php
 $products = Product::query()->paginate(10);
 $products->load('seo')->loadCount('options');
+```
+
+**Note:** All the capabilities that `with()` and `withCount()` methods have also applies to `load()` and `loadCount()` methods.
+
+For example, you can pass provide **callbacks** to restric eager loading:
+
+```php
+$products->load(['reviews' => function($q) {
+    $q->where('status', '=', 'approved');
+}]);
+```
+
+```php
+$products->loadCount(['reviews' => function($q) {
+    $q->where('status', '=', 'approved');
+}]);
 ```

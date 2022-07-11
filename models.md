@@ -71,11 +71,28 @@ $product->color = 'black'
 // Save new product
 $product->save();
 ```
+### Last Insert ID
 
 If your table's primary key is an **auto-incrementing** field, you can get the last insert id:
 
 ```php
 $product->lastInsertId();
+```
+
+### Save and Refresh
+To insert a model and repopulate it with the newly created record, use `saveAndRefresh()` method:
+
+```php
+// Create the instance
+$product = new Product;
+
+// Set product properties
+$product->name = 'ACME Shoes';
+$product->size = 10;
+$product->color = 'black'
+
+// Save new product
+$product->saveAndRefresh();
 ```
 
 ## Update Data
@@ -139,6 +156,20 @@ $productQuery = Product::query();
 ```
 
 Now you can access all the methods on [query builders](/query-builder). Below are some example for using query builder on a model.
+
+## Cast Into Array
+
+To convert loaded models into **array**, use `toArray()` method.
+
+```php
+$product = new Product(23);
+$productArray = $product->toArray();
+```
+
+```php
+$products = Product::query()->limit(10)->all();
+$productsArray = $products->toArray();
+```
 
 
 > Fetch all products

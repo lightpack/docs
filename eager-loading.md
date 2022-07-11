@@ -142,11 +142,19 @@ You can also restrict **nested** eager loading. For example. to eager load `proj
 $projects = Project::query()->with(['tasks' => function($q) {
     // Load tasks with pending status
     $q->where('status', '=', 'pending');
-    
+
     // Load comments with approved status
     $q->with(['comments' => function($q) {
         $q->where('status', =, 'approved');
     }]);
+})->all();
+```
+
+**Note:** You can apply the same constraints on `withCount()` method too:
+
+```php
+$projects = Project::query()->withCount(['tasks' => function($q) {
+    $q->where('status', '=', 'pending');
 })->all();
 ```
 

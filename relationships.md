@@ -334,4 +334,10 @@ $products = Product::query()->has('orders', '<', 3)->all();
 $products = Product::query()->has('orders', '<=', 2)->all();
 ```
 
-### whereHas()
+You can even pass a callback as **4th** parameter to `has()` method to add more constraints on relationship. For example, suppose you want to fetch **products** with atleast **2 paid orders**.
+
+```php
+$products = Product::query()->has('orders', '>=', 2, function($q) {
+    $q->where('paid', '=', true);
+});
+```

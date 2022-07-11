@@ -294,10 +294,6 @@ foreach($category->orders as $order) {
 
 ## Conditional Relationship
 
-**Lightpack** provides `has()` and `whereHas()` methods to conditionally query for relationships.
-
-### has()
-
 Suppose you want to find **products** with at least one **order**, use `has()` method. For example, below we query only those **products** that has at least one **order**.
 
 ```php

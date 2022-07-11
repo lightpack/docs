@@ -71,11 +71,28 @@ $product->color = 'black'
 // Save new product
 $product->save();
 ```
+### Last Insert ID
 
 If your table's primary key is an **auto-incrementing** field, you can get the last insert id:
 
 ```php
 $product->lastInsertId();
+```
+
+### Save and Refresh
+To insert a model and repopulate it with the newly created record, use `saveAndRefresh()` method:
+
+```php
+// Create the instance
+$product = new Product;
+
+// Set product properties
+$product->name = 'ACME Shoes';
+$product->size = 10;
+$product->color = 'black'
+
+// Save new product
+$product->saveAndRefresh();
 ```
 
 ## Update Data

@@ -291,3 +291,47 @@ foreach($category->orders as $order) {
     $order->details;
 }
 ```
+
+## Conditional Relationship
+
+**Lightpack** provides `has()` and `whereHas()` methods to conditionally query for relationships.
+
+### has()
+
+Suppose you want to find **products** with atleast one **order**, use `has()` method. For example, below we query only those **products** that has atleast one **order**.
+
+```php
+$products = Product::query()->has('orders')->all();
+```
+
+The above is same as:
+
+```php
+$products = Product::query()->has('orders', '>', 0)->all();
+// or
+$products = Product::query()->has('orders', '>=', 1)->all();
+```
+
+To fetch products with no orders:
+
+```php
+$products = Product::query()->has('orders', '=', 0)->all();
+```
+
+To fetch products with atleast **2** orders:
+
+```php
+$products = Product::query()->has('orders', '>', 1)->all();
+// or
+$products = Product::query()->has('orders', '>=', 2)->all();
+```
+
+To fetch products with atmost **2** orders:
+
+```php
+$products = Product::query()->has('orders', '<', 3)->all();
+// or
+$products = Product::query()->has('orders', '<=', 2)->all();
+```
+
+### whereHas()

@@ -140,6 +140,20 @@ $productQuery = Product::query();
 
 Now you can access all the methods on [query builders](/query-builder). Below are some example for using query builder on a model.
 
+## Cast Into Array
+
+To convert loaded models into **array**, use `toArray()` method.
+
+```php
+$product = new Product(23);
+$productArray = $product->toArray();
+```
+
+```php
+$products = Product::query()->limit(10)->all();
+$productsArray = $products->toArray();
+```
+
 
 > Fetch all products
 ```php

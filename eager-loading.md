@@ -116,6 +116,18 @@ foreach($projects as $project) {
 }
 ```
 
+### Nested Eager Loading
+
+Suppose we have table `projects` with many `tasks` and each task can have many `comments`. We can **eager load** `projects` with their `tasks` and `comments` together:
+
+```php
+$projects = Project::query()->with('tasks.comments')->all();
+```
+
+Note that such convinience can become a performance issue if there are too many `comments` for `tasks` for a given project.
+
+
+
 ### Deferred eager loading
 
 Suppose that we have `100` records in products table. Eager loading `seo` and `options` for `100` products will be a huge performance miss.

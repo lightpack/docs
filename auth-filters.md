@@ -11,7 +11,7 @@ Used as `auth:web` alias, this filter will check if the current session has been
 For example:
 
 ```php
-route()->group(['filters' => 'auth:web'], function() {
+route()->group(['filters' => ['auth:web']], function() {
     // protected routes list here
 });
 ```

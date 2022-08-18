@@ -21,14 +21,7 @@ You can set your database credentials in the [environment configuration](/enviro
 'DB_PSWD' => '',
 ``` 
 
-Now you can get a MySQL database connection by simply calling `app('db')`.
-
-```php
-$db = app('db');
-```
-
-<p class="tip">Once you make a database connection, you can start querying against it using the <a href="https://www.php.net/manual/en/book.pdo.php" target="_blank">PHP PDO APIs</a>.
-</p>
+Now you can get a MySQL database connection by simply calling `db()` function.
 
 ## Drivers
 
@@ -47,29 +40,29 @@ You can execute raw queries against the database connection using the <code>quer
 method.
 
 ```php
-app('db')->query('SELECT * FROM products WHERE id = 23');
+db()->query('SELECT * FROM products WHERE id = 23');
 ```
 
 This method optionally takes an array of parameters as its second argument to protect against SQL injection attacks.
 
 ```php
-app('db')->query('SELECT * FROM products WHERE price > ?', [500]);
+db()->query('SELECT * FROM products WHERE price > ?', [500]);
 ```
 
 Ofcourse you can also use named **placeholders** in your raw queries.
 
 ```php
-app('db')->query('SELECT * FROM products WHERE id = :id', [':id' => 23]);
+db()->query('SELECT * FROM products WHERE id = :id', [':id' => 23]);
 ```
 
 You can also execute **insert** and **update** raw queries.
 
 ```php
-app('db')->query('INSERT INTO products (name) VALUES ('Blue Denim'));
+db()->query('INSERT INTO products (name) VALUES ('Blue Denim'));
 ```
 
 ```php
-app('db')->query('UPDATE articles SET status = ?', ['active']);
+db()->query('UPDATE articles SET status = ?', ['active']);
 ```
 
 ## Query Logging
@@ -79,11 +72,31 @@ To log queries that got executed throughout an application request lifecycle, th
 To get all the query logs as an array:
 
 ```php
-app('db')->getQueryLogs();
+db()->getQueryLogs();
 ```
 
 To print all the query logs:
 
 ```php
-app('db')->printQueryLogs();
+db()->printQueryLogs();
+```
+
+## Transactions
+
+To start a transaction, you can use the <code>begin()</code> method.
+
+```php
+db()->begin();
+```
+
+To commit a transaction, you can use the <code>commit()</code> method.
+
+```php
+db()->commit();
+```
+
+To rollback a transaction, you can use the <code>rollback()</code> method.
+
+```php
+db()->rollback();
 ```

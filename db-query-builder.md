@@ -1,32 +1,20 @@
 # Query Builder
 
-While you can definitely write raw SQL queries, Lightpack does come with a sleek query builder that helps you build SQL queries programatically.
+While you can definitely write raw SQL queries, **Lightpack** does come with a sleek query builder that helps you build SQL queries programatically.
 
 It also helps you protect against SQL injection attacks by properly binding query parameters.
 
 ## Getting Started
 
-First you need to create a query builder object passing it the name of the database **table** you want to query against.
+Call the `table()` method to get an instance of the query builder for the database connection.
 
 For example, this will create a query builder object for `products` table. 
 
 ```php
-<?php
-
-use Lightpack\Database\Query\Query;
-
-$products = new Query('products');
-```
-
-Or you can simply call the <code>table()</code> method on `app('db')` function.
-
-```php
-$products = app('db')->table('products');
+$products = db()->table('products');
 ```
 
 Now you can start building and executing queries as documented below.
-
-<p class="tip">The constructor for <code>Query</code> class optionally takes a database connection as its second argument. If you do not provide one, it will fallback to default database connection connection configured in services <code>app('db')</code></p>
 
 ## Fetch all
 
@@ -50,6 +38,7 @@ $products->one();
 To retrieve a specific column value from a record:
 
 ```php
+// SELECT name FROM products LIMIT 1
 $products->column('name');
 ```
 

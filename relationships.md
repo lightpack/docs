@@ -164,7 +164,7 @@ echo $option->product->name
 
 ## Many to Many
 
-<code>Many to Many</code> relationships are often represented using a `junction` aka `pivot` table in the database.
+<code>Many to Many</code> relationships are often represented using a `junction` aka `pivot` table in the database. Managing data in `pivot` or `junction` table is often a pain. **Lightpack** provides an easy approach to manage pivot records to **insert**, **update**, **delete** and **fetch** data.
 
 Let us consider `users` and `roles` table. Considering that a user may have multiple roles and a role may belong to multiple
 users, there is a many-to-many relationship between `users` and `roles ` table. To represent this relationship, we need to
@@ -214,6 +214,58 @@ $user = new User(23);
 foreach($user->roles as $role) {
     echo $role->name;
 }
+```
+
+### Attach Pivot Records
+
+To insert a pivot record, use `attach()` method.
+
+```php
+$user = new User(23);
+
+$user->roles()->attach(1);
+```
+
+You can also attach multiple values by pssing an array to `attach()` method.
+
+```php
+$user = new User(23);
+
+$user->roles()->attach([1, 2]);
+```
+
+### Detach Pivot Records
+
+To delete a pivot record, use `detach()` method.
+
+```php
+$user = new User(23);
+
+$user->roles()->detach(1);
+```
+
+You can also detach multiple values by passing an array to `detach()` method.
+
+```php
+$user = new User(23);
+
+$user->roles()->detach([1, 2]);
+```
+
+### Sync Pivot Records
+
+What is syncing pivot records? Here is an explanation:
+
+- When you **attach** a new role to a user, it creates a new pivot record in the `user_role` table.
+- When you **detach** a role from a user, it deletes the pivot record from the `user_role` table.
+- When you **sync** roles to a user, it will ensure that the user will have only the roles that are passed to the `sync()` method.
+
+To update pivot records, use `sync()` method.
+
+```php
+$user = new User(23);
+
+$user->roles()->sync([1, 2]);
 ```
 
 ## Has Many Through

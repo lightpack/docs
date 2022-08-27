@@ -212,6 +212,43 @@ Now this will produce error message with provided label.
 echo $validator->getError('fname'); // First name is required
 ```
 
+## Validating Nested Array
+
+You can validate nested array data as well. For example imagine you have a form with a nested array:
+
+```php
+<form method="post">
+    <input name="title">
+    <input name="address[city]">
+    <input name="address[state]">
+    <input name="address[zip]">
+</form>
+```
+
+When the form is submitted, `$_POST` may look like this:
+
+```php
+$_POST = [
+    'title' => 'My Title',
+    'address' => [
+        'city' => 'My City',
+        'state' => 'My State',
+        'zip' => 'My Zip',
+    ],
+];
+```
+
+To validate this data, you can use `setRules()` method to set rules for each field using `dot` syntax.
+
+```php
+$validator->setRules([
+    'title' => 'required|alpha',
+    'address.city' => 'required',
+    'address.state' => 'required',
+    'address.zip' => 'required|numeric',
+]);
+```
+
 ## Callbacks as rules
 
 There might be cases when you might want to set your own custom rules. You can do so using **callbacks** as rules.

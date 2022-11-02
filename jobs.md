@@ -18,7 +18,7 @@ Although `Lightpack` will solve background jobs processing needs for most of the
 
 Currently, jobs processing is powered by `MySQL/MariaDB` database. So you will need to migrate a `jobs` table in your app database. So please create this table in your database:
 
-```SQL
+```sql
 CREATE TABLE jobs (
     id int NOT NULL AUTO_INCREMENT,
     handler varchar(255) NOT NULL,

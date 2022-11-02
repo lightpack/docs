@@ -101,6 +101,20 @@ You can provide your own custom regular expression to match the path.
 route()->get('/users/:id', UserController::class)->pattern(['id' => '([0-9]{4})']);
 ```   
 
+## Route Names
+
+You can define a name for your route. This is useful when you want to generate a URL for a route.
+
+```php
+route()->get('/products/:id', ProductController::class)->name('product.show');
+```
+
+You can generate a URL for a route by passing the route name and parameters using the `url()` helper function. For example, if you want to generate a URL for the above route, you can do it as follows:
+
+```php
+url()->route('product.show', 1]);
+```
+
 ## Route Filters
 
 You can apply filters on a route by passing a `string` or an `array` of filters aliases as last argument.

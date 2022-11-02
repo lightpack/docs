@@ -12,7 +12,7 @@ class HomeController
 {
     public function index()
     {
-        echo 'welcome';
+        return 'welcome';
     }
 }
 ```
@@ -25,7 +25,7 @@ For dynamic routes, you can access route parameters by defining them in the
 controller's action method signature. For example, for the following route definition:
 
 ```php
-route()->get('/page/:num/status/:str', PageController::class);
+route()->get('/users/:user/posts/:post', PostController::class);
 ```
 
 Define your controller as:
@@ -35,9 +35,9 @@ Define your controller as:
 
 namespace App\Controllers;
 
-class PageController
+class PostController
 {
-    public function index($page, $status)
+    public function index($user, $post)
     {
         // ...
     }
@@ -46,7 +46,7 @@ class PageController
 ## Rendering Views
 
 Define your view templates in <code>app/views</code> folder. To render a view template, 
-call the <code>render()</code> method of <code>response()</code>. This method
+call the <code>view()</code> method of <code>response()</code>. This method
 takes a view template name and an optional array of view data as arguments.
 
 ```php
@@ -56,7 +56,7 @@ namespace App\Controllers;
 
 class PageController
 {
-    response()->render('page');
+    return response()->view('page');
 }
 ```
 
@@ -67,17 +67,16 @@ class PageController
 {
     public function index()
     {
-        response()->render('users', [
+        return response()->render('page', [
             'title' => 'Lightpack PHP',
         ]);
     }
 }
 ```
 
-Now you can access the view data array by key names as variables within your view template files.
+Now you can access the view data array by key names as variables within your view template files. For example, if you want to access the <code>title</code> variable, you can do it as follows:
 
 ```php
-// app/views/page.php
 Title: <?= $title ?>
 ```
 
@@ -85,7 +84,7 @@ You can also organize your view templates in folder within <code>app/views</code
 example, to render the template <code>app/views/page/home.php</code>,
 
 ```php
-response()->render('page/home');
+response()->view('page/home');
 ```
 
 ## JSON Response
@@ -94,7 +93,7 @@ For APIs, you may be interested in sending JSON response instead of view templat
 simply call the <code>json()</code> method inherited from parent class.
 
 ```php
-response()->json(['framework' => 'Lighpack']);
+return response()->json(['framework' => 'Lighpack']);
 ```
 
 ## XML Response
@@ -103,12 +102,12 @@ For sending XML response, simply call the <code>xml()</code> method inherited fr
 passing it the XML formatted string data.
 
 ```php
-response()->xml('xml_data_string');
+return response()->xml('xml_data_string');
 ```
 
 <p class="tip">
-Calling methods <code>render()</code>, or <code>json()</code>, or <code>xml()</code> automatically takes care of setting appropriate response content type and status code <code>200</code>,
-thereby saving you some typing.
+Calling methods <code>view()</code>, or <code>json()</code>, or <code>xml()</code> automatically takes care of setting appropriate response content type and status code <code>200</code>,
+thereby saving you some typing. However, you can set them manually using the methods available in <code>response()</code> object.
 </p>
 
-Read more about using [response()](/response) function.
+Read more about using [response()](/response) in **Lightpack PHP**.

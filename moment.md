@@ -4,7 +4,7 @@
 
 Designing a highly flexible date and time library can be daunting. At the same time it can become so big that it may demand its own separate project.
 
-**Moment** tries to solve some of the most frequently accessed date and time functions keeping its core dead simple and small. 
+**Moment** tries to solve some of the most frequently accessed date and time functions keeping its core dead simple and small. You can access an instance of Moment class by calling `moment()` function.
 
 ## Formatting
 
@@ -13,7 +13,7 @@ By default, **Moment** returns **datetime** in `Y-m-d H:i:s` format. To change t
 For example:
 
 ```php
-Moment::format('d-M, Y H:ia');
+moment()->format('d-M, Y H:ia');
 ```
 
 ## Available methods:
@@ -25,13 +25,13 @@ Below we document all the utilities provided by **Moment**.
 To get current **datetime**:
 
 ```php
-Moment::now();
+moment()->now();
 ```
 
 You can optionally pass it the **datetime** format as string.
 
 ```php
-Moment::now('d-M, Y');
+moment()->now('d-M, Y');
 ```
 
 ### travel()
@@ -39,31 +39,31 @@ Moment::now('d-M, Y');
 To travel ahead of or behind of current date and time:
 
 ```php
-Moment::travel('+5 minutes');
-Moment::travel('-5 minutes');
-Moment::travel('+5 hours');
-Moment::travel('-5 hours');
-Moment::travel('+5 days');
-Moment::travel('-5 days');
-Moment::travel('+5 weeks');
-Moment::travel('-5 weeks');
-Moment::travel('2 AM');
-Moment::travel('2 PM');
-Moment::travel('noon');
-Moment::travel('midnight');
-Moment::travel('last day of this month');
-Moment::travel('last day of next month');
-Moment::travel('last day of previous month');
-Moment::travel('first day of april');
-Moment::travel('last day of april');
-Moment::travel('first day of april last year');
-Moment::travel('first day of april next year');
+moment()->travel('+5 minutes');
+moment()->travel('-5 minutes');
+moment()->travel('+5 hours');
+moment()->travel('-5 hours');
+moment()->travel('+5 days');
+moment()->travel('-5 days');
+moment()->travel('+5 weeks');
+moment()->travel('-5 weeks');
+moment()->travel('2 AM');
+moment()->travel('2 PM');
+moment()->travel('noon');
+moment()->travel('midnight');
+moment()->travel('last day of this month');
+moment()->travel('last day of next month');
+moment()->travel('last day of previous month');
+moment()->travel('first day of april');
+moment()->travel('last day of april');
+moment()->travel('first day of april last year');
+moment()->travel('first day of april next year');
 ```
 
 You can optionally pass the **datetime** format as second argument.
 
 ```php
-Moment::travel('+5 days', 'd-M, Y');
+moment()->travel('+5 days', 'd-M, Y');
 ```
 
 ### today()
@@ -71,13 +71,13 @@ Moment::travel('+5 days', 'd-M, Y');
 To get **today's** date:
 
 ```php
-Moment::today();
+moment()->today();
 ```
 
 You can optionally pass it the **datetime** format as string.
 
 ```php
-Moment::today('d-M, Y');
+moment()->today('d-M, Y');
 ```
 
 ### tomorrow()
@@ -85,13 +85,13 @@ Moment::today('d-M, Y');
 To get **tomorrow's** date:
 
 ```php
-Moment::tomorrow();
+moment()->tomorrow();
 ```
 
 You can optionally pass it the **datetime** format as string.
 
 ```php
-Moment::tomorrow('d-M, Y');
+moment()->tomorrow('d-M, Y');
 ```
 
 ### yesterday()
@@ -99,13 +99,13 @@ Moment::tomorrow('d-M, Y');
 To get **yesterday's** date:
 
 ```php
-Moment::yesterday();
+moment()->yesterday();
 ```
 
 You can optionally pass it the **datetime** format as string.
 
 ```php
-Moment::yesterday('d-M, Y');
+moment()->yesterday('d-M, Y');
 ```
 
 ### next()
@@ -113,19 +113,19 @@ Moment::yesterday('d-M, Y');
 To get the date of **upcoming** next day by name:
 
 ```php
-Moment::next('monday');
-Moment::next('tuesday');
-Moment::next('wednesday');
-Moment::next('thursday');
-Moment::next('friday');
-Moment::next('saturday');
-Moment::next('sunday');
+moment()->next('monday');
+moment()->next('tuesday');
+moment()->next('wednesday');
+moment()->next('thursday');
+moment()->next('friday');
+moment()->next('saturday');
+moment()->next('sunday');
 ```
 
 You can optionally pass it the **datetime** format as string.
 
 ```php
-Moment::next('sunday', 'd-M, Y');
+moment()->next('sunday', 'd-M, Y');
 ```
 
 ### last()
@@ -133,19 +133,19 @@ Moment::next('sunday', 'd-M, Y');
 To get the date of **last** day by name:
 
 ```php
-Moment::last('monday');
-Moment::last('tuesday');
-Moment::last('wednesday');
-Moment::last('thursday');
-Moment::last('friday');
-Moment::last('saturday');
-Moment::last('sunday');
+moment()->last('monday');
+moment()->last('tuesday');
+moment()->last('wednesday');
+moment()->last('thursday');
+moment()->last('friday');
+moment()->last('saturday');
+moment()->last('sunday');
 ```
 
 You can optionally pass it the **datetime** format as string.
 
 ```php
-Moment::last('sunday', 'd-M, Y');
+moment()->last('sunday', 'd-M, Y');
 ```
 
 ### thisMonthEnd()
@@ -153,13 +153,13 @@ Moment::last('sunday', 'd-M, Y');
 To get the date of last day of **current** month:
 
 ```php
-Moment::thisMonthEnd();
+moment()->thisMonthEnd();
 ```
 
 You can optionally pass it the **datetime** format as string.
 
 ```php
-Moment::thisMonthEnd('d-M, Y');
+moment()->thisMonthEnd('d-M, Y');
 ```
 
 ### nextMonthEnd()
@@ -167,13 +167,13 @@ Moment::thisMonthEnd('d-M, Y');
 To get the date of last day of **next** month:
 
 ```php
-Moment::nextMonthEnd();
+moment()->nextMonthEnd();
 ```
 
 You can optionally pass it the **datetime** format as string.
 
 ```php
-Moment::nextMonthEnd('d-M, Y');
+moment()->nextMonthEnd('d-M, Y');
 ```
 
 ### lastMonthEnd()
@@ -181,13 +181,13 @@ Moment::nextMonthEnd('d-M, Y');
 To get the date of **last day** of last month:
 
 ```php
-Moment::lastMonthEnd();
+moment()->lastMonthEnd();
 ```
 
 You can optionally pass it the **datetime** format as string.
 
 ```php
-Moment::lastMonthEnd('d-M, Y');
+moment()->lastMonthEnd('d-M, Y');
 ```
 
 ### daysBetween()
@@ -195,7 +195,7 @@ Moment::lastMonthEnd('d-M, Y');
 To get the **number** of days between two dates:
 
 ```php
-Moment::daysBetween('2021-07-23', '2021-05-18');
+moment()->daysBetween('2021-07-23', '2021-05-18');
 ```
 
 ### diff()
@@ -203,7 +203,7 @@ Moment::daysBetween('2021-07-23', '2021-05-18');
 To get the difference between two **datetimes** as an interval:
 
 ```php
-$diff = Moment::diff('2021-07-23 14:25:45', '2019-03-14 08:23:12');
+$diff = moment()->diff('2021-07-23 14:25:45', '2019-03-14 08:23:12');
 ```
 
 Now you can access a number of properties on `$diff` object:
@@ -247,7 +247,7 @@ a year ago
 Pass it the **datetime** string you want to compare:
 
 ```php
-Moment::fromNow('2021-07-20 11:30:45');
+moment()->fromNow('2021-07-20 11:30:45');
 ```
 
 ### create()
@@ -257,13 +257,13 @@ Use this function to create a `DateTime` object. Optionally pass it the **dateti
 Create a DateTime object with datetime `now`:
 
 ```php
-Moment::create();
+moment()->create();
 ```
 
 Or, create a DateTime object with datetime `2021-07-23`:
 
 ```php
-Moment::create('2021-07-23');
+moment()->create('2021-07-23');
 ```
 
 Because it returns `DateTime` object, hence you can apply all the methods exposed via `DateTime` class in **PHP**.
@@ -274,7 +274,7 @@ For example:
 // Add 2 hours in current datetime and
 // return datetime in Y-m-d H:i:s format
 
-Moment::create()->modify('+2 hours')->format('Y-m-d H:i:s');
+moment()->create()->modify('+2 hours')->format('Y-m-d H:i:s');
 ```
 
 Another example:
@@ -283,5 +283,5 @@ Another example:
 // Add 5 days in 2021-07-23 and 
 // return datetime in Y-m-d format
 
-Moment::create('2021-07-23')->modify('+5 days')->format('Y-m-d'),
+moment()->create('2021-07-23')->modify('+5 days')->format('Y-m-d'),
 ```

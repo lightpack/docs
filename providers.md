@@ -75,7 +75,7 @@ public function register(Container $container)
 
 You need to register the provider class in order to access the service.
 
-Open `config/providers.php` class where you will find a number of providers already present. Just add your provider class at the **end** of the providers array.
+Open `config/providers.php` file and just add your provider class at the **end** of the providers array.
 
 ```php
 <?php
@@ -88,7 +88,6 @@ Open `config/providers.php` class where you will find a number of providers alre
 
 return [
     'providers' => [
-        // ...
         App\Providers\MailerProvider::class,
     ],
 ];

@@ -34,7 +34,7 @@ To store an item in the cache, call `set()` method. It takes item `key`, item
 This example stores in cache an item with key `name` and value `Bob` for `5 minutes`.
 
 ```php
-cache()->set('name', 'Bob', 5);
+cache()->set('name', 'Bob', 5 * 60);
 ```
 
 ### get()

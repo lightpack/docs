@@ -31,13 +31,13 @@ Once you have setup your `SMTP` credentials, you should now create a mail class.
 php lucy create:mail TestMail
 ```
 
-This should have created a `TestMail.php` file in **app/Mails** folder. You can write your mail logic in `execute()` method. Here is a minimal example of sending an email:
+This should have created a `TestMail.php` file in **app/Mails** folder. You can write your mail logic in `dispatch()` method. Here is a minimal example of sending an email:
 
 ```php
-public function execute(array $payload = [])
+public function dispatch(array $payload = [])
 {
-    $this->from('joe@example.com')
-        ->to('bob@example.com')
+    $this->to('bob@example.com')
+        ->from('joe@example.com')
         ->subject('Hello Bob')
         ->body('Welcome to Lightpack')
         ->send();
@@ -49,13 +49,13 @@ public function execute(array $payload = [])
 To send the mail, simply instantiate the mail class and call its `execute()` method:
 
 ```php
-(new TestMail)->execute();
+(new TestMail)->dispatch();
 ```
 
-You can optionally pass it an array as data payload which you can use inside the `execute()` method:
+You can optionally pass it an array as data payload which you can use inside the `dispatch()` method:
 
 ```php
-(new TestMail)->execute([
+(new TestMail)->dispatch([
     'to' => 'devs@example.com',
     'from' => 'lightpack@example.com',
 ]);
@@ -99,42 +99,43 @@ Hello Devs, welcome to Lightpack PHP web framework.
 
 ### Setting View Templates
 
-Now in the mail class, specify those two templates as class properties:
+Now in the mail class `dispatch()` method, specify those two templates using `htmlView()` and `textView()` methods.
 
 ```php
 class WelcomeMail extends Mail
 {
-    protected $textView = 'mails/welcome.text';
-    
-    protected $htmlView = 'mails/welcome.html';
-
-    // ...
+    public function dispatch(array $payload = [])
+    {
+        $this->to('bob@example.com')
+            ->from('joe@example.com')
+            ->subject('Hello Bob')
+            ->htmlView('mails/welcome.html')
+            ->textView('mails/welcome.text')
+            ->send();
+    }
 }
 ```
 
-**Thats it!!** Now you can simply send the mail:
-
-```php
-public function execute(array $payload = [])
-{
-   $this->from('lightpack@example.com')
-        ->to('devs@example.com')
-        ->subject('Hello Devs')
-        ->send();
-}
-```
+**Thats it!!** Now you can simply send both the versions of the mail.
 
 ### Passing View Data
 
-In case you need to pass data to your templates, simply set the `data` attribute as an array inside `execute()` method:
+In case you need to pass data to your templates, use the `viewData()` method passing it an array as argument for data. 
 
 ```php
-public function execute(array $payload = [])
+public function dispatch(array $payload = [])
 {
-    $this->data = [
+    $this->viewData([
         'title' => 'Hello Devs',
         'content' => 'Welcome to Lightpack PHP web framework.',
-    ];
+    ]);
+
+    $this->to('bob@example.com')
+        ->from('joe@example.com')
+        ->subject('Hello Bob')
+        ->htmlView('mails/welcome.html')
+        ->textView('mails/welcome.text')
+        ->send();
 }
 ```
 

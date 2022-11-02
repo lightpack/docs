@@ -8,16 +8,16 @@ it anywhere using <code>response()</code> function.
 
 ## Code
 
-To set the response status code, use <code>setCode()</code> method.
+To set the response status code, use <code>setStatus()</code> method.
 
 ```php
-response()->setCode(404);
+response()->setStatus(404);
 ```
 
 To get the set response code, use <code>getCode()</code> method.
 
 ```php
-response()->getCode();
+response()->getStatus();
 ```
 
 <p class="tip">By default, the response code is set to <code>200</code>.</p>
@@ -127,7 +127,7 @@ Method chaining is supported to assist you in preparing the appropriate response
 
 ```php
 response()
-    ->setCode(200)
+    ->setStatus(200)
     ->setMessage('OK')
     ->setType('text/html')
     ->setBody('Hello World')

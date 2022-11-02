@@ -53,32 +53,28 @@ request()->isDelete();
 
 ## Input
 
-To access form input values submitted via HTTP <code>GET</code> or <code>POST</code>
-request:
+To access incoming request input data, use <code>request()->input()</code> method.
 
 ```php
-request()->get('key');
-request()->post('key');
+request()->input('key');
 ```
 
 Provide second parameter for default input value:
 
 ```php
-request()->get('key', 'default');
-request()->post('key', 'default');
+request()->input('key', 'default');
 ```
 
-Passing no key will return global $_GET/$_POST arrays.
+Passing no key will return all the input data as an array:
 
 ```php
-request()->get(); // returns $_GET
-request()->post(); // returns $_POST
+request()->input();
 ```
 
-To get JSON payload from incoming request:
+To access query string data, use <code>request()->query()</code> method. For example, if the request URL is <code>/users/editors?status=active</code>, following code will return the value of <code>status</code> query string parameter:
 
 ```php
-request()->json();
+request()->query('status');
 ```
 
 ## AJAX

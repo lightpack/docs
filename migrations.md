@@ -17,10 +17,19 @@ To create a new migration file, fire this command from console:
 php lucy create:migration add_products_table
 ```
 
-This will create two files prefixed with current **datetime** in `database/migrations` folder. 
+This will create the migration file prefixed with current **datetime** in `database/migrations` folder. 
 
-Define all your migration scripts as pure `SQL` inside **database/migrations/up** folder. Any reverse operations
-should go inside **database/migrations/down** folder.
+You can define all your migration scripts as pure **SQL** inside `up()` method. Any reverse operations should go inside `down()` folder.
+
+```php
+public function up(): void
+{
+    $sql = "CREATE TABLE products (id int(11) NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL)";
+
+    // Execute the SQL 
+    $this->connection->query($sql);
+}
+```
 
 ## Running Migrations
 
@@ -30,7 +39,7 @@ To run your migration files:
 php lucy migrate:up
 ```
 
-This command will run all the migration scripts defined inside **database/migrations/up** folder. 
+This command will run the `up()` method in all the migration scripts defined inside **database/migrations** folder. 
 
 To track the files that have been migrated, it will also create a `migrations` table in the database.
 
@@ -42,7 +51,7 @@ To rollback or undo all your migrations:
 php lucy migrate:down
 ```
 
-This will run all the migration scripts inside **database/migrations/down** folder.
+This will run the `down()` method in all the migration scripts inside **database/migrations** folder.
 
 To rollback a limited number of migrations, provide the `steps` flag:
 

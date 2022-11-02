@@ -10,16 +10,14 @@ Instead, we should make a `one-way` hash of the password and then store the hash
 class Lightpack\Crypto\Password {}
 ```
 
+You can access an instance of this class anywhere in your application using `password()` function.
+
 ## hash()
 
 Use this method to get the hash of the user supplied password text. It takes the plain text password string as argument and return the hash.
 
 ```php
-<?php
-
-use Lightpack\Crypto\Password;
-
-$hash = Password::hash('secret');
+$hash = password()->hash('secret');
 ```
 
 ## verify()
@@ -29,7 +27,7 @@ Use this method to verify if the user supplied password matches the existing has
 Suppose `$hash` is the hashed password stored in database. To match if the stored password hash matches the user supplied password:
 
 ```php
-if(Password::verify('secret', $hash)) {
+if(password()->verify('secret', $hash)) {
     // correct password
 }
 ```

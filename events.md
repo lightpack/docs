@@ -14,22 +14,18 @@ components.
 ## Defining Listener
 
 To use events in Lighpack, first create a listener. For example, here we create 
-a UI menu event listener.
+a user event listener.
 
 ```php
 <?php
 
 namespace App\Events;
 
-class MenuEventListener
+class UserCreatedEvent
 {
     public function handle()
     {
-        app('event')->setData([
-            '/' => 'Home', 
-            '/about' => 'About', 
-            '/contact' => 'Contact'
-        ]);
+        // ...
     }
 }
 ```
@@ -42,26 +38,42 @@ Now configure this listener in <code>config/events.php</code> file.
 <?php
 
 return [
-    'menu::render-before' => [
-        App\Events\MenuEventListener::class,
+    'user:created' => [
+        App\Events\UserCreatedEvent::class,
     ]
 ];
 ```
 
 ## Notifying Listeners
 
-Now anywhere you fire an event named <code>menu::render-before</code>,
-will call <code>App\Events\MenuEventListener::handle()</code> method.
+Now anywhere you fire an event named <code>user:created</code>,
+will call <code>App\Events\UserCreatedEvent::handle()</code> method.
 
 ```php
 <?php
 
-class PageController
+class UserController
 {
     public function index()
     {
-        app('event')->notify('menu::render-before');
-        $menu = app('event')->getData();
+        event()->fire('user:created');
     }
+}
+```
+
+## Passing Event Data
+
+You can pass any data as second argument to `fire()` method.
+
+```php
+event()->fire('user:created', $user);
+```
+
+Now you can access the event data array in the `handle()` method of the listener.
+
+```php
+public function handle(User $user)
+{
+    // ...
 }
 ```

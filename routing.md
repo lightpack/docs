@@ -112,7 +112,7 @@ route()->get('/products/:id', ProductController::class)->name('product.show');
 You can generate a URL for a route by passing the route name and parameters using the `url()` helper function. For example, if you want to generate a URL for the above route, you can do it as follows:
 
 ```php
-url()->route('product.show', 1]);
+url()->route('product.show', 23]);
 ```
 
 ## Route Filters

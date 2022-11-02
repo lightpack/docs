@@ -117,19 +117,19 @@ class TaskController
             ['title' => 'Learn PHP', 'status' => 'Pending'],
         ];
 
-        response()->render('tasks/index', $data);
+        return response()->view('tasks/index', $data);
     }
 }
 ```
 
 In the above code, we have defined an array of fake tasks. Each task is an array having **title** and **status** key.
 
-To render a view template, we call the `render()` method of response object returned by `response()` function call. This method takes path to a view template file relative to `app/views` directory and an optional array of data.
+To render a view template, we call the `view()` method of response object returned by `response()` function call. This method takes path to a view template file relative to `app/views` directory and an optional array of data.
 
 So the following code snippet means we want to render `app/views/tasks/index.php` template file with `$data` array.
 
 ```php
-response()->render('tasks/index', $data);
+response()->view('tasks/index', $data);
 ```
 
 To render our tasks view, create `tasks` folder with `index.php` file in `app/views` directory.
@@ -222,7 +222,7 @@ We will update our `TaskController` to use this model. Update your controller's 
 ```php
 public function index()
 {
-    response()->render('tasks/index', [
+    return response()->view('tasks/index', [
         'tasks' => TaskModel::query()->all(),
     ]);
 }
@@ -262,7 +262,7 @@ Open `app/views/tasks/index.php` template and update the markup to support links
     <li>
         <?= $task->title ?> :
         <?= $task->status ?>
-        <a href="<?= url('tasks/edit', $task->id) ?>">
+        <a href="<?= url()->to('tasks/edit', $task->id) ?>">
             Edit
         </a>
     </li>
@@ -271,7 +271,7 @@ Open `app/views/tasks/index.php` template and update the markup to support links
 
 <hr>
 
-<a href="<?= url('tasks/add') ?>">
+<a href="<?= url()->to('tasks/add') ?>">
     + New Task
 </a>
 ```
@@ -280,7 +280,7 @@ Now refresh your browser to view the updated screen.
 
 <img src="_media/tutorial/screen-4.png" style="max-width: 520px">
 
-<p class="tip">Note that we have used a utility function <code>url()</code> to generate our urls. This function takes any number of string arguments, concats them, and produces an URL relative to our application's base url.
+<p class="tip">Note that we have used a utility function <code>url()</code> to generate our urls. The `to()` method of url generator object takes any number of string arguments, concats them, and produces an URL relative to our application's base url.
 </p>
 
 ### Add New Task
@@ -302,7 +302,7 @@ Now create a method named `showAddForm()` in `TaskController.php` file.
 ```php
 public function showAddForm()
 {
-    response()->render('tasks/form');
+    return response()->view('tasks/form');
 }
 ```
 
@@ -314,7 +314,7 @@ We will need to create our task form markup in `app/views/tasks/form.php` file.
     <button>Submit</button>
 </form>
 
-<a href="<?= url("tasks") ?>">Cancel</a>
+<a href="<?= url()->to('tasks') ?>">Cancel</a>
 ```
 
 Refresh your browser to see the task form.
@@ -340,10 +340,10 @@ Update the `TaskController` with following method:
 public function postAddForm()
 {
     $task = new TaskModel();
-    $task->title = request()->post('title');
+    $task->title = request()->input('title');
     $task->save();
 
-    redirect('tasks');
+    return redirect()->to('tasks');
 }
 ```
 
@@ -351,7 +351,7 @@ public function postAddForm()
 
 Try to add a new task. You should now see the new task listed. 
 
-We first check if the current request method is `POST`. For that we call `request()->isPost()` method. To access the `POST` request form data, you can simply use the global `$_POST` array, but we used `request()->post()` method. It takes the name of form field and returns the data. We then finally insert the posted data in the database using `insert()` method.
+To access the `POST` request form data, you can simply use the global `$_POST` array, but we used `request()->input()` method. It takes the name of form field and returns the data. We then finally insert the posted data in the database using `save()` method on the model.
 
 Note: The **TaskModel** extends Lightpack's ORM model to ease working with **tasks** table. Read more about [ORM models](https://lightpack.github.io/docs/#/orm-introduction).
 
@@ -364,7 +364,7 @@ Click on **edit** task link to edit a task. You should see `RouteNotFoundExcepti
 Update `routes/web.php` file to support task edting.
 
 ```php
-route()->get('/tasks/edit/:num', TaskController::class, 'showEditForm');
+route()->get('/tasks/edit/:id', TaskController::class, 'showEditForm');
 ```
 
 In the `TaskController.php` file, add a new method named `showEditForm()`.
@@ -374,7 +374,7 @@ public function showEditForm($id)
 {
     $task = new TaskModel($id);
 
-    response()->render('tasks/form', [
+    return response()->view('tasks/form', [
         'task' => $task,
     ]);
 }
@@ -390,7 +390,7 @@ We are going to use the same form to edit a task. Update `app/views/tasks/form.p
     <button>Submit</button>
 </form>
 
-<a href="<?= url("tasks") ?>">Cancel</a>
+<a href="<?= url()->to('tasks') ?>">Cancel</a>
 ```
 
 Now if you try to edit a task, you should see the form populated with task title.
@@ -421,7 +421,7 @@ Let us also populate **tasks** status field. Update `app/views/tasks/form.php` a
 
 </form>
 
-<a href="<?= url("tasks") ?>">Cancel</a>
+<a href="<?= url()->to('tasks') ?>">Cancel</a>
 ```
 
 Refresh your browser to see the task form populated with **status** field.
@@ -434,7 +434,7 @@ Refresh your browser to see the task form populated with **status** field.
 Let us add a route for handling `POST` requests to edit our tasks. Update `routes/web.php` file a new route definition for posting task edit form.
 
 ```php
-route()->post('/tasks/edit/:num', TaskController::class, 'postEditForm');
+route()->post('/tasks/edit/:id', TaskController::class, 'postEditForm');
 ```
 
 Now add `postEditForm()` method in `TaskController`.
@@ -443,8 +443,8 @@ Now add `postEditForm()` method in `TaskController`.
 public function postEditForm($id)
 {
     $task = new TaskModel($id);
-    $task->title = request()->post('title');
-    $task->status = request()->post('status');
+    $task->title = request()->input('title');
+    $task->status = request()->input('status');
     $task->save();
 
     redirect('tasks');

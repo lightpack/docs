@@ -15,19 +15,19 @@ These classes are responsible for authenticating a request. You can create your 
 
 namespace App\Security;
 
-use Lightpack\Auth\Result;
+use Lightpack\Auth\Identity;
 use Lightpack\Auth\AbstractAuthenticator;
 
 class CustomAuthenticator extends AbstractAuthenticator
 {
-    public function verify(): Result
+    public function verify(): ?Identity
     {
         // custom auth logic goes here
     }
 }
 ```
 
-The `verify()` method should return an instantce of **\Lightpack\Auth\Result**. 
+The `verify()` method should return an instantce of **\Lightpack\Auth\Identity**. 
 
 ## Identifiers
 
@@ -45,6 +45,11 @@ use Lightpack\Auth\Identifier;
 
 class CustomIdentifier implements Identifier
 {
+    public function findById($id): ?Identity
+    {
+        // custom logic to fetch user by id
+    }
+
     public function findByAuthToken(string $token): ?Identity
     {
         // fetch user with matching api_token

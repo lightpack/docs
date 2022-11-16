@@ -204,16 +204,16 @@ Look for **MySQL** settings. There you need to configure database credentials wi
 
 ## List All Tasks
 
-To work with `tasks` table in database, we will create a `TaskModel` class. Fire following command inside terminal
+To work with `tasks` table in database, we will create a `Task` class. Fire following command inside terminal
 from project root.
 
 ```terminal
-php lucy create:model TaskModel --table=tasks
+php lucy create:model Task --table=tasks
 ```
 
 **Note:** Read more about `models` [here](https://lightpack.github.io/docs/#/models).
 
-This should have created `TaskModel` in `app/Models` folder.
+This should have created `Task` in `app/Models` folder.
 
 ### Update Controller
 
@@ -223,7 +223,7 @@ We will update our `TaskController` to use this model. Update your controller's 
 public function index()
 {
     return response()->view('tasks/index', [
-        'tasks' => TaskModel::query()->all(),
+        'tasks' => Task::query()->all(),
     ]);
 }
 ```
@@ -339,7 +339,7 @@ Update the `TaskController` with following method:
 ```php
 public function postAddForm()
 {
-    $task = new TaskModel();
+    $task = new Task();
     $task->title = request()->input('title');
     $task->save();
 
@@ -353,7 +353,7 @@ Try to add a new task. You should now see the new task listed.
 
 To access the `POST` request form data, you can simply use the global `$_POST` array, but we used `request()->input()` method. It takes the name of form field and returns the data. We then finally insert the posted data in the database using `save()` method on the model.
 
-Note: The **TaskModel** extends Lightpack's ORM model to ease working with **tasks** table. Read more about [ORM models](https://lightpack.github.io/docs/#/orm-introduction).
+Note: The **Task** extends Lightpack's ORM model to ease working with **tasks** table. Read more about [ORM models](https://lightpack.github.io/docs/#/orm-introduction).
 
 ### Edit Task
 
@@ -372,7 +372,7 @@ In the `TaskController.php` file, add a new method named `showEditForm()`.
 ```php
 public function showEditForm($id)
 {
-    $task = new TaskModel($id);
+    $task = new Task($id);
 
     return response()->view('tasks/form', [
         'task' => $task,
@@ -442,7 +442,7 @@ Now add `postEditForm()` method in `TaskController`.
 ```php
 public function postEditForm($id)
 {
-    $task = new TaskModel($id);
+    $task = new Task($id);
     $task->title = request()->input('title');
     $task->status = request()->input('status');
     $task->save();

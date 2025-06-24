@@ -1,11 +1,13 @@
-# Relationships
+# ORM Relationships
+
+## Introduction
 
 ![Order UI and Entity Diagram](_media/orm/orm-order-items-ui-prototype.svg)
 
 
 To set the context let's understand the diagram above. It shows a simplified version of an **order** screen on the left and associated table **entities** on the right. The **order** UI shows information about the associated `order`, `customer`, `order items`, and `payment` details.
 
-## Data Modelling
+### Data Modelling
 
 Although the **order** UI shows all the information together on the screen, when modelling the database schema, you would consider normalized forms with:
 
@@ -16,7 +18,7 @@ Although the **order** UI shows all the information together on the screen, when
 
 > Note: to uniquely identify the order and its related items, we need a table named `order_item` which stores references to the `order_id` and `product_id`. Such a table is often called a **pivot** or **junction** or **bridge** table.
 
-## Entity Associations
+### Entity Associations
 
 When relating data models (**entities**) together, we may think in terms of **associations** or **relationships**. For example:
 
@@ -37,10 +39,10 @@ In **Relation Databases**, we introduce 4 main types of associations:
 ![Association Types between Entities](_media/orm/rdbms-association-types.svg)
 
 
-## Association Types
+### Association Types
 
-### 1. One to One (1:1)
-A **One to One** relationship means that each record in `Table A` is linked to one and only one record in `Table B`, and vice versa. 
+#### 1. One to One (1:1)
+A **One to One** relationship means that each record in **Table A** is linked to one and only one record in **Table B**, and vice versa. 
 
 Think of it as a **passport** and a **person**: each person has one unique passport, and each passport belongs to one person.
 
@@ -65,8 +67,8 @@ public function order() {
 
 ---
 
-### 2. One to Many (1:N)
-A **One to Many** relationship means that a single record in `Table A` can be related to many records in `Table B`, but each record in `Table B` relates back to only one record in `Table A`. 
+#### 2. One to Many (1:N)
+A **One to Many** relationship means that a single record in **Table A** can be related to many records in **Table B**, but each record in **Table B** relates back to only one record in **Table A**. 
 
 Imagine a customer placing multiple orders: one customer, many orders.
 
@@ -91,10 +93,10 @@ public function customer() {
 
 ---
 
-### 3. Many to One (N:1)
-A **Many to One** relationship is simply the inverse of **One to Many**. Many records in `Table A` relate to a single record in `Table B`. 
+#### 3. Many to One (N:1)
+A **Many to One** relationship is simply the inverse of **One to Many**. Many records in **Table A** relate to a single record in **Table B**. 
 
-For example, many `order_item` records point to one `order`.
+Think of students and schools: Many students can attend the same school, but each student is enrolled in only one school.
 
 **Order Example:**
 - Many `order_item` rows belong to one `order`.
@@ -116,8 +118,8 @@ public function items() {
 
 ---
 
-### 4. Many to Many (N:M)
-A **Many to Many** relationship means that multiple records in `Table A` can relate to multiple records in `Table B`. This is typically implemented using a **junction** (**pivot**) table. 
+#### 4. Many to Many (N:M)
+A **Many to Many** relationship means that multiple records in **Table A** can relate to multiple records in **Table B**. This is typically implemented using a **junction** (**pivot**) table. 
 
 Think of products and orders: an order can have many products, and a product can appear in many orders.
 

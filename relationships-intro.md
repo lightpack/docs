@@ -218,48 +218,6 @@ $order = new Order(42);
 $customer = $order->customer;
 ```
 
-#### Many to One
-**Database:** Many records in Table A link to one in Table B (e.g., `order_item` and `order`).
-
-**ORM Mapping:**
-
-**OrderItem model (belongs to order):**
-```php
-class OrderItem extends Model
-{
-    public function order()
-    {
-        return $this->belongsTo(Order::class, 'order_id', 'id');
-    }
-}
-```
-
-**Order model (inverse):**
-```php
-class Order extends Model
-{
-    public function items()
-    {
-        return $this->hasMany(OrderItem::class, 'order_id', 'id');
-    }
-}
-```
-
-**Parameter Explanation:**
-- `TargetModel::class`: The related model's class name.
-- `'order_id'`: The foreign key column in the related table (`order_item`).
-- `'id'`: The local/owner key (primary key) in the current table (`order`).
-
-**Usage Example:**
-```php
-$item = OrderItem::find(1);
-$order = $item->order; // Get the order this item belongs to
-$order = Order::find(1);
-foreach ($order->items as $item) {
-    // Each item in this order
-}
-```
-
 #### Many to Many
 
 **Database:** Many records in Table A relate to many in Table B, typically via a pivot/junction table (e.g., `orders` and `products` via `order_item`).

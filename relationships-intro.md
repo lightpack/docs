@@ -277,3 +277,110 @@ $product = new Product(99);
  */
 $orders = $product->orders;
 ```
+
+---
+
+### Advanced Relationships in Lightpack ORM
+
+Lightpack ORM provides advanced relationship methods for more complex scenarios, including multi-table joins and polymorphic associations. These help you model real-world data structures with elegance and minimal code.
+
+#### hasManyThrough
+
+Use `hasManyThrough()` to access a distant related model through an intermediate model. For example, a **Country** has many **Posts** through **Users**:
+
+```php
+class Country extends Model
+{
+    public function posts()
+    {
+        return $this->hasManyThrough(Post::class, User::class);
+    }
+}
+```
+
+Now, you can get all posts for a country directly:
+```php
+$country = new Country(1);
+$posts = $country->posts; // All posts from users in this country
+```
+
+---
+
+#### Polymorphic Relationships
+
+Polymorphic relationships allow a model to belong to more than one type of model using a single association. This is useful for scenarios like comments on posts or videos, or a user having one avatar.
+
+##### morphTo (Polymorphic Inverse)
+
+Use `morphTo()` in the child model to indicate it can belong to multiple parent types:
+
+```php
+class Comment extends Model
+{
+    public function commentable()
+    {
+        return $this->morphTo([
+            'post' => Post::class,
+            'video' => Video::class,
+        ]);
+    }
+}
+```
+
+Now you can resolve the parent for a comment:
+```php
+$comment = new Comment(77);
+$parent = $comment->commentable; // Could be a Post or Video instance
+```
+
+##### morphMany (Polymorphic "Many")
+
+Use `morphMany()` in the parent model to indicate it can have many of a polymorphic child:
+
+```php
+class Post extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class);
+    }
+}
+
+class Video extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class);
+    }
+}
+```
+
+Now, you can get all comments for a post or video:
+```php
+$post = new Post(5);
+$comments = $post->comments;
+```
+
+##### morphOne (Polymorphic "One")
+
+Use `morphOne()` in the parent model for a one-to-one polymorphic relationship. For example, a **User** may have one **Avatar**:
+
+```php
+class User extends Model
+{
+    public function avatar()
+    {
+        return $this->morphOne(Avatar::class);
+    }
+}
+```
+
+Now, you can get a user's avatar:
+```php
+$user = new User(42);
+$avatar = $user->avatar;
+```
+
+---
+
+These advanced relationships let you model flexible, real-world associations and simplify complex data access in your application. Lightpack's expressive relationship methods make even the most dynamic data structures easy to work with.

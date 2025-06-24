@@ -53,20 +53,6 @@ Think of it as a **passport** and a **person**: each person has one unique passp
 **In Schema:**
 - `payment` table has a unique `order_id` column (foreign key).
 
-**ORM Code:**
-```php
-// In Order model
-public function payment() {
-    return $this->hasOne(Payment::class);
-}
-// In Payment model
-public function order() {
-    return $this->belongsTo(Order::class);
-}
-```
-
----
-
 #### 2. One to Many (1:N)
 A **One to Many** relationship means that a single record in **Table A** can be related to many records in **Table B**, but each record in **Table B** relates back to only one record in **Table A**. 
 
@@ -79,20 +65,6 @@ Imagine a customer placing multiple orders: one customer, many orders.
 **Schema:**
 - `order` table has a `customer_id` column (foreign key).
 
-**ORM Code:**
-```php
-// In Customer model
-public function orders() {
-    return $this->hasMany(Order::class);
-}
-// In Order model
-public function customer() {
-    return $this->belongsTo(Customer::class);
-}
-```
-
----
-
 #### 3. Many to One (N:1)
 A **Many to One** relationship is simply the inverse of **One to Many**. Many records in **Table A** relate to a single record in **Table B**. 
 
@@ -103,20 +75,6 @@ Think of students and schools: Many students can attend the same school, but eac
 
 **Schema:**
 - `order_item` table has an `order_id` column (foreign key).
-
-**ORM Code:**
-```php
-// In OrderItem model
-public function order() {
-    return $this->belongsTo(Order::class);
-}
-// In Order model
-public function items() {
-    return $this->hasMany(OrderItem::class);
-}
-```
-
----
 
 #### 4. Many to Many (N:M)
 A **Many to Many** relationship means that multiple records in **Table A** can relate to multiple records in **Table B**. This is typically implemented using a **junction** (**pivot**) table. 
@@ -129,18 +87,6 @@ Think of products and orders: an order can have many products, and a product can
 
 **Schema:**
 - `order_item` table has both `order_id` and `product_id` columns (foreign keys).
-
-**ORM Code:**
-```php
-// In Order model
-public function products() {
-    return $this->pivot(Product::class, 'order_item');
-}
-// In Product model
-public function orders() {
-    return $this->pivot(Order::class, 'order_item');
-}
-```
 
 > **Summary:**
 > - **One to One:** Each order has one payment.

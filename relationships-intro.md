@@ -161,11 +161,9 @@ $payment->order;
 ```
 
 #### One to Many
-**Database:** One record in Table A links to many in Table B (e.g., `customer` and `orders`).
 
-**ORM Mapping:**
+Use the relationship method `hasMany()` to define a **one to many** relationship between the **customer** and **order** entities.
 
-**Customer model (has many orders):**
 ```php
 class Customer extends Model
 {
@@ -176,7 +174,26 @@ class Customer extends Model
 }
 ```
 
-**Order model (inverse):**
+Now, to get all orders placed by a customer, simply use the name of the **orders()** method on a **Customer** instance.
+
+```php
+/**
+ * Find the customer with id: 7
+ */
+$customer = new Customer(7);
+
+/**
+ * Get all orders for this customer
+ */
+$orders = $customer->orders;
+```
+
+Behind the scenes, the ORM intercepts the call to `$customer->orders` and returns a collection of **Order** instances related to that customer.
+
+##### Inverse of hasMany()
+
+Use the relationship method `belongsTo()` to define the inverse of the **hasMany()** relationship.
+
 ```php
 class Order extends Model
 {
@@ -187,19 +204,18 @@ class Order extends Model
 }
 ```
 
-**Parameter Explanation:**
-- `TargetModel::class`: The related model's class name.
-- `'customer_id'`: The foreign key column in the related table (`order`).
-- `'id'`: The local/owner key (primary key) in the current table (`customer`).
+Now, you can fetch the `Customer` instance for a given `Order`:
 
-**Usage Example:**
 ```php
-$customer = Customer::find(1);
-foreach ($customer->orders as $order) {
-    // Work with each order for this customer
-}
-$order = Order::find(1);
-$customer = $order->customer; // Get the customer for this order
+/**
+ * Find the order with id: 42
+ */
+$order = new Order(42);
+
+/**
+ * Get the customer who placed this order
+ */
+$customer = $order->customer;
 ```
 
 #### Many to One

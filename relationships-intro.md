@@ -102,12 +102,47 @@ Now that you’ve seen how relationships are structured at the database level, l
 
 In an ORM, each type of database relationship is represented by a specific method or association on your model classes. Instead of writing SQL joins, you define these relationships once, and then access related data as if you were simply navigating object properties.
 
-#### 1. One to One
+#### One to One
 **Database:** Each record in Table A links to one in Table B (e.g., `order` and `payment`).
 
-**ORM Mapping:**  
-- In your `Order` model, you define a `hasOne(Payment::class)` method.
-- In your `Payment` model, you use `belongsTo(Order::class)`.
+**ORM Mapping:**
+
+**Order model (owns the payment):**
+```php
+<?php
+
+namespace App\Models;
+
+class Order extends Model
+{
+    // Returns the payment record associated with this order (one-to-one relationship)
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'order_id');
+    }
+}
+```
+**Payment model (inverse):**
+```php
+<?php
+
+namespace App\Models;
+
+class Payment extends Model
+{
+    public function order()
+    {
+        // Returns the order this payment belongs to (inverse one-to-one relationship)
+
+        return $this->belongsTo(Order::class, 'order_id', 'id');
+    }
+}
+```
+**Parameter Explanation:**
+- `TargetModel::class`: The related model's class name.
+- `'order_id'`: The foreign key column in the related table (`payment`).
+- `'id'`: The local key (primary key) in the current table (`order`).
 
 **Usage Example:**
 ```php
@@ -115,12 +150,48 @@ $order = Order::find(1);
 $payment = $order->payment; // Directly access the related payment
 ```
 
+
 #### 2. One to Many
 **Database:** One record in Table A links to many in Table B (e.g., `customer` and `orders`).
 
-**ORM Mapping:**  
-- In your `Customer` model, you define a `hasMany(Order::class)` method.
-- In your `Order` model, you use `belongsTo(Customer::class)`.
+**ORM Mapping:**
+
+**Customer model (has many orders):**
+```php
+<?php
+
+namespace App\Models;
+
+class Customer extends Model
+{
+    // Returns the payment record associated with this order (one-to-one relationship)
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'customer_id', 'id');
+    }
+}
+```
+**Order model (inverse):**
+```php
+<?php
+
+namespace App\Models;
+
+class Order extends Model
+{
+    public function customer()
+    {
+        // Returns the order this payment belongs to (inverse one-to-one relationship)
+
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+    }
+}
+```
+**Parameter Explanation:**
+- `TargetModel::class`: The related model's class name.
+- `'customer_id'`: The foreign key column in the related table (`order`).
+- `'id'`: The local/owner key (primary key) in the current table (`customer`).
 
 **Usage Example:**
 ```php
@@ -128,27 +199,106 @@ $customer = Customer::find(1);
 foreach ($customer->orders as $order) {
     // Work with each order for this customer
 }
+$order = Order::find(1);
+$customer = $order->customer; // Get the customer for this order
 ```
+
 
 #### 3. Many to One
 **Database:** Many records in Table A link to one in Table B (e.g., `order_item` and `order`).
 
-**ORM Mapping:**  
-- In your `OrderItem` model, you define a `belongsTo(Order::class)` method.
-- In your `Order` model, you use `hasMany(OrderItem::class)`.
+**ORM Mapping:**
+
+**OrderItem model (belongs to order):**
+```php
+<?php
+
+namespace App\Models;
+
+class OrderItem extends Model
+{
+    public function order()
+    {
+        // Returns the order this payment belongs to (inverse one-to-one relationship)
+
+        return $this->belongsTo(Order::class, 'order_id', 'id');
+    }
+}
+```
+**Order model (inverse):**
+```php
+<?php
+
+namespace App\Models;
+
+class Order extends Model
+{
+    public function items()
+    {
+        // Returns the order this payment belongs to (inverse one-to-one relationship)
+
+        return $this->hasMany(OrderItem::class, 'order_id', 'id');
+    }
+}
+```
+**Parameter Explanation:**
+- `TargetModel::class`: The related model's class name.
+- `'order_id'`: The foreign key column in the related table (`order_item`).
+- `'id'`: The local/owner key (primary key) in the current table (`order`).
 
 **Usage Example:**
 ```php
 $item = OrderItem::find(1);
 $order = $item->order; // Get the order this item belongs to
+$order = Order::find(1);
+foreach ($order->items as $item) {
+    // Each item in this order
+}
 ```
+
 
 #### 4. Many to Many
 **Database:** Many records in Table A relate to many in Table B, typically via a pivot/junction table (e.g., `orders` and `products` via `order_item`).
 
-**ORM Mapping:**  
-- In your `Order` model, you define a `pivot(Product::class, 'order_item')` method.
-- In your `Product` model, you define a `pivot(Order::class, 'order_item')` method.
+**ORM Mapping:**
+
+**Order model (many products):**
+```php
+<?php
+
+namespace App\Models;
+
+class Order extends Model
+{
+    public function products()
+    {
+        // Returns the order this payment belongs to (inverse one-to-one relationship)
+
+        return $this->belongsToMany(Product::class, 'order_item', 'order_id', 'product_id');
+    }
+}
+```
+**Product model (inverse):**
+```php
+<?php
+
+namespace App\Models;
+
+class Product extends Model
+{
+    public function orders()
+    {
+        // Returns the order this payment belongs to (inverse one-to-one relationship)
+
+        return $this->belongsToMany(Order::class, 'order_item', 'product_id', 'order_id', 'id', 'id');
+    }
+}
+```
+**Parameter Explanation:**
+- `TargetModel::class`: The related model's class name.
+- `'order_item'`: The name of the pivot (junction) table.
+- `'order_id'` / `'product_id'`: Foreign key columns in the pivot table.
+- `'id'`: The primary key in the parent and related tables.
 
 **Usage Example:**
 ```php
@@ -162,6 +312,8 @@ foreach ($product->orders as $order) {
     // Each order that includes this product
 }
 ```
+> Many ORMs allow you to omit some parameters if you follow naming conventions, but specifying them explicitly is best for clarity and future-proofing.
+
 
 ---
 

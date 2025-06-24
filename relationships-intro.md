@@ -5,6 +5,8 @@
 ![Order UI and Entity Diagram](_media/orm/orm-order-items-ui-prototype.svg)
 
 
+ORMs turn the abstract relationships of your database into natural, intuitive code. By mapping database associations to model methods, you unlock the full power of relational data—without the pain of raw SQL joins.
+
 To set the context let's understand the diagram above. It shows a simplified version of an **order** screen on the left and associated table **entities** on the right. The **order** UI shows information about the associated `order`, `customer`, `order items`, and `payment` details.
 
 ### Data Modelling
@@ -220,9 +222,7 @@ $customer = $order->customer;
 
 #### Many to Many
 
-**Database:** Many records in Table A relate to many in Table B, typically via a pivot/junction table (e.g., `orders` and `products` via `order_item`).
-
-**Order model (many products):**
+Use the relationship method `pivot()` to define a **many to many** relationship between the **order** and **product** entities, using a pivot table (like `order_item`).
 
 ```php
 class Order extends Model
@@ -234,7 +234,25 @@ class Order extends Model
 }
 ```
 
-**Product model (inverse):**
+Now, to get all products in a given order, simply use the name of the **products()** method on an **Order** instance.
+
+```php
+/**
+ * Find the order with id: 12
+ */
+$order = new Order(12);
+
+/**
+ * Get all products in this order
+ */
+$products = $order->products;
+```
+
+Behind the scenes, the ORM joins the `orders`, `order_item`, and `products` tables to return all related **Product** instances for the order.
+
+##### Inverse of pivot()
+
+Essentailly **many to man**y relationship works both ways, so use the same relationship method on the **Product** model to access all orders that include a given product. 
 
 ```php
 class Product extends Model
@@ -246,46 +264,16 @@ class Product extends Model
 }
 ```
 
-**Parameter Explanation:**
-- `TargetModel::class`: The related model's class name.
-- `'order_item'`: The name of the pivot (junction) table.
-- `'order_id'` / `'product_id'`: Foreign key columns in the pivot table.
-- `'id'`: The primary key in the parent and related tables.
+Now, you can fetch all orders that include a specific product:
 
-**Usage Example:**
 ```php
-$order = Order::find(1);
-foreach ($order->products as $product) {
-    // Each product in this order
-}
+/**
+ * Find the product with id: 99
+ */
+$product = new Product(99);
 
-$product = Product::find(1);
-foreach ($product->orders as $order) {
-    // Each order that includes this product
-}
+/**
+ * Get all orders that include this product
+ */
+$orders = $product->orders;
 ```
-
-> Many ORMs allow you to omit some parameters if you follow naming conventions, but specifying them explicitly is best for clarity and future-proofing.
-
----
-
-### ORM Terminology Quick Reference
-
-| Database Concept      | ORM Concept/Method    | Example in Code                |
-|----------------------|----------------------|-------------------------------|
-| Foreign Key          | `belongsTo`          | `$order->customer`            |
-| Primary Key          | `hasOne`, `hasMany`  | `$customer->orders`           |
-| Junction Table       | `pivot`/`belongsToMany` | `$order->products`         |
-| Related Record       | Property/Collection  | `$order->payment`, `$order->items` |
-
----
-
-### Why This Matters
-
-- **Productivity:** You can fetch, update, and traverse related data with simple, readable code—no need for manual joins.
-- **Clarity:** Your code mirrors your business logic. Relationships are explicit in your models, making the structure of your app easy to understand.
-- **Consistency:** ORMs handle the heavy lifting of relationship management, so you don’t have to repeat yourself or risk subtle bugs.
-
----
-
-In summary, ORMs turn the abstract relationships of your database into natural, intuitive code. By mapping database associations to model methods, you unlock the full power of relational data—without the pain of raw SQL.

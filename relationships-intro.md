@@ -41,7 +41,7 @@ In **Relation Databases**, we introduce 4 main types of associations:
 
 ### Association Types
 
-#### 1. One to One (1:1)
+#### One to One (1:1)
 A **One to One** relationship means that each record in **Table A** is linked to one and only one record in **Table B**, and vice versa. 
 
 Think of it as a **passport** and a **person**: each person has one unique passport, and each passport belongs to one person.
@@ -53,7 +53,7 @@ Think of it as a **passport** and a **person**: each person has one unique passp
 **In Schema:**
 - `payment` table has a unique `order_id` column (foreign key).
 
-#### 2. One to Many (1:N)
+#### One to Many (1:N)
 A **One to Many** relationship means that a single record in **Table A** can be related to many records in **Table B**, but each record in **Table B** relates back to only one record in **Table A**. 
 
 Imagine a customer placing multiple orders: one customer, many orders.
@@ -65,7 +65,7 @@ Imagine a customer placing multiple orders: one customer, many orders.
 **Schema:**
 - `order` table has a `customer_id` column (foreign key).
 
-#### 3. Many to One (N:1)
+#### Many to One (N:1)
 A **Many to One** relationship is simply the inverse of **One to Many**. Many records in **Table A** relate to a single record in **Table B**. 
 
 Think of students and schools: Many students can attend the same school, but each student is enrolled in only one school.
@@ -76,7 +76,7 @@ Think of students and schools: Many students can attend the same school, but eac
 **Schema:**
 - `order_item` table has an `order_id` column (foreign key).
 
-#### 4. Many to Many (N:M)
+#### Many to Many (N:M)
 A **Many to Many** relationship means that multiple records in **Table A** can relate to multiple records in **Table B**. This is typically implemented using a **junction** (**pivot**) table. 
 
 Think of products and orders: an order can have many products, and a product can appear in many orders.
@@ -109,36 +109,26 @@ In an ORM, each type of database relationship is represented by a specific metho
 
 **Order model (owns the payment):**
 ```php
-<?php
-
-namespace App\Models;
-
 class Order extends Model
 {
-    // Returns the payment record associated with this order (one-to-one relationship)
-
     public function payment()
     {
         return $this->hasOne(Payment::class, 'order_id');
     }
 }
 ```
+
 **Payment model (inverse):**
 ```php
-<?php
-
-namespace App\Models;
-
 class Payment extends Model
 {
     public function order()
     {
-        // Returns the order this payment belongs to (inverse one-to-one relationship)
-
         return $this->belongsTo(Order::class, 'order_id', 'id');
     }
 }
 ```
+
 **Parameter Explanation:**
 - `TargetModel::class`: The related model's class name.
 - `'order_id'`: The foreign key column in the related table (`payment`).
@@ -150,44 +140,33 @@ $order = Order::find(1);
 $payment = $order->payment; // Directly access the related payment
 ```
 
-
-#### 2. One to Many
+#### One to Many
 **Database:** One record in Table A links to many in Table B (e.g., `customer` and `orders`).
 
 **ORM Mapping:**
 
 **Customer model (has many orders):**
 ```php
-<?php
-
-namespace App\Models;
-
 class Customer extends Model
 {
-    // Returns the payment record associated with this order (one-to-one relationship)
-
     public function orders()
     {
-        return $this->hasMany(Order::class, 'customer_id', 'id');
+        return $this->hasMany(Order::class, 'customer_id');
     }
 }
 ```
+
 **Order model (inverse):**
 ```php
-<?php
-
-namespace App\Models;
-
 class Order extends Model
 {
     public function customer()
     {
-        // Returns the order this payment belongs to (inverse one-to-one relationship)
-
-        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 }
 ```
+
 **Parameter Explanation:**
 - `TargetModel::class`: The related model's class name.
 - `'customer_id'`: The foreign key column in the related table (`order`).
@@ -203,44 +182,33 @@ $order = Order::find(1);
 $customer = $order->customer; // Get the customer for this order
 ```
 
-
-#### 3. Many to One
+#### Many to One
 **Database:** Many records in Table A link to one in Table B (e.g., `order_item` and `order`).
 
 **ORM Mapping:**
 
 **OrderItem model (belongs to order):**
 ```php
-<?php
-
-namespace App\Models;
-
 class OrderItem extends Model
 {
     public function order()
     {
-        // Returns the order this payment belongs to (inverse one-to-one relationship)
-
         return $this->belongsTo(Order::class, 'order_id', 'id');
     }
 }
 ```
+
 **Order model (inverse):**
 ```php
-<?php
-
-namespace App\Models;
-
 class Order extends Model
 {
     public function items()
     {
-        // Returns the order this payment belongs to (inverse one-to-one relationship)
-
         return $this->hasMany(OrderItem::class, 'order_id', 'id');
     }
 }
 ```
+
 **Parameter Explanation:**
 - `TargetModel::class`: The related model's class name.
 - `'order_id'`: The foreign key column in the related table (`order_item`).
@@ -256,44 +224,34 @@ foreach ($order->items as $item) {
 }
 ```
 
+#### Many to Many
 
-#### 4. Many to Many
 **Database:** Many records in Table A relate to many in Table B, typically via a pivot/junction table (e.g., `orders` and `products` via `order_item`).
 
-**ORM Mapping:**
-
 **Order model (many products):**
+
 ```php
-<?php
-
-namespace App\Models;
-
 class Order extends Model
 {
     public function products()
     {
-        // Returns the order this payment belongs to (inverse one-to-one relationship)
-
-        return $this->belongsToMany(Product::class, 'order_item', 'order_id', 'product_id');
+        return $this->pivot(Product::class, 'order_item', 'order_id', 'product_id');
     }
 }
 ```
+
 **Product model (inverse):**
+
 ```php
-<?php
-
-namespace App\Models;
-
 class Product extends Model
 {
     public function orders()
     {
-        // Returns the order this payment belongs to (inverse one-to-one relationship)
-
-        return $this->belongsToMany(Order::class, 'order_item', 'product_id', 'order_id', 'id', 'id');
+        return $this->pivot(Order::class, 'order_item', 'product_id', 'order_id');
     }
 }
 ```
+
 **Parameter Explanation:**
 - `TargetModel::class`: The related model's class name.
 - `'order_item'`: The name of the pivot (junction) table.
@@ -312,8 +270,8 @@ foreach ($product->orders as $order) {
     // Each order that includes this product
 }
 ```
-> Many ORMs allow you to omit some parameters if you follow naming conventions, but specifying them explicitly is best for clarity and future-proofing.
 
+> Many ORMs allow you to omit some parameters if you follow naming conventions, but specifying them explicitly is best for clarity and future-proofing.
 
 ---
 

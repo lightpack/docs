@@ -103,11 +103,9 @@ Now that you’ve seen how relationships are structured at the database level, l
 In an ORM, each type of database relationship is represented by a specific method or association on your model classes. Instead of writing SQL joins, you define these relationships once, and then access related data as if you were simply navigating object properties.
 
 #### One to One
-**Database:** Each record in Table A links to one in Table B (e.g., `order` and `payment`).
 
-**ORM Mapping:**
+Use the relationship method `hasOne()` to define **one to one** relationhsip between **order** and **payment** entity.
 
-**Order model (owns the payment):**
 ```php
 class Order extends Model
 {
@@ -118,26 +116,48 @@ class Order extends Model
 }
 ```
 
-**Payment model (inverse):**
+Now to get the associated payment for an order, simply use the name of the **payment()** method on **Order** instance.
+
+```php
+/**
+ * Find order with id: 23
+ */
+$order = new Order(23);
+
+/**
+ * Get the associated payment
+ */
+$order->payment;
+```
+
+Behind the scenes, the ORM intercepts the call to `$order->payment` and resolves the associated **Payment** instance.
+
+##### Inverse of hasOne()
+
+Use the relationship method **belongsTo()** to define the inverse of the **hasOne()** relationship.
+
 ```php
 class Payment extends Model
 {
     public function order()
     {
-        return $this->belongsTo(Order::class, 'order_id', 'id');
+        return $this->belongsTo(Order::class, 'order_id');
     }
 }
 ```
 
-**Parameter Explanation:**
-- `TargetModel::class`: The related model's class name.
-- `'order_id'`: The foreign key column in the related table (`payment`).
-- `'id'`: The local key (primary key) in the current table (`order`).
+Now this makes it possible to fetch the `Order` instance that the `Payment` belongs to.
 
-**Usage Example:**
 ```php
-$order = Order::find(1);
-$payment = $order->payment; // Directly access the related payment
+/**
+ * Find the payment with id: 101
+ */
+$payment = new Payment(101);
+
+/**
+* Get the associated order
+*/
+$payment->order;
 ```
 
 #### One to Many

@@ -457,7 +457,7 @@ $parent = $comment->parent; // Could be a Post, Photo, or Video instance
 
 ---
 
-### Polymorphic Table Schema Example
+**Polymorphic Table Schema Example**
 
 Your polymorphic child table (e.g., `comments`) **must** have columns named exactly `morph_id` and `morph_type`:
 
@@ -479,7 +479,7 @@ This universal naming makes your migrations and queries consistent, readable, an
 
 ---
 
-### When (Not) to Use Polymorphic Relations
+**When (Not) to Use Polymorphic Relations**
 
 Polymorphic relations are a pragmatic solution for flexible data models, but they come with tradeoffs:
 - **No DB-enforced FKs:** Integrity is enforced in application code only.

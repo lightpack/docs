@@ -312,38 +312,6 @@ Polymorphic relationships are a powerful feature that let a single model relate 
 
 ![Polymorphic Relationship Diagram](_media/orm/orm-polymorphic-relationships.svg)
 
-> **Column Naming Convention:**
-> Lightpack requires you to name your polymorphic columns as `morph_id` and `morph_type`—no exceptions. This is a deliberate design choice. Unlike other ORMs that generate awkward names like `commentable_id`, `commentable_type`, or `imageable_id`, Lightpack keeps it simple and predictable. Your schema is always easy to interpret, and your code stays clean.
-
-> **Referential Integrity Warning:**
-> Polymorphic relationships are not enforced by database-level foreign keys. The integrity is maintained by your application and ORM alone. If you need strict referential integrity, **avoid polymorphic patterns**—split your tables or redesign your schema. Use polymorphic relations only when flexibility outweighs the need for DB-enforced constraints.
-
----
-
-##### morphTo (Polymorphic Inverse)
-
-Suppose you want `Comment` to belong to either a `Post`, `Photo`, or `Video`. Define the inverse like this:
-
-```php
-class Comment extends Model
-{
-    public function parent()
-    {
-        return $this->morphTo([
-            Post::class,
-            Photo::class,
-            Video::class,
-        ]);
-    }
-}
-```
-
-Now, given a comment, you can access its parent—no matter the type:
-```php
-$comment = new Comment(101);
-$parent = $comment->parent; // Could be a Post, Photo, or Video instance
-```
-
 ---
 
 ##### morphMany (Polymorphic "Many")
@@ -406,6 +374,32 @@ $avatar = $user->avatar;
 
 ---
 
+##### morphTo (Polymorphic Inverse)
+
+Suppose you want `Comment` to belong to either a `Post`, `Photo`, or `Video`. Define the inverse like this:
+
+```php
+class Comment extends Model
+{
+    public function parent()
+    {
+        return $this->morphTo([
+            Post::class,
+            Photo::class,
+            Video::class,
+        ]);
+    }
+}
+```
+
+Now, given a comment, you can access its parent—no matter the type:
+```php
+$comment = new Comment(101);
+$parent = $comment->parent; // Could be a Post, Photo, or Video instance
+```
+
+---
+
 ### Polymorphic Table Schema Example
 
 Your polymorphic child table (e.g., `comments`) **must** have columns named exactly `morph_id` and `morph_type`:
@@ -423,6 +417,9 @@ CREATE TABLE comments (
 
 This universal naming makes your migrations and queries consistent, readable, and future-proof.
 
+> **Column Naming Convention:**
+> Lightpack requires you to name your polymorphic columns as `morph_id` and `morph_type`—no exceptions. This is a deliberate design choice. To avoid awkward column names like `commentable_id`, `articleable_id`, or `imageable_id`, Lightpack keeps it simple and predictable. Your schema is always easy to interpret, and your code stays clean.
+
 ---
 
 ### When (Not) to Use Polymorphic Relations
@@ -434,6 +431,11 @@ Polymorphic relations are a pragmatic solution for flexible data models, but the
 
 **Bottom line:** If you require absolute referential integrity, avoid polymorphic relations—split your tables or redesign your schema. But if you need flexibility and can enforce integrity at the application level, Lightpack’s polymorphic support is robust, expressive, and easy to use.
 
+> **Referential Integrity Warning:**
+> Polymorphic relationships are not enforced by database-level foreign keys. The integrity is maintained by your application and ORM alone. If you need strict referential integrity, **avoid polymorphic patterns**—split your tables or redesign your schema. Use polymorphic relations only when flexibility outweighs the need for DB-enforced constraints.
+
 ---
 
 Polymorphic relationships in Lightpack are designed to make your codebase more maintainable, not more confusing. Use them wisely, and you’ll unlock elegant solutions to complex data modeling challenges.
+
+---

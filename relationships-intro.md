@@ -308,37 +308,58 @@ $posts = $country->posts; // All posts from users in this country
 
 #### Polymorphic Relationships
 
-Polymorphic relationships allow a model to belong to more than one type of model using a single association. This is useful for scenarios like comments on posts or videos, or a user having one avatar.
+Polymorphic relationships are a powerful feature that let a single model relate to more than one type of parent model—using a unified, elegant approach. In Lightpack ORM, this is implemented with confidence and clarity, so you can tackle real-world use cases like comments, media attachments, or user avatars without convoluted table structures.
+
+![Polymorphic Relationship Diagram](_media/orm/orm-polymorphic-relationships.svg)
+
+> **Column Naming Convention:**
+> Lightpack requires you to name your polymorphic columns as `morph_id` and `morph_type`—no exceptions. This is a deliberate design choice. Unlike other ORMs that generate awkward names like `commentable_id`, `commentable_type`, or `imageable_id`, Lightpack keeps it simple and predictable. Your schema is always easy to interpret, and your code stays clean.
+
+> **Referential Integrity Warning:**
+> Polymorphic relationships are not enforced by database-level foreign keys. The integrity is maintained by your application and ORM alone. If you need strict referential integrity, **avoid polymorphic patterns**—split your tables or redesign your schema. Use polymorphic relations only when flexibility outweighs the need for DB-enforced constraints.
+
+---
 
 ##### morphTo (Polymorphic Inverse)
 
-Use `morphTo()` in the child model to indicate it can belong to multiple parent types:
+Suppose you want `Comment` to belong to either a `Post`, `Photo`, or `Video`. Define the inverse like this:
 
 ```php
 class Comment extends Model
 {
-    public function commentable()
+    public function parent()
     {
         return $this->morphTo([
-            'post' => Post::class,
-            'video' => Video::class,
+            Post::class,
+            Photo::class,
+            Video::class,
         ]);
     }
 }
 ```
 
-Now you can resolve the parent for a comment:
+Now, given a comment, you can access its parent—no matter the type:
 ```php
-$comment = new Comment(77);
-$parent = $comment->commentable; // Could be a Post or Video instance
+$comment = new Comment(101);
+$parent = $comment->parent; // Could be a Post, Photo, or Video instance
 ```
+
+---
 
 ##### morphMany (Polymorphic "Many")
 
-Use `morphMany()` in the parent model to indicate it can have many of a polymorphic child:
+If you want each `Post`, `Photo`, or `Video` to have many comments, define it like this:
 
 ```php
 class Post extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class);
+    }
+}
+
+class Photo extends Model
 {
     public function comments()
     {
@@ -355,15 +376,17 @@ class Video extends Model
 }
 ```
 
-Now, you can get all comments for a post or video:
+Usage:
 ```php
-$post = new Post(5);
-$comments = $post->comments;
+$video = new Video(7);
+$comments = $video->comments; // All comments for this video
 ```
+
+---
 
 ##### morphOne (Polymorphic "One")
 
-Use `morphOne()` in the parent model for a one-to-one polymorphic relationship. For example, a **User** may have one **Avatar**:
+For a one-to-one polymorphic relationship, such as a `User` having a single `Avatar`:
 
 ```php
 class User extends Model
@@ -375,7 +398,7 @@ class User extends Model
 }
 ```
 
-Now, you can get a user's avatar:
+Usage:
 ```php
 $user = new User(42);
 $avatar = $user->avatar;
@@ -383,4 +406,34 @@ $avatar = $user->avatar;
 
 ---
 
-These advanced relationships let you model flexible, real-world associations and simplify complex data access in your application. Lightpack's expressive relationship methods make even the most dynamic data structures easy to work with.
+### Polymorphic Table Schema Example
+
+Your polymorphic child table (e.g., `comments`) **must** have columns named exactly `morph_id` and `morph_type`:
+
+```sql
+CREATE TABLE comments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    morph_id INT NOT NULL,
+    morph_type VARCHAR(64) NOT NULL,
+    body TEXT,
+    created_at DATETIME,
+    updated_at DATETIME
+);
+```
+
+This universal naming makes your migrations and queries consistent, readable, and future-proof.
+
+---
+
+### When (Not) to Use Polymorphic Relations
+
+Polymorphic relations are a pragmatic solution for flexible data models, but they come with tradeoffs:
+- **No DB-enforced FKs:** Integrity is enforced in application code only.
+- **Migration complexity:** Changing parent types later requires careful data handling.
+- **Query performance:** Can be less efficient than standard FKs for some workloads.
+
+**Bottom line:** If you require absolute referential integrity, avoid polymorphic relations—split your tables or redesign your schema. But if you need flexibility and can enforce integrity at the application level, Lightpack’s polymorphic support is robust, expressive, and easy to use.
+
+---
+
+Polymorphic relationships in Lightpack are designed to make your codebase more maintainable, not more confusing. Use them wisely, and you’ll unlock elegant solutions to complex data modeling challenges.

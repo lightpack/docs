@@ -292,23 +292,36 @@ Lightpack ORM provides advanced relationship methods for more complex scenarios,
 
 #### hasManyThrough
 
-Use `hasManyThrough()` to access a distant related model through an intermediate model. For example, a **Country** has many **Posts** through **Users**:
+The `hasManyThrough` relationship lets you access related records that are connected by an intermediate model. This is perfect for scenarios where you want to “reach through” one model to get to another.
+
+Consider this example:
+
+- An **author** *has many* **books**
+- Each **book** *has many* **reviews**
+- An **author** *has many* **reviews** _through_ their **books**
+-  **author** → **books** → **reviews**
+
+This means you can fetch all reviews for an author, even though reviews are not directly linked to the author, but come through the author’s books.
 
 ```php
-class Country extends Model
+class Author extends Model
 {
-    public function posts()
+    // One author has many reviews through books
+    public function reviews()
     {
-        return $this->hasManyThrough(Post::class, User::class);
+        return $this->hasManyThrough(Review::class, Book::class, 'author_id', 'book_id');
     }
 }
 ```
 
-Now, you can get all posts for a country directly:
+Now you can easily fetch associated **reviews**, 
+
 ```php
-$country = new Country(1);
-$posts = $country->posts; // All posts from users in this country
+$author = new Author(1);
+$reviews = $author->reviews;
 ```
+
+Behind the scenes, Lightpack ORM joins the `authors`, `books`, and `reviews` tables to fetch all reviews for books written by that author—no manual SQL or nested loops required.
 
 ---
 

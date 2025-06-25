@@ -290,6 +290,44 @@ $orders = $product->orders;
 
 Lightpack ORM provides advanced relationship methods for more complex scenarios, including multi-table joins and polymorphic associations. These help you model real-world data structures with elegance and minimal code.
 
+
+#### hasOneThrough
+
+The `hasOneThrough` relationship lets you access a single, distant related record through an intermediate model. This is ideal for cases where you want to “reach through” one model to get a single related record from another.
+
+Consider this example:
+
+- A **patient** has one **appointment**
+- Each **appointment** has one **doctor**
+- A **patient** has one **doctor** _through_ their **appointment**
+- **patient** → **appointment** → **doctor**
+
+This pattern allows you to fetch the doctor for a patient, even though the doctor is not directly linked to the patient, but is associated through the patient’s appointment.
+
+**Example: Patient, Appointment, Doctor**
+
+```php
+class Patient extends Model
+{
+    // Each patient has one doctor through their appointment
+    public function doctor()
+    {
+        return $this->hasOneThrough(Doctor::class, Appointment::class, 'patient_id', 'doctor_id');
+    }
+}
+```
+
+Now you can easily fetch the doctor for a patient:
+
+```php
+$patient = new Patient(1);
+$doctor = $patient->doctor;
+```
+
+Behind the scenes, Lightpack ORM joins the `patients`, `appointments`, and `doctors` tables to fetch the doctor for the patient’s appointment—no manual SQL or nested queries required.
+
+---
+
 #### hasManyThrough
 
 The `hasManyThrough` relationship lets you access related records that are connected by an intermediate model. This is perfect for scenarios where you want to “reach through” one model to get to another.

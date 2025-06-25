@@ -106,6 +106,8 @@ In an ORM, each type of database relationship is represented by a specific metho
 
 #### One to One
 
+![ORM One to One Association](_media/orm/orm-one-to-one-association.svg)
+
 Use the relationship method `hasOne()` to define **one to one** relationhsip between **order** and **payment** entity.
 
 ```php
@@ -164,6 +166,8 @@ $payment->order;
 
 #### One to Many
 
+![ORM One to Many Association](_media/orm/orm-one-to-many-association.svg)
+
 Use the relationship method `hasMany()` to define a **one to many** relationship between the **customer** and **order** entities.
 
 ```php
@@ -221,6 +225,8 @@ $customer = $order->customer;
 ```
 
 #### Many to Many
+
+![ORM Many to Many Association](_media/orm/orm-many-to-many-association.svg)
 
 Use the relationship method `pivot()` to define a **many to many** relationship between the **order** and **product** entities, using a pivot table (like `order_item`).
 

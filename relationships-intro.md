@@ -320,7 +320,7 @@ Polymorphic relationships are a powerful feature that let a single model relate 
 
 ---
 
-##### morphMany (Polymorphic "Many")
+##### morphMany (Polymorphic Many)
 
 If you want each `Post`, `Photo`, or `Video` to have many comments, define it like this:
 
@@ -358,7 +358,7 @@ $comments = $video->comments; // All comments for this video
 
 ---
 
-##### morphOne (Polymorphic "One")
+##### morphOne (Polymorphic One)
 
 For a one-to-one polymorphic relationship, such as a `User` having a single `Avatar`:
 

@@ -295,3 +295,65 @@ $products->loadCount(['reviews' => function($q) {
     $q->where('status', '=', 'approved');
 }]);
 ```
+
+---
+
+## Strict Mode & Lazy Loading
+
+Preventing **`N+1`** query issues and ensuring predictable performance is a core principle in Lightpack ORM. While eager loading is the primary tool for fetching related data efficiently, Lightpack also offers **strict mode** for even greater safety and explicitness.
+
+> **Tip:** For maximum safety against N+1 issues, enable strict mode on your models. See the section below for details.
+
+### What is Strict Mode?
+
+Strict mode prevents accidental lazy loading of relations. In strict mode, if you try to access a relation that was not eager loaded (via `with`, `load`, etc.), Lightpack will throw an exception—unless that relation is explicitly whitelisted. This is crucial for API performance, large-scale applications, and when you want to guarantee predictable queries.
+
+### How to Enable Strict Mode
+
+Enable strict mode by setting the following property on your model:
+
+```php
+protected $strictMode = true;
+```
+
+Optionally, you can allow specific relations to be lazy loaded by whitelisting them:
+
+```php
+protected $allowedLazyRelations = ['profile', 'roles'];
+```
+
+### How It Works
+- Accessing a relation that was not eager loaded or whitelisted throws an exception.
+- Only relations included in `with`, `load`, or `allowedLazyRelations` can be accessed without error.
+- This ensures all relation access is explicit and safe for large-scale or API use.
+
+### Example: Strict Mode in Action
+
+```php
+class User extends Model
+{
+    protected $strictMode = true;
+    protected $allowedLazyRelations = ['profile'];
+}
+
+// Eager loading
+$user = User::query()->with('roles')->one(); // OK
+$user->roles; // OK
+
+// Not eager loaded and not whitelisted
+$user = new User($id); // No eager load
+
+// Throws exception
+$user->roles;
+
+// Whitelisted lazy relation
+$user->profile; // OK
+```
+
+### Lazy Loading and Caching
+
+- Accessing an undefined property that matches a relation method triggers lazy loading (unless strict mode is enabled).
+- Once loaded, the relation result is **cached** on the model instance to avoid repeated queries.
+- Always prefer eager loading for predictable performance and to avoid N+1 query issues.
+
+**Tip:** Strict mode is highly recommended for APIs and large-scale applications where query predictability and performance are critical.

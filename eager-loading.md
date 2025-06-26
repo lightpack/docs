@@ -298,11 +298,39 @@ $products->loadCount(['reviews' => function($q) {
 
 ---
 
-### Lazy Loading
+## Lazy Loading
 
-- Accessing an undefined property that matches a relation method triggers lazy loading (unless strict mode is enabled).
-- Once loaded, the relation result is **cached** on the model instance to avoid repeated queries.
-- Always prefer eager loading for predictable performance and to avoid N+1 query issues.
+If you access a relation property that hasn't been loaded yet, Lightpack ORM will transparently execute a new query to fetch it. This aspect is know as **lazy loading** relationships.
+
+```php
+$user = User::find(1); // No relations loaded
+$posts = $user->posts; // Triggers a query to fetch posts for this user
+```
+
+- The first time you access `$user->posts`, Lightpack issues a query and caches the result on the model instance.
+- Subsequent accesses to `$user->posts` use the cached data—no additional queries are made.
+
+### Tradeoffs and Risks
+
+- **N+1 Query Problem:** If you loop over a collection and access a relation on each item, you can easily trigger many queries:
+  
+  ```php
+  $users = User::all();
+  foreach ($users as $user) {
+        $user->profile; // Triggers 1 profile query per user
+  }
+  ```
+
+  This leads to poor performance and unpredictable database load.
+
+- **Performance Unpredictability:** Lazy loading can make it hard to know how many queries your code will run, especially as your data grows.
+
+- **Best Practice:** Always prefer eager loading (`with()`, `load()`) for predictable, efficient queries. Use lazy loading only if you are certain the relation will be accessed infrequently or in non-performance-critical code (e.g., admin dashboards, prototypes).
+
+### When is Lazy Loading Acceptable?
+
+- For small datasets, prototyping, or admin tools where performance is not critical.
+- When you explicitly whitelist certain relations using `allowedLazyRelations` in strict mode.
 
 ---
 
@@ -357,7 +385,5 @@ $user->roles;
 // Whitelisted lazy relation
 $user->profile; // OK
 ```
-
-> **Tip:** To prevent accidentally introducing **`N+1`** query performance issues, enable strict mode on yur model.
 
 ---

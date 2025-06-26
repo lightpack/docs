@@ -34,7 +34,6 @@
   * [Relationships](relationships.md)
   * [Eager Loading](eager-loading.md)
   * [Collections](collections.md)
-  * [Filters](filters.md)
   * [Transformers](transformers.md)
 
 <!-- * Security -->

@@ -105,18 +105,14 @@ Convert the collection to an array of arrays (each model as array).
 $array = $users->toArray();
 ```
 
-## Eager Loading & Counting
-
-Collections make it easy to eager load relationships after fetching records, avoiding N+1 query problems:
-
 ### load()
-Eager load one or more relationships on all models in the collection.
+Eager load one or more relationships for existing model instances.
 ```php
 $users->load('profile', 'roles');
 ```
 
 ### loadCount()
-Eager load counts for related models.
+Eager load counts of related models.
 ```php
 $users->loadCount('posts');
 foreach ($users as $user) {

@@ -580,3 +580,90 @@ $parent = $comment->parent; // Could be a Post, Photo, or Video instance
 ```
 
 ---
+
+## Semantic Relationship Methods
+
+Semantic relationship methods empower you to define model relationships that are not only technically correct, but also meaningful and intention-revealing. Instead of limiting your models to generic accessors like `departments()`, you can define expressive methods such as `activeDepartments()`, `hrDepartments()`, or `recentlyCreatedDepartments()`. This approach makes your codebase more readable, maintainable, and aligned with real business logic.
+
+### Why Semantic Methods?
+
+- **Clarity:** Your model methods communicate *why* you’re fetching certain related data, not just *how*.
+- **Maintainability:** Changes to business logic (e.g., what counts as “active”) are isolated to a single place.
+- **Expressiveness:** Your code reads like natural language, making it easier for new developers to understand intent.
+
+### Example: Organization and Departments
+
+Suppose you have an `Organization` model and a related `Department` model. Each organization can have many departments, but you want to easily fetch only the active ones, or only those in the HR domain.
+
+#### Standard Relationship
+
+```php
+class Organization extends Model
+{
+    // All departments for this organization
+    public function departments()
+    {
+        return $this->hasMany(Department::class);
+    }
+}
+```
+
+#### Semantic (Filtered) Relationships
+
+```php
+class Organization extends Model
+{
+    // Only active departments
+    public function activeDepartments()
+    {
+        return $this->hasMany(Department::class)->where('status', 'active');
+    }
+
+    // Only HR departments
+    public function hrDepartments()
+    {
+        return $this->hasMany(Department::class)->where('type', 'hr');
+    }
+
+    // Departments created in the last 30 days
+    public function recentlyCreatedDepartments()
+    {
+        return $this->hasMany(Department::class)
+                    ->where('created_at', '>=', now()->subDays(30));
+    }
+}
+```
+
+### Usage
+
+```php
+$org = new Organization(1);
+
+// Get all departments
+$departments = $org->departments;
+
+// Get only active departments
+$active = $org->activeDepartments;
+
+// Get only HR departments
+$hr = $org->hrDepartments;
+
+// Get recently created departments
+$recent = $org->recentlyCreatedDepartments;
+```
+
+### Best Practices
+
+- **Name methods for intent:** Use clear, business-driven names like `activeDepartments()` or `financeDepartments()`.
+- **Centralize logic:** Place filtering logic in the relationship method, not scattered throughout your codebase.
+- **Document your methods:** Briefly describe what each semantic relationship returns.
+
+### When to Use Semantic Relationships
+
+- When you have common queries that filter or scope related data.
+- When business logic or access rules change over time.
+- When you want your code to be self-documenting and intention-revealing.
+
+---
+
+Semantic relationship methods are a powerful way to make your models expressive, maintainable, and aligned with your domain. By naming relationships for what they *mean*, not just what they *are*, you create a codebase that’s easier to read, reason about, and extend.

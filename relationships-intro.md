@@ -466,7 +466,7 @@ CREATE TABLE comments (
 );
 ```
 
-This universal naming makes your migrations and queries consistent, readable, and future-proof.
+This enforced naming approach makes your migrations and queries consistent, readable, and future-proof.
 
 > **Column Naming Convention:**
 > Lightpack requires you to name your polymorphic columns as `morph_id` and `morph_type`—no exceptions. This is a deliberate design choice. To avoid awkward column names like `commentable_id`, `articleable_id`, or `imageable_id`, Lightpack keeps it simple and predictable. Your schema is always easy to interpret, and your code stays clean.

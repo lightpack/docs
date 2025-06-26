@@ -298,6 +298,42 @@ $products->loadCount(['reviews' => function($q) {
 
 ---
 
+#### Eager Loading Polymorphic Parents with `loadMorphs`
+
+When working with a collection of polymorphic models (e.g., a list of comments where each comment could belong to a different parent type), eager loading the parent models efficiently can be challenging. Lightpack ORM provides the `loadMorphs()` method to solve this elegantly.
+
+##### Why use `loadMorphs()`?
+
+If you have a collection of comments, each referencing a different parent type (Post, Video, etc.), calling `$comments->load('parent')` is not sufficient, because the ORM needs to know all possible parent types to perform efficient eager loading. `loadMorphs()` lets you specify the possible types so Lightpack can fetch all parents in as few queries as possible.
+
+##### Example Usage
+
+Suppose you fetch a set of comments:
+
+```php
+$comments = Comment::query()->where('user_id', '=', 42)->all();
+```
+
+You can eager load their parents like this:
+
+```php
+$comments->loadMorphs([
+    Post::class,
+    Video::class,
+    Photo::class,
+]);
+```
+
+Now, for each comment, `$comment->parent` will be the appropriate parent model instance, and all parents will have been loaded efficiently—no N+1 problem!
+
+##### Best Practices & Notes
+- Always specify all possible parent types for the morph relation.
+- Use `loadMorphs` after fetching the collection (not on the query builder).
+- This method is especially useful for API responses or UI screens showing polymorphic lists with their parents.
+- If you omit a possible type, parents of that type will not be eager loaded and may trigger lazy loading (and N+1 queries) if accessed.
+
+---
+
 ## Lazy Loading
 
 If you access a relation property that hasn't been loaded yet, Lightpack ORM will transparently execute a new query to fetch it. This aspect is know as **lazy loading** relationships.

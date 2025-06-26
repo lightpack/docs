@@ -304,8 +304,6 @@ $products->loadCount(['reviews' => function($q) {
 - Once loaded, the relation result is **cached** on the model instance to avoid repeated queries.
 - Always prefer eager loading for predictable performance and to avoid N+1 query issues.
 
-**Tip:** To prevent accidentally introducing **`N+1`** query performance issues, enable strict mode on yur model.
-
 ---
 
 ## Strict Mode & Lazy Loading
@@ -359,3 +357,7 @@ $user->roles;
 // Whitelisted lazy relation
 $user->profile; // OK
 ```
+
+> **Tip:** To prevent accidentally introducing **`N+1`** query performance issues, enable strict mode on yur model.
+
+---

@@ -131,7 +131,11 @@ To count the associated relations, use `withCount()` method:
 $categories = Category::query()->withCount('products')->all();
 ```
 
-This will find all categories along with their products count which you can access using `{relation_key}_count` property on individual object. For example:
+> **How do you access the count?**
+>
+> When you use `withCount()` or `loadCount()` in Lightpack, the ORM automatically adds a `_count` suffix to the relation property. For example, after calling `withCount('comments')`, you can access the count using `$post->comments_count`. This naming convention keeps your model properties clear and intention-revealing.
+
+For example:
 
 ```php
 $categories = Category::query()->withCount('products')->all();

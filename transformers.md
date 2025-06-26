@@ -22,6 +22,57 @@ A transformer is a dedicated class that defines how a model (or collection of mo
 
 ## Defining a Transformer
 
+---
+
+The `transform()` method on any model is the canonical way to convert it to an array for API or view output. This method:
+
+- Looks up the transformer class from the model’s `$transformer` property.
+- If `$transformer` is a string, it instantiates that transformer.
+- If `$transformer` is an array, it expects a `context` key in the options array (e.g., `'api'`, `'view'`) and selects the transformer for that context.
+- If no transformer is defined, or the context is invalid, it throws a clear, descriptive exception.
+
+### Examples
+```php
+// Single transformer
+class User extends Model {
+    protected $transformer = UserTransformer::class;
+}
+
+// Multiple contexts
+class Product extends Model {
+    protected $transformer = [
+        'api' => ProductApiTransformer::class,
+        'view' => ProductViewTransformer::class,
+    ];
+}
+
+// Usage
+$user = new User(1);
+$userArray = $user->transform(); // Uses UserTransformer
+
+$product = new Product(1);
+$productApi = $product->transform(['context' => 'api']);
+$productView = $product->transform(['context' => 'view']);
+```
+
+#### Passing Fields and Includes
+You can pass `fields` and `includes` options to control the output:
+```php
+$user->transform([
+    'fields' => ['self' => ['name', 'email']],
+    'includes' => ['profile', 'roles'],
+]);
+```
+These options are forwarded to the transformer instance and determine which fields and relations are included in the output.
+
+#### Error Handling
+- If you call `transform()` on a model without a transformer, you get:
+  `No transformer defined for model: User`
+- If you provide an invalid context:
+  `Invalid transformer context 'admin' for Product. Available contexts: api, view`
+
+---
+
 A transformer is a PHP class that extends `Lightpack\Database\Lucid\Transformer` and implements a `data($model)` method. This method returns an array representation of the model, controlling which fields are exposed and how relations are included.
 
 ### Basic Transformer Example
@@ -250,7 +301,8 @@ If an invalid context is provided, a clear exception is thrown listing available
 
 ## Error Handling & Robustness
 - If you include a non-existent relation, it is simply ignored in the output.
-- If you specify an invalid context, a clear error is thrown with available contexts listed.
+- If you call `transform()` on a model without a transformer, you get a clear exception: `No transformer defined for model: ModelClass`.
+- If you specify an invalid context, a descriptive exception is thrown: `Invalid transformer context 'admin' for ModelClass. Available contexts: api, view`.
 - Null or missing relations are output as empty arrays or omitted, never causing errors.
 
 ---

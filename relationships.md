@@ -1,204 +1,304 @@
-# Relationships
+# ORM Relationships
 
-Relationships provide a simple way to query related data from multiple
-tables. Think of <code>joins</code> based queries when associating multiple tables together.
+## Introduction
 
-<p class="tip">Lucid ORM not only makes it easy to associate multiple tables together, but is
-also very performant.</p>
+![Order UI and Entity Diagram](_media/orm/orm-order-items-ui-prototype.svg)
 
-Let us consider three tables for example: <code>products</code>, <code>options</code>, <code>seo</code>.
 
-<table>
-    <tr>
-        <td class="token title important">products</td>
-        <td>id</td>
-        <td>title</td>
-    </tr>
-</table>
-<table>
-    <tr>
-        <td class="token title important">options</td>
-        <td>id</td>
-        <td>product_id</td>
-        <td>name</td>
-        <td>color</td>
-    </tr>
-</table>
-<table>
-    <tr>
-        <td class="token title important">seo</td>
-        <td>id</td>
-        <td>product_id</td>
-        <td>meta_title</td>
-        <td>meta_description</td>
-    </tr>
-</table>
+ORMs turn the abstract relationships of your database into natural, intuitive code. By mapping database associations to model methods, you unlock the full power of relational data—without the pain of raw SQL joins.
 
-Let us consider that each product is allowed to have multiple options and only one meta seo
-record. 
+To set the context let's understand the diagram above. It shows a simplified version of an **order** screen on the left and associated table **entities** on the right. The **order** UI shows information about the associated `order`, `customer`, `order items`, and `payment` details.
 
-We can say that there is <code>one-to-one</code> relationship between products and seo table
-and <code>one-to-many</code> relationship between products and options table.
+### Data Modelling
 
-Before relating our tables we first need to define their models as shown below.
+Although the **order** UI shows all the information together on the screen, when modelling the database schema, you would consider normalized forms with:
 
-Fire these three model code generation commands from your terminal inside project root.
+* tables named `order`, `customer`, `product`, `order_item`, and `payment`. 
+* a foreign key column `customer_id` in the `order` table.
+* a foreign key column `order_id` in the `payment` table.
+* two foreign key columns `order_id` and `product_id` in the `order_item` table.
 
-```terminal
-php lucy create:model Seo --table=seo
-php lucy create:model Option --table=options
-php lucy create:model Product --table=products
+> Note: to uniquely identify the order and its related items, we need a table named `order_item` which stores references to the `order_id` and `product_id`. Such a table is often called a **pivot** or **junction** or **bridge** table.
+
+### Entity Associations
+
+When relating data models (**entities**) together, we may think in terms of **associations** or **relationships**. For example:
+
+* A `customer` has many `order`.
+* An `order` belongs to one `customer`.
+* An `order` has one `payment`.
+* A `payment` belongs to one `order`.
+* A `product` has many `order`.
+* An `order` has many `product`. 
+
+In **Relation Databases**, we introduce 4 main types of associations:
+
+* One to One
+* One to Many
+* Many to One
+* Many to Many
+
+![Association Types between Entities](_media/orm/rdbms-association-types.svg)
+
+
+### Association Types
+
+#### One to One (1:1)
+A **One to One** relationship means that each record in **Table A** is linked to one and only one record in **Table B**, and vice versa. 
+
+Think of it as a **passport** and a **person**: each person has one unique passport, and each passport belongs to one person.
+
+**Order Example:**
+- Each `order` has one `payment` record.
+- Each `payment` belongs to one `order`.
+
+**In Schema:**
+- `payment` table has a unique `order_id` column (foreign key).
+
+#### One to Many (1:N)
+A **One to Many** relationship means that a single record in **Table A** can be related to many records in **Table B**, but each record in **Table B** relates back to only one record in **Table A**. 
+
+Imagine a customer placing multiple orders: one customer, many orders.
+
+**Order Example:**
+- A `customer` can have many `orders`.
+- Each `order` belongs to one `customer`.
+
+**Schema:**
+- `order` table has a `customer_id` column (foreign key).
+
+#### Many to One (N:1)
+A **Many to One** relationship is simply the inverse of **One to Many**. Many records in **Table A** relate to a single record in **Table B**. 
+
+Think of students and schools: Many students can attend the same school, but each student is enrolled in only one school.
+
+**Order Example:**
+- Many `order_item` rows belong to one `order`.
+
+**Schema:**
+- `order_item` table has an `order_id` column (foreign key).
+
+#### Many to Many (N:M)
+A **Many to Many** relationship means that multiple records in **Table A** can relate to multiple records in **Table B**. This is typically implemented using a **junction** (**pivot**) table. 
+
+Think of products and orders: an order can have many products, and a product can appear in many orders.
+
+**Order Example:**
+- An `order` can have many `products` (through `order_item`).
+- A `product` can belong to many `orders` (through `order_item`).
+
+**Schema:**
+- `order_item` table has both `order_id` and `product_id` columns (foreign keys).
+
+> **Summary:**
+> - **One to One:** Each order has one payment.
+> - **One to Many:** One customer, many orders.
+> - **Many to One:** Many order items, one order.
+> - **Many to Many:** Many products in many orders, connected by order items.
+
+## Relationship Methods
+
+Now that you’ve seen how relationships are structured at the database level, let’s translate these concepts into the world of ORMs. While the database focuses on tables, foreign keys, and junction tables, an ORM lets you work with your data as rich, interconnected objects—making your code more expressive, maintainable, and closer to how you think about your domain.
+
+In an ORM, each type of database relationship is represented by a specific method or association on your model classes. Instead of writing SQL joins, you define these relationships once, and then access related data as if you were simply navigating object properties.
+
+### Has One
+
+![ORM One to One Association](_media/orm/orm-one-to-one-association.svg)
+
+Use the relationship method `hasOne()` to define **one to one** relationhsip between **order** and **payment** entity.
+
+```php
+class Order extends Model
+{
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'order_id');
+    }
+}
 ```
 
-It should have created three model classes inside `app/Models` folder. Now let us understand how to use relationships among these three models.
+Now to get the associated payment for an order, simply use the name of the **payment()** method on **Order** instance.
 
-## Has One
+```php
+/**
+ * Find order with id: 23
+ */
+$order = new Order(23);
 
-It represents the <code>one-to-one</code> relationship between two models. To relate our 
-<code>products</code> and <code>seo</code> table, define a method named <code>seo()</code>
-in the <code>product</code> model.
+/**
+ * Get the associated payment
+ */
+$order->payment;
+```
+
+Behind the scenes, the ORM intercepts the call to `$order->payment` and resolves the associated **Payment** instance.
+
+### Belongs To
+
+Use the relationship method **belongsTo()** to define the inverse of the **hasOne()** relationship.
+
+```php
+class Payment extends Model
+{
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
+}
+```
+
+Now this makes it possible to fetch the `Order` instance that the `Payment` belongs to.
+
+```php
+/**
+ * Find the payment with id: 101
+ */
+$payment = new Payment(101);
+
+/**
+* Get the associated order
+*/
+$payment->order;
+```
+
+### Has Many
+
+![ORM One to Many Association](_media/orm/orm-one-to-many-association.svg)
+
+Use the relationship method `hasMany()` to define a **one to many** relationship between the **customer** and **order** entities.
+
+```php
+class Customer extends Model
+{
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
+}
+```
+
+Now, to get all orders placed by a customer, simply use the name of the **orders()** method on a **Customer** instance.
+
+```php
+/**
+ * Find the customer with id: 7
+ */
+$customer = new Customer(7);
+
+/**
+ * Get all orders for this customer
+ */
+$orders = $customer->orders;
+```
+
+Behind the scenes, the ORM intercepts the call to `$customer->orders` and returns a collection of **Order** instances related to that customer.
+
+**Inverse of Has Many**
+
+You should not be surprised to know that `belongsTo()` also represents the inverse of `hasMany()`.
+
+```php
+class Order extends Model
+{
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+}
+```
+
+Now, you can fetch the `Customer` instance for a given `Order`:
+
+```php
+/**
+ * Find the order with id: 42
+ */
+$order = new Order(42);
+
+/**
+ * Get the customer who placed this order
+ */
+$customer = $order->customer;
+```
+
+### Many to Many
+
+![ORM Many to Many Association](_media/orm/orm-many-to-many-association.svg)
+
+Use the relationship method `pivot()` to define a **many to many** relationship between the **order** and **product** entities, using a pivot table (like `order_item`).
+
+```php
+class Order extends Model
+{
+    public function products()
+    {
+        return $this->pivot(Product::class, 'order_item', 'order_id', 'product_id');
+    }
+}
+```
+
+Now, to get all products in a given order, simply use the name of the **products()** method on an **Order** instance.
+
+```php
+/**
+ * Find the order with id: 12
+ */
+$order = new Order(12);
+
+/**
+ * Get all products in this order
+ */
+$products = $order->products;
+```
+
+Behind the scenes, the ORM joins the `orders`, `order_item`, and `products` tables to return all related **Product** instances for the order.
+
+**Inverse of Many to Many**
+
+Essentailly **many to many** relationship works both ways, so use the same relationship method on the **Product** model to access all orders that include a given product. 
 
 ```php
 class Product extends Model
 {
-    public function seo()
+    public function orders()
     {
-        return $this->hasOne(Seo::class, 'product_id');
+        return $this->pivot(Order::class, 'order_item', 'product_id', 'order_id');
     }
 }
 ```
 
-Now you can easily fetch seo details for a given product as its **property**:
+Now, you can fetch all orders that include a specific product:
 
 ```php
-// Find product seo data
-$product = new Product(23);
+/**
+ * Find the product with id: 99
+ */
+$product = new Product(99);
 
-// Access the values
-echo $product->seo->meta_title;
-echo $product->seo->meta_description;
+/**
+ * Get all orders that include this product
+ */
+$orders = $product->orders;
 ```
 
-It works because the <code>hasOne()</code> method actually joins the <code>products</code>
-table with <code>seo</code> table. It accepts the model name as first parameter and related 
-foreign key as the second parameter.
+---
 
-## Belongs To
+#### Attach Pivot Records
 
-It represent the inverse of <code>hasOne()</code> relationship method.
+To insert a pivot record, use `attach()` method. 
+* It creates new records to the pivot table,
+* ignores duplicates,
+* also supports inserting data for extra columns.
 
-To relate the <code>Seo</code> model with <code>Product</code> model, use <code>belongsTo()</code>
-method.
-
-```php
-class Seo extends Model
-{
-    public function product()
-    {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
-}
-```
-
-Now you can get the product for the given seo record using product as its property.
-
-```php
-// Get the product details
-$seo = new Seo(23);
-
-// Access the values
-echo $seo->product->name;
-echo $seo->product->color;
-```
-
-## Has Many
-
-It represents the <code>one-to-many</code> relationship between two models.
-
-```php
-class Product extends Model
-{
-    public function options()
-    {
-        return $this->hasMany(Option::class, 'product_id');
-    }
-}
-```
-
-Now you can fetch all options for a given product as its property.
-
-```php
-// Find product options
-$product = new Product(23);
-
-// Access each option
-foreach($product->options as $option) {
-    echo $option->name;
-    echo $option->value;
-}
-```
-
-### Inverse of Has Many
-
-You should not be surprised to know that <code>belongsTo()</code> also represents the
-inverse of <code>hasMany()</code>.
-
-```php
-class Option extends Model
-{
-    public function product()
-    {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
-}
-```
-
-Now you can access the product that belongs to an option as its property.
-
-```php
-$option = new Option(23);
-
-// Access product name
-echo $option->product->name
-```
-
-## Many to Many
-
-<code>Many to Many</code> relationships are often represented using a `junction` aka `pivot` table in the database. Managing data in `pivot` or `junction` table is often a pain. **Lightpack** provides an easy approach to manage pivot records to **insert**, **update**, **delete** and **fetch** data.
-
-Let us consider `users` and `roles` table. Considering that a user may have multiple roles and a role may belong to multiple
-users, there is a many-to-many relationship between `users` and `roles ` table. To represent this relationship, we need to
-have a third table `user_role` or `role_user`. This table is called a `junction` or `pivot` table.
-
-<table>
-    <tr>
-        <td class="token title important">users</td>
-        <td>id</td>
-        <td>name</td>
-    </tr>
-</table>
-
-<table>
-    <tr>
-        <td class="token title important">roles</td>
-        <td>id</td>
-        <td>name</td>
-    </tr>
-</table>
-
-<table>
-    <tr>
-        <td class="token title important">user_role</td>
-        <td>user_id</td>
-        <td>role_id</td>
-    </tr>
-</table>
-
-Lightpack supports `many-to-many` relationship using `pivot()` method. Simply define a method named `roles()` in the `User` model.
-
+Let's take **User** and **Role** models for example.
+ 
 ```php
 class User extends Model
 {
+    /**
+     * A user has many roles assigned.
+     */ 
     public function roles()
     {
         return $this->pivot(Role::class, 'user_role', 'user_id', 'role_id');
@@ -206,186 +306,277 @@ class User extends Model
 }
 ```
 
-Now you can access all the roles that a user may have as `$user->roles`.
+Now to assign new roles to the user:
 
 ```php
 $user = new User(23);
 
-foreach($user->roles as $role) {
-    echo $role->name;
-}
-```
-
-### Attach Pivot Records
-
-To insert a pivot record, use `attach()` method.
-
-```php
-$user = new User(23);
-
+// Attach a role to the user
 $user->roles()->attach(1);
-```
 
-You can also attach multiple values by pssing an array to `attach()` method.
-
-```php
-$user = new User(23);
-
+// Attach multiple roles together
 $user->roles()->attach([1, 2]);
+
+// Pass additional attributes in pivot table
+$user->roles()->attach([1, 2], [
+    'assigned_by' => $adminId,
+    'assigned_at' => now(),
+]);
 ```
 
-### Detach Pivot Records
+#### Detach Pivot Records
 
-To delete a pivot record, use `detach()` method.
+To delete a pivot record, use `detach()` method. It removes records in the pivot table, supporting extra columns as additional where filters.
 
 ```php
 $user = new User(23);
 
+// Remove role 1 for the user
 $user->roles()->detach(1);
-```
 
-You can also detach multiple values by passing an array to `detach()` method.
-
-```php
-$user = new User(23);
-
+// Remove multiple roles together
 $user->roles()->detach([1, 2]);
+
+// Remove roles 2 and 3 only if assigned_by matches
+$user->roles()->detach([2, 3], ['assigned_by' => $adminId]);
 ```
 
-### Sync Pivot Records
+#### Sync Pivot Records
 
-What is syncing pivot records? Here is an explanation:
+To update pivot records, use `sync()` method. What is syncing pivot records?
 
-- When you **attach** a new role to a user, it creates a new pivot record in the `user_role` table.
+- When you **attach** a new role to a user, it creates a new pivot record in the `user_role` table. It ignores passed duplicate IDs
 - When you **detach** a role from a user, it deletes the pivot record from the `user_role` table.
-- When you **sync** roles to a user, it will ensure that the user will have only the roles that are passed to the `sync()` method.
-
-To update pivot records, use `sync()` method.
+- But when you **sync** roles to a user, it will ensure that the user will have only the roles that are passed to the `sync()` method.
+- It also supports passing extra columns.
 
 ```php
 $user = new User(23);
 
-$user->roles()->sync([1, 2]);
+// Assign roles 1, 2, 3 to user, removing any others
+$user->roles()->sync([1, 2, 3]);
+
+// Sync with extra data (e.g., assigned_at timestamp)
+$user->roles()->sync([1, 2], ['assigned_at' => now()]);
 ```
 
-## Has Many Through
+Note that all `sync` operations are wrapped in a transaction:
+- If any part fails, the whole operation is rolled back.
+- Prevents partial updates and race conditions.
 
-Consider **categories**, **products**, and **orders** tables:
+### Through Relationships
 
-<table>
-    <tr>
-        <td class="token title important">categories</td>
-        <td>id</td>
-        <td>name</td>
-    </tr>
-</table>
+#### Has One
 
-<table>
-    <tr>
-        <td class="token title important">products</td>
-        <td>id</td>
-        <td>category_id</td>
-        <td>name</td>
-    </tr>
-</table>
+The `hasOneThrough()` relationship method lets you access a single, distant related record through an intermediate model. This is ideal for cases where you want to “reach through” one model to get a single related record from another.
 
-<table>
-    <tr>
-        <td class="token title important">orders</td>
-        <td>id</td>
-        <td>product_id</td>
-        <td>details</td>
-    </tr>
-</table>
+Consider this example:
 
-A **category** has many **products** and a **product** has many **orders**. 
+- A **patient** has one **appointment**
+- Each **appointment** has one **doctor**
+- A **patient** has one **doctor** _through_ their **appointment**
+- **patient** → **appointment** → **doctor**
 
-<p class="tip">We can find <b>orders</b> for a <b>category</b> through <b>products</b>.</p>
+This pattern allows you to fetch the doctor for a patient, even though the doctor is not directly linked to the patient, but is associated through the patient’s appointment.
 
-**Lightpack** supports `hasManyThrough()` method for the same. Consider these **models** described below:
+**Example: Patient, Appointment, Doctor**
 
 ```php
-class Product extends Model
+class Patient extends Model
 {
-    // ...
-}
-```
-
-```php
-class Order extends Model
-{
-    // ...
-}
-```
-
-```php
-class Category extends Model
-{
-    public function orders()
+    // Each patient has one doctor through their appointment
+    public function doctor()
     {
-        return $this->hasManyThrough(
-            Order::class, 
-            Product::class, 
-            'category_id', // Foreign key on the products table
-            'product_id' // Foreign key on the orders table...
-        );
+        return $this->hasOneThrough(Doctor::class, Appointment::class, 'patient_id', 'doctor_id');
     }
 }
 ```
 
-Now you can access orders in a category:
+Now you can easily fetch the doctor for a patient:
 
 ```php
-$category = new Category(23);
+$patient = new Patient(1);
+$doctor = $patient->doctor;
+```
 
-foreach($category->orders as $order) {
-    $order->id;
-    $order->details;
+Behind the scenes, Lightpack ORM joins the `patients`, `appointments`, and `doctors` tables to fetch the doctor for the patient’s appointment—no manual SQL or nested queries required.
+
+---
+
+#### Has Many
+
+The `hasManyThrough()` relationship method lets you access related records that are connected by an intermediate model. This is perfect for scenarios where you want to “reach through” one model to get to another.
+
+Consider this example:
+
+- An **author** *has many* **books**
+- Each **book** *has many* **reviews**
+- An **author** *has many* **reviews** _through_ their **books**
+-  **author** → **books** → **reviews**
+
+This means you can fetch all reviews for an author, even though reviews are not directly linked to the author, but come through the author’s books.
+
+```php
+class Author extends Model
+{
+    // One author has many reviews through books
+    public function reviews()
+    {
+        return $this->hasManyThrough(Review::class, Book::class, 'author_id', 'book_id');
+    }
 }
 ```
 
-## Conditional Relationship
-
-Suppose you want to find **products** with at least one **order**, use `has()` method. For example, below we query only those **products** that has at least one **order**.
+Now you can easily fetch associated **reviews**, 
 
 ```php
-$products = Product::query()->has('orders')->all();
+$author = new Author(1);
+$reviews = $author->reviews;
 ```
 
-The above is same as:
+Behind the scenes, Lightpack ORM joins the `authors`, `books`, and `reviews` tables to fetch all reviews for books written by that author—no manual SQL or nested loops required.
+
+---
+
+### Polymorphic Relationships
+
+#### Introduction
+
+Polymorphic relationships are a powerful feature that let a single model relate to more than one type of parent model—using a unified, elegant approach. In Lightpack ORM, this is implemented with confidence and clarity, so you can tackle real-world use cases like comments, media attachments, or user avatars without convoluted table structures.
+
+![Polymorphic Relationship Diagram](_media/orm/orm-polymorphic-relationships.svg)
+
+**Polymorphic Table Schema Example**
+
+Your polymorphic child table (e.g., `comments`) **must** have columns named exactly `morph_id` and `morph_type`:
+
+```sql
+CREATE TABLE comments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    morph_id INT NOT NULL,
+    morph_type VARCHAR(64) NOT NULL,
+    body TEXT,
+    created_at DATETIME,
+    updated_at DATETIME
+);
+```
+
+This enforced naming approach makes your migrations and queries consistent, readable, and future-proof.
+
+> **Column Naming Convention:**
+> Lightpack requires you to name your polymorphic columns as `morph_id` and `morph_type`—no exceptions. This is a deliberate design choice. To avoid awkward column names like `commentable_id`, `articleable_id`, or `imageable_id`, Lightpack keeps it simple and predictable. Your schema is always easy to interpret, and your code stays clean.
+
+---
+
+**When (Not) to Use Polymorphic Relations**
+
+Polymorphic relations are a pragmatic solution for flexible data models, but they come with tradeoffs:
+- **No DB-enforced FKs:** Integrity is enforced in application code only.
+- **Migration complexity:** Changing parent types later requires careful data handling.
+- **Query performance:** Can be less efficient than standard FKs for some workloads.
+
+**Bottom line:** If you require absolute referential integrity, avoid polymorphic relations—split your tables or redesign your schema. But if you need flexibility and can enforce integrity at the application level, Lightpack’s polymorphic support is robust, expressive, and easy to use.
+
+> **Referential Integrity Warning:**
+> Polymorphic relationships are not enforced by database-level foreign keys. The integrity is maintained by your application and ORM alone. If you need strict referential integrity, **avoid polymorphic patterns**—split your tables or redesign your schema. Use polymorphic relations only when flexibility outweighs the need for DB-enforced constraints.
+
+---
+
+Polymorphic relationships in Lightpack are designed to make your codebase more maintainable, not more confusing. Use them wisely, and you’ll unlock elegant solutions to complex data modeling challenges. Lets explore the polymorphic relationship methods available:
 
 ```php
-$products = Product::query()->has('orders', '>', 0)->all();
-// or
-$products = Product::query()->has('orders', '>=', 1)->all();
+morphOne()
+morphMany()
+morphTo()
 ```
 
-To fetch products with no orders:
+---
+
+#### Morph One
+
+For a one-to-one polymorphic relationship, such as a **User** having a single **Avatar**, use the `morphOne()` method to fetch related avatar model:
 
 ```php
-$products = Product::query()->has('orders', '=', 0)->all();
+class User extends Model
+{
+    public function avatar()
+    {
+        return $this->morphOne(Avatar::class);
+    }
+}
 ```
 
-To fetch products with at least **2** orders:
+Usage:
+```php
+$user = new User(42);
+$avatar = $user->avatar;
+```
+
+---
+
+#### Morph Many
+
+If you want each **Post**, **Photo**, or **Video** to have many comments, use the `morphMany()` method to fetch related comments model collection.
 
 ```php
-$products = Product::query()->has('orders', '>', 1)->all();
-// or
-$products = Product::query()->has('orders', '>=', 2)->all();
+class Post extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class);
+    }
+}
+
+class Photo extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class);
+    }
+}
+
+class Video extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class);
+    }
+}
 ```
 
-To fetch products with atmost **2** orders:
+Usage:
+```php
+$video = new Video(7);
+$comments = $video->comments; // All comments for this video
+```
+
+---
+
+
+#### Morph Inverse
+
+Use the method `morphTo()` to define the polymorphic inverse relation to fetch related parent model. 
+
+Suppose you want to fetch parent **Post**, **Photo**, or **Video** model for the **Comment** model:
 
 ```php
-$products = Product::query()->has('orders', '<', 3)->all();
-// or
-$products = Product::query()->has('orders', '<=', 2)->all();
+class Comment extends Model
+{
+    public function parent()
+    {
+        return $this->morphTo([
+            Post::class,
+            Photo::class,
+            Video::class,
+        ]);
+    }
+}
 ```
 
-You can even pass a callback as **4th** parameter to `has()` method to add more constraints on relationship. For example, suppose you want to fetch **products** with atleast **2 paid orders**.
-
+Now, given a comment, you can access its parent—no matter the type:
 ```php
-$products = Product::query()->has('orders', '>=', 2, function($q) {
-    $q->where('paid', '=', true);
-});
+$comment = new Comment(101);
+$parent = $comment->parent; // Could be a Post, Photo, or Video instance
 ```
+
+---

@@ -157,6 +157,67 @@ $productQuery = Product::query();
 
 Now you can access all the methods on [query builders](/query-builder). Below are some example for using query builder on a model.
 
+**Fetch all products**
+```php
+$products = Product::query()->all();
+```
+
+**Fetch all active products**
+```php
+$products = Product::query()->where('active', '=', '1')->all();
+```
+
+**Fetch products with matching ids**
+```php
+$products = Product::query()->whereIn('id', [1,2,3])->all();
+```
+
+**Fetch all products with at least one order**
+
+```php
+$products = Product::query()->has('orders')->all();
+```
+
+The above is same as:
+
+```php
+$products = Product::query()->has('orders', '>', 0)->all();
+// or
+$products = Product::query()->has('orders', '>=', 1)->all();
+```
+
+**Fetch products with no orders**
+
+```php
+$products = Product::query()->has('orders', '=', 0)->all();
+```
+
+**Fetch products with at least 2 orders**
+
+```php
+$products = Product::query()->has('orders', '>', 1)->all();
+// or
+$products = Product::query()->has('orders', '>=', 2)->all();
+```
+
+**Fetch products with atmost 2 orders**
+
+```php
+$products = Product::query()->has('orders', '<', 3)->all();
+// or
+$products = Product::query()->has('orders', '<=', 2)->all();
+```
+
+**Callbacks as query constraints**
+
+You can even pass a callback as **4th** parameter to `has()` method to add more constraints on relationship. For example, suppose you want to fetch **products** with atleast **2 paid orders**.
+
+```php
+$products = Product::query()->has('orders', '>=', 2, function($q) {
+    $q->where('paid', '=', true);
+});
+```
+
 ## Cast Into Array
 
 To convert loaded models into **array**, use `toArray()` method.
@@ -169,20 +230,4 @@ $productArray = $product->toArray();
 ```php
 $products = Product::query()->limit(10)->all();
 $productsArray = $products->toArray();
-```
-
-
-> Fetch all products
-```php
-$products = Product::query()->all();
-```
-
-> Fetch all active products
-```php
-$products = Product::query()->where('active', '=', '1')->all();
-```
-
-> Fetch products with matching ids
-```php
-$products = Product::query()->whereIn('id', [1,2,3])->all();
 ```

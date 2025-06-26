@@ -33,6 +33,8 @@
   * [Models](models.md)
   * [Relationships](relationships.md)
   * [Eager Loading](eager-loading.md)
+  * [Collections](collections.md)
+  * [Transformers](transformers.md)
 
 <!-- * Security -->
 

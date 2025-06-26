@@ -28,7 +28,27 @@ Once again let us consider these three tables:
     </tr>
 </table>
 
-Suppose we have **20** **products** and correspondingly **20 seo** records. To display `products` along with their `seo` details, you can simply loop each product:
+The association between these entities is:
+
+* A **product** has many **options**.
+* A **product** has one **seo** details.
+
+```php
+class Product extends Model
+{
+    public function options()
+    {
+        return $this->hasMany(Option::class, 'product_id');
+    }
+
+    public function seo()
+    {
+        return $this->hasOne(Seo::class, 'product_id');
+    }
+}
+```
+
+Now suppose we have **20** **products** and correspondingly **20 seo** records. To fetch `products` along with their `seo` details, you can simply loop each product:
 
 ```php
 $products = Product::query()->all();
@@ -41,7 +61,27 @@ foreach($products as $product) {
  The problem with above approach is that it will fire one query for fetching all `products`
 and **20** extra queries per product to fetch `seo` data. This will result in a total of `21 queries` which can be expensive.
 
-This is called `N+1` queries problem. To resolve such issue, the concept of **eager loading** exists that helps resolve `N+1` issues. 
+In raw SQL terms, following queries will be executed
+
+```sql
+-- 1 query to fetch all products
+SELECT * FROM products;
+
+-- 20 queries (one per product) to fetch seo details
+SELECT * FROM seo WHERE product_id = 1;
+SELECT * FROM seo WHERE product_id = 2;
+SELECT * FROM seo WHERE product_id = 3;
+-- ...and so on, up to product_id = 20
+SELECT * FROM seo WHERE product_id = 20;
+```
+
+**This is known as the classic `N+1` queries problem** 
+
+For every **product**, the ORM issues an additional query to fetch its related **SEO** record—quickly adding up to many unnecessary database calls and poor performance.
+
+**Eager loading** is a technique designed to solve this problem. Instead of fetching related data one record at a time, eager loading retrieves all the necessary related records in as few queries as possible—usually just one extra query, no matter how many products you have. This dramatically reduces database load and speeds up your application, especially when displaying lists of records with their associations.
+
+In Lightpack ORM, eager loading is simple and explicit, empowering you to write efficient, high-performance code with minimal effort.
 
 ### Single-ended Associations
 

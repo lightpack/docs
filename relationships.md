@@ -667,3 +667,7 @@ $recent = $org->recentlyCreatedDepartments;
 ---
 
 Semantic relationship methods are a powerful way to make your models expressive, maintainable, and aligned with your domain. By naming relationships for what they *mean*, not just what they *are*, you create a codebase that’s easier to read, reason about, and extend.
+
+**How does this work behind the scenes?**
+
+Each relationship method returns a query builder. This means you can chain and apply any filtering, sorting, or limiting logic directly within your relationship method. When you access a property like `$organization->activeDepartments`, the ORM executes the query as defined in your method—including all your custom conditions—and returns the result. This is why you can define as many semantic, filtered relationships as your application needs.

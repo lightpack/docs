@@ -75,7 +75,7 @@ SELECT * FROM seo WHERE product_id = 3;
 SELECT * FROM seo WHERE product_id = 20;
 ```
 
-**This is known as the classic `N+1` queries problem** 
+> **This is known as the classic `N+1` queries problem**. 
 
 For every **product**, the ORM issues an additional query to fetch its related **SEO** record—quickly adding up to many unnecessary database calls and poor performance.
 
@@ -141,20 +141,65 @@ foreach($categories as $category) {
 }
 ```
 
-You can also use `with()` and `withCount()` methods together. For example, this query finds all **projects** along with **manager** data and count of **tasks**.
+---
+
+### Quick Reference: Eager Loading Methods
+
+| Use When...                           | For fetching...     | Example Usage                                      |
+|---------------------------------------|---------------------|----------------------------------------------------|
+| `with()`                              | Related models      | `with('seo')`, `with('options')`                   |
+| `withCount()`                         | Count of relations  | `withCount('products')`                            |
+| `load()` (on collection)              | Related models      | `$products->load('seo')`                           |
+| `loadCount()` (on collection)         | Count of relations  | `$products->loadCount('options')`                  |
+
+- Use `with()` and `withCount()` when building your initial query.
+- Use `load()` and `loadCount()` to eager load associations on an **existing collection**.
+
+---
+
+### Eager Loading Callbacks: Filtering Related Data
+
+You can pass a callback to `with()`, `withCount()`, `load()`, or `loadCount()` to apply conditions to the eager loaded relationship. The callback receives the query builder for the related model, letting you add any filters you need.
 
 ```php
-$projects = ProjectModel::query()->with('manager')->withCount('tasks')->all();
+$projects = Project::query()->with(['tasks' => function($q) {
+    $q->where('status', '=', 'pending');
+}])->all();
 ```
 
-So you can loop each **projects** and access the **manager** data along with **task** count on each project:
+Here, only tasks with status `pending` are eager loaded for each project.
+
+You can also nest callbacks for deeper relations:
 
 ```php
-foreach($projects as $project) {
-    $manager = $project->manager; // manager
-    $tasksCount = $project->tasks_count; // tasks count
-}
+$projects = Project::query()->with([
+    'tasks' => function($q) {
+        $q->where('status', '=', 'pending');
+        $q->with(['comments' => function($q) {
+            $q->where('status', '=', 'approved');
+        }]);
+    }
+])->all();
 ```
+
+---
+
+### Chaining and Composing Eager Loading Methods
+
+Lightpack ORM allows you to fluently chain eager loading methods with other query builder methods for expressive, composable queries. For example:
+
+```php
+$projects = Project::query()
+    ->with('manager')
+    ->withCount('tasks')
+    ->where('status', '=', 'active')
+    ->orderBy('created_at', 'desc')
+    ->all();
+```
+
+This query fetches all active projects, eager loads the manager, counts the tasks, orders by creation date, and returns the results—all in a single, readable chain.
+
+---
 
 ### Nested Eager Loading
 

@@ -20,6 +20,40 @@ A transformer is a dedicated class that defines how a model (or collection of mo
 
 ---
 
+## How Transformer Resolution Works
+
+Transformers in Lightpack ORM are designed to make your API and view output flexible, maintainable, and secure. Understanding how the framework selects and applies transformers is key to leveraging their full power.
+
+### Resolution Process
+
+When you call the `transform()` method on a model (or collection), Lightpack follows a clear, predictable process:
+
+1. **Check the `$transformer` Property**
+   - This property tells Lightpack which transformer class to use.
+   - It can be:
+     - A **string**: The class name of a single transformer (e.g., `UserTransformer::class`).
+     - An **array**: A map of context names (like `'api'`, `'view'`) to transformer classes.
+     - `null`: No transformer defined—calling `transform()` will throw an error.
+
+2. **Context Support**
+   - If you want different outputs for different consumers (API, admin, etc.), use an array mapping contexts to transformer classes.
+   - At runtime, specify the context via the `context` option:
+   ```php
+   $product->transform(['context' => 'api']);
+   $product->transform(['context' => 'view']);
+   ```
+
+3. **Fields and Includes**
+   - You can pass a `fields` array to include only specific fields for the main model or for related models.
+   - You can pass an `includes` array to include related data (including nested relations).
+   - These options are forwarded directly to the transformer instance before transformation.
+   ```php
+   $user->transform([
+       'fields' => ['self' => ['name', 'email']],
+       'includes' => ['profile', 'roles'],
+   ]);
+   ```
+
 ## Defining a Transformer
 
 ---
@@ -64,12 +98,6 @@ $user->transform([
 ]);
 ```
 These options are forwarded to the transformer instance and determine which fields and relations are included in the output.
-
-#### Error Handling
-- If you call `transform()` on a model without a transformer, you get:
-  `No transformer defined for model: User`
-- If you provide an invalid context:
-  `Invalid transformer context 'admin' for Product. Available contexts: api, view`
 
 ---
 
@@ -304,52 +332,5 @@ If an invalid context is provided, a clear exception is thrown listing available
 - If you call `transform()` on a model without a transformer, you get a clear exception: `No transformer defined for model: ModelClass`.
 - If you specify an invalid context, a descriptive exception is thrown: `Invalid transformer context 'admin' for ModelClass. Available contexts: api, view`.
 - Null or missing relations are output as empty arrays or omitted, never causing errors.
-
----
-
-## Best Practices & Tips
-- **Always define a transformer for each model** that will be serialized for API or view output.
-- **Use field selection** to minimize payloads and control exposure of sensitive data.
-- **Use includes and nested includes** to fetch and structure related data as needed.
-- **Leverage contexts** to serve different consumers (API, admin, view) with tailored output.
-- **Transform collections and paginated data** directly for consistent, predictable API responses.
-- **Combine with eager loading** for best performance—transformers expect related data to be loaded efficiently.
-
----
-
-## Example: Full-featured Transformation
-
-```php
-$project = new Project(2);
-
-$result = (new ProjectTransformer)
-    ->includes(['tasks', 'tasks.comments'])
-    ->fields([
-        'self' => ['id', 'name'],
-        'tasks' => ['name'],
-        'tasks.comments' => ['content']
-    ])
-    ->transform($project);
-
-// Output:
-// [
-//   'id' => 2,
-//   'name' => 'Project 2',
-//   'tasks' => [
-//     [
-//       'name' => 'Task 2',
-//       'comments' => [
-//         ['content' => 'Comment 2'],
-//         ['content' => 'Comment 3']
-//       ]
-//     ],
-//     [ 'name' => 'Task 3', 'comments' => [] ]
-//   ]
-// ]
-```
-
----
-
-Lightpack model transformers give you precise, powerful, and expressive control over your model output, making it easy to build robust APIs and clean views with minimal effort.
 
 ---

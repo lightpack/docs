@@ -356,4 +356,4 @@ $user->profile; // OK
 - Once loaded, the relation result is **cached** on the model instance to avoid repeated queries.
 - Always prefer eager loading for predictable performance and to avoid N+1 query issues.
 
-**Tip:** Strict mode is highly recommended for APIs and large-scale applications where query predictability and performance are critical.
+**Tip:** To prevent accidentally introducing **`N+1`** query performance issues, enable strict mode on yur model.

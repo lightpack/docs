@@ -673,3 +673,81 @@ Semantic relationship methods are a powerful way to make your models expressive,
 Each relationship method returns a query builder. This means you can chain and apply any filtering, sorting, or limiting logic directly within your relationship method. When you access a property like `$organization->activeDepartments`, the ORM executes the query as defined in your method—including all your custom conditions—and returns the result. This is why you can define as many semantic, filtered relationships as your application needs.
 
 ---
+
+## Querying Relationships
+
+Understanding how to access and work with relationships is fundamental to getting the most out of your ORM. Lightpack ORM makes it intuitive to fetch related data, whether you want a single associated record or a whole collection of related models. This section will guide you through the mechanics, best practices, and the semantics of querying relationships. So let's reconsider the relation where an  **organization** has many **departments**.
+
+```php
+class Organization extends Model
+{
+    public function departments()
+    {
+        return $this->hasMany(Department::class, 'organization_id');
+    }
+}
+```
+
+### Accessing Relationships: Property vs. Method
+
+You can access a relationship in two ways:
+
+1. **As a dynamic property:**
+    ```php
+    $org = new Organization(1);
+    $departments = $org->departments; // Property access
+    ```
+    When you access a relationship as a property, the ORM automatically runs the underlying query and returns the related data. This is the most common and convenient way to fetch associated models.
+
+2. **As a method call:**
+    ```php
+    $query = $org->departments(); // Method access
+    ```
+    When you call the relationship as a method, you get the underlying query builder. This allows you to further customize the query before executing it:
+
+    ```php
+    $activeDepartments = $org->departments()->where('status', 'active')->all();
+    ```
+
+#### What Happens Behind the Scenes?
+
+- **Property Access:**
+    - The first time you access a relationship as a property (e.g., `$org->departments`), the ORM calls your relationship method, executes the query, and caches the result on the model instance. Subsequent accesses return the cached result.
+    - If the relationship returns multiple models (like `hasMany`), you receive a **Collection** of models. 
+    - If the relationship returns a single model (like `hasOne` or `belongsTo`), you get a single model instance or `null`.
+
+- **Method Access:**
+    - Calling the relationship as a method (e.g., `$org->departments()`) returns the query builder object. You can chain additional constraints, then call query methods like `all()`, `one()`, `count()`, etc., to execute the query and fetch results.
+    - This is ideal when you want to apply dynamic scopes or advanced queries on the relationship.
+
+### Collections: Working with Multiple Related Models
+
+When a relationship returns multiple models (such as with `hasMany`, `belongsToMany`, or `morphMany`), the result is a **Collection** object. This collection behaves much like an array, but is enhanced with a rich set of methods for filtering, mapping, reducing, and more. For example:
+
+```php
+$departments = $org->departments; // Collection of Department models
+
+// Get the names of all departments
+$names = $departments->column('name');
+
+// Filter only active departments
+$active = $departments->filter(function($dept) {
+    return $dept->status === 'active';
+});
+```
+
+Collections make it easy to work with groups of related models in a fluent, expressive way. You’ll find a full guide to collections in a dedicated section of this documentation.
+
+### Best Practices and Semantics
+
+- **Use property access** for simple, direct retrieval of related data.
+- **Use method access** when you need to customize the query.
+- **Remember caching:** Property access caches the result for the current model instance.
+- **Understand return types:** Relationships that return many models give you a **Collection**; those that return one give you a model instance or `null`.
+- **Be intention-revealing:** Name your relationship methods for clarity and business meaning.
+
+---
+
+By understanding the difference between property and method access, and how collections work, you’ll write more expressive, efficient, and maintainable code with Lightpack ORM. For a deep dive into collections and their powerful capabilities, see the [Collections documentation](collections.md).
+
+---

@@ -32,6 +32,7 @@
   * [Introduction](orm-introduction.md)
   * [Models](models.md)
   * [Relationships](relationships.md)
+  * [Relationships](relationships-intro.md)
   * [Eager Loading](eager-loading.md)
 
 <!-- * Security -->

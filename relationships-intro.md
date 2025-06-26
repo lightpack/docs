@@ -102,7 +102,7 @@ Now that you’ve seen how relationships are structured at the database level, l
 
 In an ORM, each type of database relationship is represented by a specific method or association on your model classes. Instead of writing SQL joins, you define these relationships once, and then access related data as if you were simply navigating object properties.
 
-### hasOne()
+### Has One
 
 ![ORM One to One Association](_media/orm/orm-one-to-one-association.svg)
 
@@ -134,7 +134,7 @@ $order->payment;
 
 Behind the scenes, the ORM intercepts the call to `$order->payment` and resolves the associated **Payment** instance.
 
-#### Inverse of hasOne()
+### Belongs To
 
 Use the relationship method **belongsTo()** to define the inverse of the **hasOne()** relationship.
 
@@ -162,7 +162,7 @@ $payment = new Payment(101);
 $payment->order;
 ```
 
-### hasMany()
+### Has Many
 
 ![ORM One to Many Association](_media/orm/orm-one-to-many-association.svg)
 
@@ -194,9 +194,9 @@ $orders = $customer->orders;
 
 Behind the scenes, the ORM intercepts the call to `$customer->orders` and returns a collection of **Order** instances related to that customer.
 
-#### Inverse of hasMany()
+**Inverse of Has Many**
 
-Use the relationship method `belongsTo()` to define the inverse of the **hasMany()** relationship.
+You should not be surprised to know that `belongsTo()` also represents the inverse of `hasMany()`.
 
 ```php
 class Order extends Model
@@ -222,7 +222,7 @@ $order = new Order(42);
 $customer = $order->customer;
 ```
 
-### pivot()
+### Many to Many
 
 ![ORM Many to Many Association](_media/orm/orm-many-to-many-association.svg)
 
@@ -254,9 +254,9 @@ $products = $order->products;
 
 Behind the scenes, the ORM joins the `orders`, `order_item`, and `products` tables to return all related **Product** instances for the order.
 
-#### Inverse of pivot()
+**Inverse of Many to Many**
 
-Essentailly **many to man**y relationship works both ways, so use the same relationship method on the **Product** model to access all orders that include a given product. 
+Essentailly **many to many** relationship works both ways, so use the same relationship method on the **Product** model to access all orders that include a given product. 
 
 ```php
 class Product extends Model
@@ -284,9 +284,63 @@ $orders = $product->orders;
 
 ---
 
-### hasOneThrough()
+#### Atatch Pivot Records
 
-The `hasOneThrough` relationship lets you access a single, distant related record through an intermediate model. This is ideal for cases where you want to “reach through” one model to get a single related record from another.
+To insert a pivot record, use `attach()` method.
+
+```php
+$user = new User(23);
+
+$user->roles()->attach(1);
+```
+
+You can also attach multiple values by pssing an array to `attach()` method.
+
+```php
+$user = new User(23);
+
+$user->roles()->attach([1, 2]);
+```
+
+#### Detach Pivot Records
+
+To delete a pivot record, use `detach()` method.
+
+```php
+$user = new User(23);
+
+$user->roles()->detach(1);
+```
+
+You can also detach multiple values by passing an array to `detach()` method.
+
+```php
+$user = new User(23);
+
+$user->roles()->detach([1, 2]);
+```
+
+#### Sync Pivot Records
+
+What is syncing pivot records? Here is an explanation:
+
+- When you **attach** a new role to a user, it creates a new pivot record in the `user_role` table.
+- When you **detach** a role from a user, it deletes the pivot record from the `user_role` table.
+- When you **sync** roles to a user, it will ensure that the user will have only the roles that are passed to the `sync()` method.
+
+To update pivot records, use `sync()` method.
+
+```php
+$user = new User(23);
+
+$user->roles()->sync([1, 2]);
+```
+
+### Through Relationships
+
+#### Has One
+
+The `hasOneThrough()` relationship method lets you access a single, distant related record through an intermediate model. This is ideal for cases where you want to “reach through” one model to get a single related record from another.
 
 Consider this example:
 
@@ -321,9 +375,9 @@ Behind the scenes, Lightpack ORM joins the `patients`, `appointments`, and `doct
 
 ---
 
-### hasManyThrough()
+#### Has Many
 
-The `hasManyThrough` relationship lets you access related records that are connected by an intermediate model. This is perfect for scenarios where you want to “reach through” one model to get to another.
+The `hasManyThrough()` relationship method lets you access related records that are connected by an intermediate model. This is perfect for scenarios where you want to “reach through” one model to get to another.
 
 Consider this example:
 
@@ -358,98 +412,11 @@ Behind the scenes, Lightpack ORM joins the `authors`, `books`, and `reviews` tab
 
 ### Polymorphic Relationships
 
+#### Introduction
+
 Polymorphic relationships are a powerful feature that let a single model relate to more than one type of parent model—using a unified, elegant approach. In Lightpack ORM, this is implemented with confidence and clarity, so you can tackle real-world use cases like comments, media attachments, or user avatars without convoluted table structures.
 
 ![Polymorphic Relationship Diagram](_media/orm/orm-polymorphic-relationships.svg)
-
----
-
-#### morphOne()
-
-For a one-to-one polymorphic relationship, such as a `User` having a single `Avatar`, use the **morhOne** method:
-
-```php
-class User extends Model
-{
-    public function avatar()
-    {
-        return $this->morphOne(Avatar::class);
-    }
-}
-```
-
-Usage:
-```php
-$user = new User(42);
-$avatar = $user->avatar;
-```
-
----
-
-#### morphMany()
-
-If you want each `Post`, `Photo`, or `Video` to have many comments, use the **morphMany** method to define it like this:
-
-```php
-class Post extends Model
-{
-    public function comments()
-    {
-        return $this->morphMany(Comment::class);
-    }
-}
-
-class Photo extends Model
-{
-    public function comments()
-    {
-        return $this->morphMany(Comment::class);
-    }
-}
-
-class Video extends Model
-{
-    public function comments()
-    {
-        return $this->morphMany(Comment::class);
-    }
-}
-```
-
-Usage:
-```php
-$video = new Video(7);
-$comments = $video->comments; // All comments for this video
-```
-
----
-
-
-#### morphTo()
-
-Suppose you want `Comment` to belong to either a `Post`, `Photo`, or `Video`. Use the method **morphTo** to define the polymorphic inverse relation:
-
-```php
-class Comment extends Model
-{
-    public function parent()
-    {
-        return $this->morphTo([
-            Post::class,
-            Photo::class,
-            Video::class,
-        ]);
-    }
-}
-```
-
-Now, given a comment, you can access its parent—no matter the type:
-```php
-$comment = new Comment(101);
-$parent = $comment->parent; // Could be a Post, Photo, or Video instance
-```
-
----
 
 **Polymorphic Table Schema Example**
 
@@ -487,6 +454,101 @@ Polymorphic relations are a pragmatic solution for flexible data models, but the
 
 ---
 
-Polymorphic relationships in Lightpack are designed to make your codebase more maintainable, not more confusing. Use them wisely, and you’ll unlock elegant solutions to complex data modeling challenges.
+Polymorphic relationships in Lightpack are designed to make your codebase more maintainable, not more confusing. Use them wisely, and you’ll unlock elegant solutions to complex data modeling challenges. Lets explore the polymorphic relationship methods available:
+
+```php
+morphOne()
+morphMany()
+morphTo()
+```
+
+---
+
+#### Morph One
+
+For a one-to-one polymorphic relationship, such as a **User** having a single **Avatar**, use the `morphOne()` method to fetch related avatar model:
+
+```php
+class User extends Model
+{
+    public function avatar()
+    {
+        return $this->morphOne(Avatar::class);
+    }
+}
+```
+
+Usage:
+```php
+$user = new User(42);
+$avatar = $user->avatar;
+```
+
+---
+
+#### Morph Many
+
+If you want each **Post**, **Photo**, or **Video** to have many comments, use the `morphMany()` method to fetch related comments model collection.
+
+```php
+class Post extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class);
+    }
+}
+
+class Photo extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class);
+    }
+}
+
+class Video extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class);
+    }
+}
+```
+
+Usage:
+```php
+$video = new Video(7);
+$comments = $video->comments; // All comments for this video
+```
+
+---
+
+
+#### Morph Inverse
+
+Use the method `morphTo()` to define the polymorphic inverse relation to fetch related parent model. 
+
+Suppose you want to fetch parent **Post**, **Photo**, or **Video** model for the **Comment** model:
+
+```php
+class Comment extends Model
+{
+    public function parent()
+    {
+        return $this->morphTo([
+            Post::class,
+            Photo::class,
+            Video::class,
+        ]);
+    }
+}
+```
+
+Now, given a comment, you can access its parent—no matter the type:
+```php
+$comment = new Comment(101);
+$parent = $comment->parent; // Could be a Post, Photo, or Video instance
+```
 
 ---

@@ -298,6 +298,16 @@ $products->loadCount(['reviews' => function($q) {
 
 ---
 
+### Lazy Loading
+
+- Accessing an undefined property that matches a relation method triggers lazy loading (unless strict mode is enabled).
+- Once loaded, the relation result is **cached** on the model instance to avoid repeated queries.
+- Always prefer eager loading for predictable performance and to avoid N+1 query issues.
+
+**Tip:** To prevent accidentally introducing **`N+1`** query performance issues, enable strict mode on yur model.
+
+---
+
 ## Strict Mode & Lazy Loading
 
 Preventing **`N+1`** query issues and ensuring predictable performance is a core principle in Lightpack ORM. While eager loading is the primary tool for fetching related data efficiently, Lightpack also offers **strict mode** for even greater safety and explicitness.
@@ -349,11 +359,3 @@ $user->roles;
 // Whitelisted lazy relation
 $user->profile; // OK
 ```
-
-### Lazy Loading and Caching
-
-- Accessing an undefined property that matches a relation method triggers lazy loading (unless strict mode is enabled).
-- Once loaded, the relation result is **cached** on the model instance to avoid repeated queries.
-- Always prefer eager loading for predictable performance and to avoid N+1 query issues.
-
-**Tip:** To prevent accidentally introducing **`N+1`** query performance issues, enable strict mode on yur model.

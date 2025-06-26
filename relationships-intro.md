@@ -286,55 +286,66 @@ $orders = $product->orders;
 
 #### Atatch Pivot Records
 
-To insert a pivot record, use `attach()` method.
+To insert a pivot record, use `attach()` method. 
+* It creates new records to the pivot table,
+* ignores duplicates,
+* also supports inserting data for extra columns.
 
 ```php
 $user = new User(23);
 
+// Attach a role to the user
 $user->roles()->attach(1);
-```
 
-You can also attach multiple values by pssing an array to `attach()` method.
-
-```php
-$user = new User(23);
-
+// Attach multiple roles together
 $user->roles()->attach([1, 2]);
+
+// Pass additional attributes in pivot table
+$user->roles()->attach([1, 2], [
+    'assigned_by' => $adminId,
+    'assigned_at' => now(),
+]);
 ```
 
 #### Detach Pivot Records
 
-To delete a pivot record, use `detach()` method.
+To delete a pivot record, use `detach()` method. It removse records in the pivot table, supporting extra columns as additional where filters.
 
 ```php
 $user = new User(23);
 
+// Remove role 1 for the user
 $user->roles()->detach(1);
-```
 
-You can also detach multiple values by passing an array to `detach()` method.
-
-```php
-$user = new User(23);
-
+// Remove multiple roles together
 $user->roles()->detach([1, 2]);
+
+// Remove roles 2 and 3 only if assigned_by matches
+$user->roles()->detach([2, 3], ['assigned_by' => $adminId]);
 ```
 
 #### Sync Pivot Records
 
-What is syncing pivot records? Here is an explanation:
+To update pivot records, use `sync()` method. What is syncing pivot records?
 
-- When you **attach** a new role to a user, it creates a new pivot record in the `user_role` table.
+- When you **attach** a new role to a user, it creates a new pivot record in the `user_role` table. It ignores passed duplicate IDs
 - When you **detach** a role from a user, it deletes the pivot record from the `user_role` table.
-- When you **sync** roles to a user, it will ensure that the user will have only the roles that are passed to the `sync()` method.
-
-To update pivot records, use `sync()` method.
+- But when you **sync** roles to a user, it will ensure that the user will have only the roles that are passed to the `sync()` method.
+- It also supports passing extra columns.
 
 ```php
 $user = new User(23);
 
-$user->roles()->sync([1, 2]);
+// Assign roles 1, 2, 3 to user, removing any others
+$user->roles()->sync([1, 2, 3]);
+
+// Sync with extra data (e.g., assigned_at timestamp)
+$user->roles()->sync([1, 2], ['assigned_at' => now()]);
 ```
+
+Note that all `sync` operations are wrapped in a transaction:
+- If any part fails, the whole operation is rolled back.
+- Prevents partial updates and race conditions.
 
 ### Through Relationships
 

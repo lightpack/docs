@@ -284,12 +284,29 @@ $orders = $product->orders;
 
 ---
 
-#### Atatch Pivot Records
+#### Attach Pivot Records
 
 To insert a pivot record, use `attach()` method. 
 * It creates new records to the pivot table,
 * ignores duplicates,
 * also supports inserting data for extra columns.
+
+Let's take **User** and **Role** models for example.
+ 
+```php
+class User extends Model
+{
+    /**
+     * A user has many roles assigned.
+     */ 
+    public function roles()
+    {
+        return $this->pivot(Role::class, 'user_role', 'user_id', 'role_id');
+    }
+}
+```
+
+Now to assign new roles to the user:
 
 ```php
 $user = new User(23);
@@ -309,7 +326,7 @@ $user->roles()->attach([1, 2], [
 
 #### Detach Pivot Records
 
-To delete a pivot record, use `detach()` method. It removse records in the pivot table, supporting extra columns as additional where filters.
+To delete a pivot record, use `detach()` method. It removes records in the pivot table, supporting extra columns as additional where filters.
 
 ```php
 $user = new User(23);

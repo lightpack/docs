@@ -145,6 +145,8 @@ $payload = $users->transform([
 ]);
 ```
 
+> **See also:** For advanced transformation options, custom field selection, relation includes, and best practices for API responses, refer to the [Transformers documentation](transformers.md).
+
 ## Array-like and JSON Behavior
 
 - **ArrayAccess:** You can use array syntax: `$users[0]`, `isset($users[3])`, etc.

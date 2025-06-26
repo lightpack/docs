@@ -96,15 +96,13 @@ Think of products and orders: an order can have many products, and a product can
 > - **Many to One:** Many order items, one order.
 > - **Many to Many:** Many products in many orders, connected by order items.
 
-## ORM Mapping
+## Relationship Methods
 
 Now that you’ve seen how relationships are structured at the database level, let’s translate these concepts into the world of ORMs. While the database focuses on tables, foreign keys, and junction tables, an ORM lets you work with your data as rich, interconnected objects—making your code more expressive, maintainable, and closer to how you think about your domain.
 
-### Relationship Methods
-
 In an ORM, each type of database relationship is represented by a specific method or association on your model classes. Instead of writing SQL joins, you define these relationships once, and then access related data as if you were simply navigating object properties.
 
-#### One to One
+### hasOne()
 
 ![ORM One to One Association](_media/orm/orm-one-to-one-association.svg)
 
@@ -136,7 +134,7 @@ $order->payment;
 
 Behind the scenes, the ORM intercepts the call to `$order->payment` and resolves the associated **Payment** instance.
 
-##### Inverse of hasOne()
+#### Inverse of hasOne()
 
 Use the relationship method **belongsTo()** to define the inverse of the **hasOne()** relationship.
 
@@ -164,7 +162,7 @@ $payment = new Payment(101);
 $payment->order;
 ```
 
-#### One to Many
+### hasMany()
 
 ![ORM One to Many Association](_media/orm/orm-one-to-many-association.svg)
 
@@ -196,7 +194,7 @@ $orders = $customer->orders;
 
 Behind the scenes, the ORM intercepts the call to `$customer->orders` and returns a collection of **Order** instances related to that customer.
 
-##### Inverse of hasMany()
+#### Inverse of hasMany()
 
 Use the relationship method `belongsTo()` to define the inverse of the **hasMany()** relationship.
 
@@ -224,7 +222,7 @@ $order = new Order(42);
 $customer = $order->customer;
 ```
 
-#### Many to Many
+### pivot()
 
 ![ORM Many to Many Association](_media/orm/orm-many-to-many-association.svg)
 
@@ -256,7 +254,7 @@ $products = $order->products;
 
 Behind the scenes, the ORM joins the `orders`, `order_item`, and `products` tables to return all related **Product** instances for the order.
 
-##### Inverse of pivot()
+#### Inverse of pivot()
 
 Essentailly **many to man**y relationship works both ways, so use the same relationship method on the **Product** model to access all orders that include a given product. 
 
@@ -286,12 +284,7 @@ $orders = $product->orders;
 
 ---
 
-### Advanced Relationships in Lightpack ORM
-
-Lightpack ORM provides advanced relationship methods for more complex scenarios, including multi-table joins and polymorphic associations. These help you model real-world data structures with elegance and minimal code.
-
-
-#### hasOneThrough
+### hasOneThrough()
 
 The `hasOneThrough` relationship lets you access a single, distant related record through an intermediate model. This is ideal for cases where you want to “reach through” one model to get a single related record from another.
 
@@ -328,7 +321,7 @@ Behind the scenes, Lightpack ORM joins the `patients`, `appointments`, and `doct
 
 ---
 
-#### hasManyThrough
+### hasManyThrough()
 
 The `hasManyThrough` relationship lets you access related records that are connected by an intermediate model. This is perfect for scenarios where you want to “reach through” one model to get to another.
 
@@ -363,7 +356,7 @@ Behind the scenes, Lightpack ORM joins the `authors`, `books`, and `reviews` tab
 
 ---
 
-#### Polymorphic Relationships
+### Polymorphic Relationships
 
 Polymorphic relationships are a powerful feature that let a single model relate to more than one type of parent model—using a unified, elegant approach. In Lightpack ORM, this is implemented with confidence and clarity, so you can tackle real-world use cases like comments, media attachments, or user avatars without convoluted table structures.
 
@@ -371,9 +364,31 @@ Polymorphic relationships are a powerful feature that let a single model relate 
 
 ---
 
-##### morphMany (Polymorphic Many)
+#### morphOne()
 
-If you want each `Post`, `Photo`, or `Video` to have many comments, define it like this:
+For a one-to-one polymorphic relationship, such as a `User` having a single `Avatar`, use the **morhOne** method:
+
+```php
+class User extends Model
+{
+    public function avatar()
+    {
+        return $this->morphOne(Avatar::class);
+    }
+}
+```
+
+Usage:
+```php
+$user = new User(42);
+$avatar = $user->avatar;
+```
+
+---
+
+#### morphMany()
+
+If you want each `Post`, `Photo`, or `Video` to have many comments, use the **morphMany** method to define it like this:
 
 ```php
 class Post extends Model
@@ -409,31 +424,10 @@ $comments = $video->comments; // All comments for this video
 
 ---
 
-##### morphOne (Polymorphic One)
 
-For a one-to-one polymorphic relationship, such as a `User` having a single `Avatar`:
+#### morphTo()
 
-```php
-class User extends Model
-{
-    public function avatar()
-    {
-        return $this->morphOne(Avatar::class);
-    }
-}
-```
-
-Usage:
-```php
-$user = new User(42);
-$avatar = $user->avatar;
-```
-
----
-
-##### morphTo (Polymorphic Inverse)
-
-Suppose you want `Comment` to belong to either a `Post`, `Photo`, or `Video`. Define the inverse like this:
+Suppose you want `Comment` to belong to either a `Post`, `Photo`, or `Video`. Use the method **morphTo** to define the polymorphic inverse relation:
 
 ```php
 class Comment extends Model

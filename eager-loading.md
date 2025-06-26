@@ -360,7 +360,7 @@ protected $allowedLazyRelations = ['profile', 'roles'];
 
 ### How It Works
 - Accessing a relation that was not eager loaded or whitelisted throws an exception.
-- Only relations included in `with`, `load`, or `allowedLazyRelations` can be accessed without error.
+- Only eager loaded relations or whitelisted `allowedLazyRelations` can be accessed without error.
 - This ensures all relation access is explicit and safe for large-scale or API use.
 
 ### Example: Strict Mode in Action

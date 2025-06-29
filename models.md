@@ -55,28 +55,12 @@ methods to deal with records in your `products` table.
 
 Once the model class is defined, performing **CRUD** operations per single database record becomes very easy. You do not need to manually wire-up raw SQL queries for:
 
-* reading an existing record, 
-* inserting a new record, 
-* update an existing record, 
-* or delete an existing record.
+- **(C)** creating a new record, 
+- **(R)** reading an existing record, 
+- **(U)** update an existing record, 
+- **(D)** or delete an existing record.
 
-### Read Data
-
-You can easily fetch a record by its **ID** when constructing the model. 
-
-```php
-$product = new Product(23);
-```
-
-Now you can access the column values as model properties.
-
-```php
-echo $product->title;
-echo $product->size;
-echo $product->color;
-```
-
-### Insert Data
+### Create
 
 Set properties on your new model and simply call the inherited method <code>insert()</code> to insert a new record.
 
@@ -127,7 +111,24 @@ $product->color = 'black'
 $product->insert();
 ```
 
-### Update Data
+
+### Read
+
+You can easily fetch a record by its **ID** when constructing the model. 
+
+```php
+$product = new Product(23);
+```
+
+Now you can access the column values as model properties.
+
+```php
+echo $product->title;
+echo $product->size;
+echo $product->color;
+```
+
+### Update
 
 Use the `update()` method to update an existing record in the database table. You first need to instantiate the model using the primary key of the table.
 
@@ -144,7 +145,7 @@ $product->color = 'brown'
 $product->update();
 ```
 
-### Delete Data
+### Delete
 
 Simply call the <code>delete()</code> passing it the id of the record to be deleted from database.
 

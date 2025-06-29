@@ -176,6 +176,44 @@ when you create a new product or update an existing product, you don't have to m
 
 <p class="tip">In order for timestamps to work, the table must have <b>created_at</b> and <b>updated_at</b> columns both.</p>
 
+## Refetch
+
+Sometimes, the data in your existing model instance can become outdated—especially if changes are made to the database from somewhere else in your application. 
+
+For an example, consider the scenario where the `timestamps` attribute in model class definition is set to **true**.
+
+```php
+class Product extends Model
+{
+    protected $timestamps = true;
+}
+```
+
+In such case, performing an `insert()` or `update()` automatically sets **created_at** and **updated_at** columns. This happens as a side-effect of the framework's ORM implementation as convinience. 
+
+```php
+/**
+ * created_at, updated_at column is set automatically
+ */
+$product->insert(); 
+```
+
+Now if you try this:
+
+```php
+echo $product->created_at; // null
+echo $product->updated_at; // null
+```
+
+To ensure you are working with the latest data for the current record from the database, you can call `refetch()` method.
+
+```php
+$product = $product->refetch();
+```
+
+`$product` will contain the latest data. If the record was deleted or the primary key isn’t set, it will return `null`.
+
+
 ## Query Builder
 
 **Lightpack** models are capable [query builders](/query-builder) too. 

@@ -2,7 +2,21 @@
 
 ![ORM Model Overview](_media/orm/orm-model-overview.svg)
 
-Models are classes that represent a table in your database. Consider that you have a `products` table in your database.
+## Introduction to ORM Models
+
+Lightpack ORM is an **Active Record** pattern implementation. Each model is a class directly corresponds to a single table in your database, and each instance of a model represents a single row within that table. The model not only holds data, but also encapsulates all the logic required to create, read, update, and delete (CRUD) records.
+
+**Key Fundamentals of Active Record:**
+- **Class-to-Table Mapping:** Each model class maps to a database table. For example, a `User` model maps to a `users` table.
+- **Object-to-Row Mapping:** Each model instance represents a row in the corresponding table.
+- **CRUD Operations:** Models provide methods to perform CRUD operations directly, such as `save()`, `find()`, `update()`, and `delete()`, without needing to write SQL manually.
+
+The following sections will explore how to define models, establish relationships, and utilize the full capabilities of the ORM system.
+
+---
+
+
+Consider that you have a `products` table in your database.
 
 ```table
 Table: products

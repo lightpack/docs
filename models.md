@@ -51,9 +51,18 @@ class Product extends Model
 Defining your model in this manner gives you access to a number of utility
 methods to deal with records in your `products` table.
 
-## Read Data
+## Performing CRUD
 
-You can easily find a record by its **ID** when constructing the model. 
+Once the model class is defined, performing **CRUD** operations per single database record becomes very easy. You do not need to manually wire-up raw SQL queries for:
+
+* reading an existing record, 
+* inserting a new record, 
+* update an existing record, 
+* or delete an existing record.
+
+### Read Data
+
+You can easily fetch a record by its **ID** when constructing the model. 
 
 ```php
 $product = new Product(23);
@@ -67,9 +76,9 @@ echo $product->size;
 echo $product->color;
 ```
 
-## Insert Data
+### Insert Data
 
-Set properties on your new model and simply call the inherited method <code>save()</code> to insert a new record.
+Set properties on your new model and simply call the inherited method <code>insert()</code> to insert a new record.
 
 ```php
 // Create the instance
@@ -80,10 +89,10 @@ $product->name = 'ACME Shoes';
 $product->size = 10;
 $product->color = 'black'
 
-// Save new product
-$product->save();
+// Create new product
+$product->insert();
 ```
-### Last Insert ID
+#### Last Insert ID
 
 If your table's primary key is an **auto-incrementing** field, you can get the last insert id:
 
@@ -91,42 +100,53 @@ If your table's primary key is an **auto-incrementing** field, you can get the l
 $product->lastInsertId();
 ```
 
-### Save and Refresh
-To insert a model and repopulate it with the newly created record, use `saveAndRefresh()` method:
+#### Manual Primary Key
+
+If your table's primary key is a **non auto-incrementing** field, you must override the inherited model attribute `autoIncrements` to false.
+
+```php
+class Product extends Model
+{
+    protected $autoIncrements = false;
+}
+```
+
+Now when calling `insert()` method, you must pass a unique primary key value for the new record to be created.
 
 ```php
 // Create the instance
 $product = new Product;
 
 // Set product properties
+$product->id = 'sku1000';
 $product->name = 'ACME Shoes';
 $product->size = 10;
 $product->color = 'black'
 
-// Save new product
-$product->saveAndRefresh();
+// Create new product
+$product->insert();
 ```
 
-## Update Data
+### Update Data
 
-Use the same `save()` method to update an existing record in the database table. You first need to instantiate the model using the primary key of the table.
+Use the `update()` method to update an existing record in the database table. You first need to instantiate the model using the primary key of the table.
 
 ```php
-// Get the product
+// Get an existing product having id: 23
 $product = new Product(23);
 
-// Set product properties 
+// Set product properties to update
 $product->name = 'ACME Footwear';
 $product->size = 11;
 $product->color = 'brown'
 
 // Update the product
-$product->save();
+$product->update();
 ```
 
-## Delete Data
+### Delete Data
 
-Simply call the <code>delete()</code> method.
+Simply call the <code>delete()</code> passing it the id of the record to be deleted from database.
 
 ```php
 (new Product)->delete(23);
@@ -136,7 +156,7 @@ If you already have an existing instance of model, you can call `delete()` metho
 
 ```php
 $product = new Product(23);
-$product->delete();
+$product->delete(); // passing id not required
 ```
 
 ## Timestamps

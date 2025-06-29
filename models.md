@@ -27,7 +27,7 @@ id, name, size, color, status
 
 Then you should define a `Product` model in <code>app/Models</code> folder.
 
-## Creating Model
+## Defining Model
 
 Fire this command to generate a model from your terminal inside your project root.
 
@@ -40,13 +40,10 @@ This should have created `Product` model in `app/Models` folder.
 ```php
 class Product extends Model
 {
-    /** @inheritDoc */
     protected $table = 'products';
 
-    /** @inheritDoc */
     protected $primaryKey = 'id';
 
-    /** @inheritDoc */
     protected $timestamps = false;
 }
 ```
@@ -62,7 +59,7 @@ You can easily find a record by its **ID** when constructing the model.
 $product = new Product(23);
 ```
 
-Now you can easily access the column values as model properties.
+Now you can access the column values as model properties.
 
 ```php
 echo $product->title;
@@ -72,8 +69,7 @@ echo $product->color;
 
 ## Insert Data
 
-Set properties on your new model and simply call the inherited method <code>save()</code> 
-to insert a new record.
+Set properties on your new model and simply call the inherited method <code>save()</code> to insert a new record.
 
 ```php
 // Create the instance
@@ -113,9 +109,7 @@ $product->saveAndRefresh();
 
 ## Update Data
 
-You can only update a record that exists in the database table, right? So you first need
-to <b>"find"</b> your model by passing the product **ID**. Rest of the steps is completely
-same as inserting data.
+Use the same `save()` method to update an existing record in the database table. You first need to instantiate the model using the primary key of the table.
 
 ```php
 // Get the product

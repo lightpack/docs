@@ -1,5 +1,7 @@
 # Models
 
+![ORM Model Overview](_media/orm/orm-model-overview.svg)
+
 Models are classes that represent a table in your database. Consider that you have a `products` table in your database.
 
 ```table

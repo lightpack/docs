@@ -286,6 +286,29 @@ $dirty = $user->getDirty(); // e.g., ['name', 'email']
 - Warn users before leaving a form with unsaved edits.
 - Highlight changed fields in a review step.
 
+### Example: Send Email Verification When Email Changes
+
+Suppose you want to automatically send an email verification request whenever a user updates their profile and changes their email address. With `isDirty('email')`, you can easily detect this:
+
+```php
+$user = new User(23);
+$user->name = 'John Doe';
+
+if ($user->isDirty('email')) { // false
+    $user->email_verified_at = null;
+}
+
+$user->update();
+
+if($user->email_verified_at == null) {
+    // send verification mail
+}
+```
+
+In above example, only user's name was changed, so while saving the profile, `$user->isDirty('email')` check will be false.This way, you only send the verification request if the email was actually updated—no need to compare values manually!
+
+> Once the `insert()` or `update()` method is called on the model instance, the ORM clears all the dirty attributes. So `isDirty()` method returns **false** and `getDirty()` method returns **empty** array after model persistence.
+
 ## Query Builder
 
 **Lightpack** models are capable [query builders](/query-builder) too. 

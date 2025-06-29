@@ -298,6 +298,7 @@ if ($user->isDirty('email')) { // false
     $user->email_verified_at = null;
 }
 
+// Update user changes
 $user->update();
 
 if($user->email_verified_at == null) {

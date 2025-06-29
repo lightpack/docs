@@ -245,16 +245,16 @@ If you try to clone a model that doesn’t exist in the database, you’ll get a
 
 ## Tracking Unsaved Changes
 
-When working with models, it’s common to check if you’ve made changes that haven’t been saved to the database yet. Lightpack models make this easy with two handy methods:
+When working with models, you may want to know if you’ve made changes that haven’t been saved to the database yet. Lightpack models make this easy with two helpful methods:
 
 | Method     | What it does                                 | Example Output      |
 |------------|----------------------------------------------|--------------------|
-| isDirty()  | Check if the model (or a field) has unsaved changes | true / false       |
-| getDirty() | List all fields that have unsaved changes    | ['name', 'email']  |
+| isDirty()  | Checks if the model (or a specific field) has unsaved changes | true / false       |
+| getDirty() | Lists all fields that have unsaved changes   | ['name', 'email']  |
 
 ### Why is this useful?
-- **Know when to save:** Only save if something actually changed.
-- **UI feedback:** Show users “You have unsaved changes.”
+- **Save only when needed:** Avoid unnecessary database writes by saving only if something has changed.
+- **User feedback:** Warn users if they try to leave a page with unsaved changes.
 - **Debugging:** See exactly what’s different before saving.
 
 ### How to use
@@ -282,8 +282,8 @@ $dirty = $user->getDirty(); // e.g., ['name', 'email']
 ```
 
 ### Typical scenarios
-- Prevent saving if nothing changed.
-- Warn users before leaving a form with unsaved edits.
+- Prevent saving when nothing has changed.
+- Warn users before they leave a form with unsaved edits.
 - Highlight changed fields in a review step.
 
 ### Example: Send Email Verification When Email Changes
@@ -306,7 +306,7 @@ if($user->email_verified_at == null) {
 }
 ```
 
-In above example, only user's name was changed, so while saving the profile, `$user->isDirty('email')` check will be false.This way, you only send the verification request if the email was actually updated—no need to compare values manually!
+In above example, only user's name was changed, so before saving the profile, `$user->isDirty('email')` check will be false.This way, you only send the verification request if the email was actually updated—no need to compare values manually!
 
 > Once the `insert()` or `update()` method is called on the model instance, the ORM clears all the dirty attributes. So `isDirty()` method returns **false** and `getDirty()` method returns **empty** array after model persistence.
 

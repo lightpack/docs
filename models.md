@@ -243,6 +243,49 @@ $copy = $original->clone(['description', 'price']);
 
 If you try to clone a model that doesn’t exist in the database, you’ll get an error.
 
+## Tracking Unsaved Changes
+
+When working with models, it’s common to check if you’ve made changes that haven’t been saved to the database yet. Lightpack models make this easy with two handy methods:
+
+| Method     | What it does                                 | Example Output      |
+|------------|----------------------------------------------|--------------------|
+| isDirty()  | Check if the model (or a field) has unsaved changes | true / false       |
+| getDirty() | List all fields that have unsaved changes    | ['name', 'email']  |
+
+### Why is this useful?
+- **Know when to save:** Only save if something actually changed.
+- **UI feedback:** Show users “You have unsaved changes.”
+- **Debugging:** See exactly what’s different before saving.
+
+### How to use
+
+**Check if anything changed:**
+```php
+$user = User::find(1);
+$user->name = 'New Name';
+
+if ($user->isDirty()) {
+    // There are unsaved changes
+}
+```
+
+**Check if a specific field changed:**
+```php
+if ($user->isDirty('name')) {
+    // The 'name' field was modified
+}
+```
+
+**See which fields changed:**
+```php
+$dirty = $user->getDirty(); // e.g., ['name', 'email']
+```
+
+### Typical scenarios
+- Prevent saving if nothing changed.
+- Warn users before leaving a form with unsaved edits.
+- Highlight changed fields in a review step.
+
 ## Query Builder
 
 **Lightpack** models are capable [query builders](/query-builder) too. 

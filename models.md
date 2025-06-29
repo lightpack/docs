@@ -1,6 +1,22 @@
 # Models
 
-Models are classes that represent a table in your database. Consider that you have a `products` table in your database.
+![ORM Model Overview](_media/orm/orm-model-overview.svg)
+
+## Introduction to ORM Models
+
+Lightpack ORM is an **Active Record** pattern implementation. Each model is a class directly corresponds to a single table in your database, and each instance of a model represents a single row within that table. The model not only holds data, but also encapsulates all the logic required to create, read, update, and delete (CRUD) records.
+
+**Key Fundamentals of Active Record:**
+- **Class-to-Table Mapping:** Each model class maps to a database table. For example, a `User` model maps to a `users` table.
+- **Object-to-Row Mapping:** Each model instance represents a row in the corresponding table.
+- **CRUD Operations:** Models provide methods to perform CRUD operations directly, such as `save()`, `find()`, `update()`, and `delete()`, without needing to write SQL manually.
+
+The following sections will explore how to define models, establish relationships, and utilize the full capabilities of the ORM system.
+
+---
+
+
+Consider that you have a `products` table in your database.
 
 ```table
 Table: products
@@ -11,7 +27,7 @@ id, name, size, color, status
 
 Then you should define a `Product` model in <code>app/Models</code> folder.
 
-## Creating Model
+## Defining Model
 
 Fire this command to generate a model from your terminal inside your project root.
 
@@ -24,13 +40,10 @@ This should have created `Product` model in `app/Models` folder.
 ```php
 class Product extends Model
 {
-    /** @inheritDoc */
     protected $table = 'products';
 
-    /** @inheritDoc */
     protected $primaryKey = 'id';
 
-    /** @inheritDoc */
     protected $timestamps = false;
 }
 ```
@@ -38,26 +51,18 @@ class Product extends Model
 Defining your model in this manner gives you access to a number of utility
 methods to deal with records in your `products` table.
 
-## Read Data
+## Performing CRUD
 
-You can easily find a record by its **ID** when constructing the model. 
+Once the model class is defined, performing **CRUD** operations per single database record becomes very easy. You do not need to manually wire-up raw SQL queries for:
 
-```php
-$product = new Product(23);
-```
+- **(C)** creating a new record, 
+- **(R)** reading an existing record, 
+- **(U)** update an existing record, 
+- **(D)** or delete an existing record.
 
-Now you can easily access the column values as model properties.
+### Create
 
-```php
-echo $product->title;
-echo $product->size;
-echo $product->color;
-```
-
-## Insert Data
-
-Set properties on your new model and simply call the inherited method <code>save()</code> 
-to insert a new record.
+Set properties on your new model and simply call the inherited method <code>insert()</code> to insert a new record.
 
 ```php
 // Create the instance
@@ -68,10 +73,10 @@ $product->name = 'ACME Shoes';
 $product->size = 10;
 $product->color = 'black'
 
-// Save new product
-$product->save();
+// Create new product
+$product->insert();
 ```
-### Last Insert ID
+#### Last Insert ID
 
 If your table's primary key is an **auto-incrementing** field, you can get the last insert id:
 
@@ -79,44 +84,70 @@ If your table's primary key is an **auto-incrementing** field, you can get the l
 $product->lastInsertId();
 ```
 
-### Save and Refresh
-To insert a model and repopulate it with the newly created record, use `saveAndRefresh()` method:
+#### Manual Primary Key
+
+If your table's primary key is a **non auto-incrementing** field, you must override the inherited model attribute `autoIncrements` to false.
+
+```php
+class Product extends Model
+{
+    protected $autoIncrements = false;
+}
+```
+
+Now when calling `insert()` method, you must pass a unique primary key value for the new record to be created.
 
 ```php
 // Create the instance
 $product = new Product;
 
 // Set product properties
+$product->id = 'sku1000';
 $product->name = 'ACME Shoes';
 $product->size = 10;
 $product->color = 'black'
 
-// Save new product
-$product->saveAndRefresh();
+// Create new product
+$product->insert();
 ```
 
-## Update Data
 
-You can only update a record that exists in the database table, right? So you first need
-to <b>"find"</b> your model by passing the product **ID**. Rest of the steps is completely
-same as inserting data.
+### Read
+
+You can easily fetch a record by its **ID** when constructing the model. 
 
 ```php
-// Get the product
+$product = new Product(23);
+```
+
+Now you can access the column values as model properties.
+
+```php
+echo $product->title;
+echo $product->size;
+echo $product->color;
+```
+
+### Update
+
+Use the `update()` method to update an existing record in the database table. You first need to instantiate the model using the primary key of the table.
+
+```php
+// Get an existing product having id: 23
 $product = new Product(23);
 
-// Set product properties 
+// Set product properties to update
 $product->name = 'ACME Footwear';
 $product->size = 11;
 $product->color = 'brown'
 
 // Update the product
-$product->save();
+$product->update();
 ```
 
-## Delete Data
+### Delete
 
-Simply call the <code>delete()</code> method.
+Simply call the <code>delete()</code> passing it the id of the record to be deleted from database.
 
 ```php
 (new Product)->delete(23);
@@ -126,7 +157,7 @@ If you already have an existing instance of model, you can call `delete()` metho
 
 ```php
 $product = new Product(23);
-$product->delete();
+$product->delete(); // passing id not required
 ```
 
 ## Timestamps
@@ -144,6 +175,140 @@ Setting `$timestamps` property to `true` automatically sets values for **created
 when you create a new product or update an existing product, you don't have to manually set values for these columns.
 
 <p class="tip">In order for timestamps to work, the table must have <b>created_at</b> and <b>updated_at</b> columns both.</p>
+
+## Refetch
+
+Sometimes, the data in your existing model instance can become outdated—especially if changes are made to the database from somewhere else in your application. 
+
+For an example, consider the scenario where the `timestamps` attribute in model class definition is set to **true**.
+
+```php
+class Product extends Model
+{
+    protected $timestamps = true;
+}
+```
+
+In such case, performing an `insert()` or `update()` automatically sets **created_at** and **updated_at** columns. This happens as a side-effect of the framework's ORM implementation as convinience. 
+
+```php
+/**
+ * created_at, updated_at column is set automatically
+ */
+$product->insert(); 
+```
+
+Now if you try this:
+
+```php
+echo $product->created_at; // null
+echo $product->updated_at; // null
+```
+
+To ensure you are working with the latest data for the current record from the database, you can call `refetch()` method.
+
+```php
+$product = $product->refetch();
+```
+
+`$product` will contain the latest data. If the record was deleted or the primary key isn’t set, it will return `null`.
+
+## Cloning a Model
+
+There may be times when you want to create a new record in your database that’s almost identical to an existing one—without re-entering all the data. The `clone` method makes this easy: it creates a new model instance with the same attribute values as the original, but leaves out the primary key and timestamps, so you can safely save it as a new record.
+
+This is especially useful for duplicating templates, copying products, or quickly creating similar entries.
+
+**How it works:**  
+- The new instance copies all attributes from the original, except for the primary key (`id`), `created_at`, and `updated_at` fields.
+- You can also specify additional fields to exclude if needed.
+- You can only clone an existing record (one that already exists in the database).
+
+**Example:**  
+Let’s say you want to duplicate a product but change its name:
+
+```php
+$original = new Product(23); // Load an existing product
+$copy = $original->clone();  // Create a new instance with the same data
+
+$copy->name = 'New Product Name';
+$copy->insert(); // Save as a new product in the database
+```
+
+If you want to exclude more fields from being copied, just pass them as an array:
+
+```php
+$copy = $original->clone(['description', 'price']);
+```
+
+If you try to clone a model that doesn’t exist in the database, you’ll get an error.
+
+## Tracking Unsaved Changes
+
+When working with models, you may want to know if you’ve made changes that haven’t been saved to the database yet. Lightpack models make this easy with two helpful methods:
+
+| Method     | What it does                                 | Example Output      |
+|------------|----------------------------------------------|--------------------|
+| isDirty()  | Checks if the model (or a specific field) has unsaved changes | true / false       |
+| getDirty() | Lists all fields that have unsaved changes   | ['name', 'email']  |
+
+### Why is this useful?
+- **Save only when needed:** Avoid unnecessary database writes by saving only if something has changed.
+- **User feedback:** Warn users if they try to leave a page with unsaved changes.
+- **Debugging:** See exactly what’s different before saving.
+
+### How to use
+
+**Check if anything changed:**
+```php
+$user = User::find(1);
+$user->name = 'New Name';
+
+if ($user->isDirty()) {
+    // There are unsaved changes
+}
+```
+
+**Check if a specific field changed:**
+```php
+if ($user->isDirty('name')) {
+    // The 'name' field was modified
+}
+```
+
+**See which fields changed:**
+```php
+$dirty = $user->getDirty(); // e.g., ['name', 'email']
+```
+
+### Typical scenarios
+- Prevent saving when nothing has changed.
+- Warn users before they leave a form with unsaved edits.
+- Highlight changed fields in a review step.
+
+### Example: Send Email Verification When Email Changes
+
+Suppose you want to automatically send an email verification request whenever a user updates their profile and changes their email address. With `isDirty('email')`, you can easily detect this:
+
+```php
+$user = new User(23);
+$user->name = 'John Doe';
+
+if ($user->isDirty('email')) { // false
+    $user->email_verified_at = null;
+}
+
+// Update user changes
+$user->update();
+
+if($user->email_verified_at == null) {
+    // send verification mail
+}
+```
+
+In above example, only user's name was changed, so before saving the profile, `$user->isDirty('email')` check will be false.This way, you only send the verification request if the email was actually updated—no need to compare values manually!
+
+> Once the `insert()` or `update()` method is called on the model instance, the ORM clears all the dirty attributes. So `isDirty()` method returns **false** and `getDirty()` method returns **empty** array after model persistence.
 
 ## Query Builder
 

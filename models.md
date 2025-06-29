@@ -213,6 +213,35 @@ $product = $product->refetch();
 
 `$product` will contain the latest data. If the record was deleted or the primary key isn’t set, it will return `null`.
 
+## Cloning a Model
+
+There may be times when you want to create a new record in your database that’s almost identical to an existing one—without re-entering all the data. The `clone` method makes this easy: it creates a new model instance with the same attribute values as the original, but leaves out the primary key and timestamps, so you can safely save it as a new record.
+
+This is especially useful for duplicating templates, copying products, or quickly creating similar entries.
+
+**How it works:**  
+- The new instance copies all attributes from the original, except for the primary key (`id`), `created_at`, and `updated_at` fields.
+- You can also specify additional fields to exclude if needed.
+- You can only clone an existing record (one that already exists in the database).
+
+**Example:**  
+Let’s say you want to duplicate a product but change its name:
+
+```php
+$original = new Product(23); // Load an existing product
+$copy = $original->clone();  // Create a new instance with the same data
+
+$copy->name = 'New Product Name';
+$copy->insert(); // Save as a new product in the database
+```
+
+If you want to exclude more fields from being copied, just pass them as an array:
+
+```php
+$copy = $original->clone(['description', 'price']);
+```
+
+If you try to clone a model that doesn’t exist in the database, you’ll get an error.
 
 ## Query Builder
 

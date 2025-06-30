@@ -710,3 +710,48 @@ $productArray = $product->toArray();
 $products = Product::query()->limit(10)->all();
 $productsArray = $products->toArray();
 ```
+
+## Hidden Attributes
+
+Sometimes, you don’t want certain model attributes to show up when converting your models to arrays or serializing them (for example, when returning JSON responses from an API). The `$hidden` property on your model lets you easily hide sensitive or irrelevant fields from output.
+
+### Why Hide Attributes?
+- **Security:** Prevent leaking sensitive data (like passwords, tokens, internal IDs).
+- **Clean Output:** Remove fields that aren’t needed by the client or API consumer.
+- **Consistency:** Ensure only intended data is exposed in API responses or exports.
+
+### How to Use
+
+Just define the `$hidden` property as an array of attribute names in your model:
+
+```php
+class User extends Model
+{
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'internal_notes',
+    ];
+}
+```
+
+Now, when you call `toArray()` or serialize the model (e.g., for JSON), these fields will be automatically excluded:
+
+```php
+$user = new User(23);
+$userArray = $user->toArray();
+// 'password', 'remember_token', and 'internal_notes' will NOT appear in $userArray
+```
+
+This also applies to collections:
+
+```php
+$users = User::query()->all();
+$usersArray = $users->toArray(); // All hidden fields are excluded for every user
+```
+
+### Best Practices
+- Always hide sensitive fields like passwords and tokens.
+- Only include what’s necessary for your consumers—less is more.
+- You can update `$hidden` dynamically if you have context-specific needs.
+- Hidden attributes only affect serialization/array conversion—they are still accessible in your code.

@@ -312,7 +312,7 @@ In above example, only user's name was changed, so before saving the profile, `$
 
 ## Query Builders
 
-**Lightpack** models are capable [query builders](/query-builder) too. 
+**Lightpack** models are capable [query builders](/db-query-builder) too. 
 
 To get a query builder on a model, call the static method `query()`:
 

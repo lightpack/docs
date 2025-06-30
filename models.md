@@ -213,6 +213,52 @@ $product = $product->refetch();
 
 `$product` will contain the latest data. If the record was deleted or the primary key isn’t set, it will return `null`.
 
+## Attribute Casting
+Attribute casting converts model attributes to a specific type (like integer, boolean, array, or date) when you access them, and back to a database-friendly format when you save them.
+
+### Supported Cast Types
+
+| Cast Type           | Description & Example                                      |
+|---------------------|-----------------------------------------------------------|
+| `int` / `integer`   | Converts to integer: `'123'` → `123`                      |
+| `float` / `double`  | Converts to float: `'123.45'` → `123.45`                  |
+| `string`            | Converts to string: `123` → `'123'`                       |
+| `bool` / `boolean`  | Converts to boolean: `'1'`, `1`, `'true'` → `true`        |
+| `array` / `json`    | Converts JSON string to array and vice versa               |
+| `date`              | Converts to `Y-m-d` string or from `DateTime`             |
+| `datetime`          | Converts to `DateTime` object or from string              |
+| `timestamp`         | Converts to Unix timestamp (int or string)                |
+
+### Example Usage
+
+Suppose your `User` model has a `settings` column that stores JSON, and a `created_at` column for timestamps. You can define casts like this:
+
+```php
+class User extends Model
+{
+    protected $casts = [
+        'settings'   => 'array',
+        'created_at' => 'datetime',
+        'active'     => 'bool',
+        'score'      => 'int',
+    ];
+}
+```
+
+Now, whenever you access `$user->settings`, you’ll get an array. `$user->created_at` will be a `DateTime` object, and so on.
+
+### How Casting Works
+- **On retrieval:** The value is converted to the specified type automatically.
+- **On save:** The value is converted back (uncast) to a database-friendly format.
+- **Null values:** Always remain `null`—no conversion is performed.
+- **Unknown types:** The value is returned as-is.
+
+### Common Pitfalls
+- Make sure your database column type matches the cast (e.g., don’t cast a string column as an array unless it stores JSON).
+- Invalid input (like malformed JSON or dates) will throw exceptions—handle these in your code if needed.
+
+---
+
 ## Cloning a Model
 
 There may be times when you want to create a new record in your database that’s almost identical to an existing one—without re-entering all the data. The `clone` method makes this easy: it creates a new model instance with the same attribute values as the original, but leaves out the primary key and timestamps, so you can safely save it as a new record.

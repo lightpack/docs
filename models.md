@@ -569,6 +569,134 @@ User::query()->update(['active' => 0]);
 
 ---
 
+## Model Hooks
+
+Lightpack Lucid models provide a set of protected lifecycle hook methods that allow you to inject custom logic before and after key persistence operations—**without global events, observers, or magic**. These hooks allow to extend model behavior making your code organized and discoverable
+
+### Available Hook Methods
+
+| Hook                | When is it called?                                 |
+|---------------------|---------------------------------------------------|
+| `beforeInsert()`    | Before `insert()`                                  |
+| `afterInsert()`     | After `insert()`                                   |
+| `beforeUpdate()`    | Before `update()`                                  |
+| `afterUpdate()`     | After `update()`                                   |
+| `beforeDelete()`    | Before `delete()`                                  |
+| `afterDelete()`     | After `delete()`                                   |
+
+---
+
+### How and Why to Use Hooks
+
+- **Validation:** Enforce business rules before DB changes
+- **Mutation:** Mutate/transform data (e.g., hash, normalize)
+- **Side Effects:** Trigger actions after DB changes (e.g., notifications, cache)
+- **Prevention:** Abort operation by throwing exceptions
+- **Audit/Logging:** Record changes or actions
+
+---
+
+### Practical Examples for Each Hook
+
+### beforeInsert()
+Called before inserting a new record:
+```php
+protected function beforeInsert()
+{
+    // Example: Hash password before storing
+    if (!empty($this->password)) {
+        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
+    }
+    // Example: Set created_by
+    $this->created_by = Auth::userId();
+}
+```
+
+### afterInsert()
+Called after inserting a new record:
+```php
+protected function afterInsert()
+{
+    // Example: Send welcome email
+    Mailer::sendWelcome($this->email);
+    // Example: Log creation
+    Audit::log('Created user: ' . $this->id);
+}
+```
+
+### beforeUpdate()
+Called before updating an existing record:
+```php
+protected function beforeUpdate()
+{
+    // Example: Prevent email change
+    if ($this->isDirty('email')) {
+        throw new \RuntimeException('Email cannot be changed.');
+    }
+    // Example: Update audit fields
+    $this->updated_by = Auth::userId();
+}
+```
+
+### afterUpdate()
+Called after updating an existing record:
+```php
+protected function afterUpdate()
+{
+    // Example: Invalidate related cache
+    Cache::forget('user_' . $this->id);
+    // Example: Notify admin
+    Notification::admin('User updated: ' . $this->id);
+}
+```
+
+### beforeDelete()
+Called before deleting a record:
+```php
+protected function beforeDelete()
+{
+    // Example: Prevent deletion if related orders exist
+    if ($this->orders()->count() > 0) {
+        throw new \RuntimeException('Cannot delete user with orders.');
+    }
+    // Example: Archive data
+    ArchiveService::archive($this->toArray());
+}
+```
+
+### afterDelete()
+Called after deleting a record:
+```php
+protected function afterDelete()
+{
+    // Example: Remove from search index
+    SearchIndex::remove('users', $this->id);
+    // Example: Log deletion
+    Audit::log('Deleted user: ' . $this->id);
+}
+```
+
+---
+
+### More Realistic Scenarios
+- **beforeInsert:** Generate a UUID PK for non-auto-increment models
+- **beforeUpdate:** Prevent updates to immutable fields (e.g., SSN)
+- **afterInsert:** Trigger onboarding workflow
+- **afterUpdate:** Sync changes to external APIs
+- **beforeDelete:** Clean up dependent child records (manual cascade)
+- **afterDelete:** Notify other systems of deletion
+
+---
+
+### Best Practices & Gotchas
+- **Keep hooks focused:** Only put logic relevant to that model and operation
+- **Throw exceptions to abort:** Any exception will prevent the operation
+- **Avoid heavy side effects in hooks:** For long-running tasks, consider queueing
+- **No global events:** All logic must be per-model, explicit, and discoverable
+- **Avoid external dependencies if possible:** Keep hooks self-contained
+
+---
+
 ## Cast Into Array
 
 To convert loaded models into **array**, use `toArray()` method.

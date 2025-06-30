@@ -753,5 +753,4 @@ $usersArray = $users->toArray(); // All hidden fields are excluded for every use
 ### Best Practices
 - Always hide sensitive fields like passwords and tokens.
 - Only include what’s necessary for your consumers—less is more.
-- You can update `$hidden` dynamically if you have context-specific needs.
 - Hidden attributes only affect serialization/array conversion—they are still accessible in your code.

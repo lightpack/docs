@@ -516,6 +516,59 @@ $users = User::filters([
 ])->all();
 ```
 
+## Global Scope
+
+Global scopes let you automatically apply common query conditions to all queries on a model—ensuring consistent, safe, and DRY data access. This is especially powerful for multi-tenant applications, or any scenario where you want to transparently filter data for all operations.
+
+### What is a Global Scope?
+A global scope is a rule that is always applied to every query for a model, whether you’re fetching, updating, deleting, or counting records. This helps prevent accidental data leaks and reduces repetitive code.
+
+### How to Define a Global Scope
+To add a global scope, override the inherited method `globalScope()` in your model. Any conditions you add to the `$query` will be automatically included in all queries for that model.
+
+**Example: Restricting by Tenant**
+
+```php
+class TenantModel extends Model
+{
+    public function globalScope(Query $query)
+    {
+        // Only show records for tenant_id = 1
+        $query->where('tenant_id', 1);
+    }
+}
+```
+Now, any model inheriting from `TenantModel` will always include `WHERE tenant_id = 1` in its queries—no matter what operation you perform.
+
+### Why is this Powerful?
+- **Security:** Prevents users from accessing data outside their tenant.
+- **Consistency:** No risk of forgetting to add the filter in a query.
+- **Simplicity:** Write your code as if you’re working with a single-tenant table.
+
+### Real-World Example
+Suppose you have a `users` table with a `tenant_id` column. By using a global scope, you can ensure that all queries only affect users belonging to the current tenant:
+
+```php
+class User extends TenantModel
+{
+    protected $table = 'users';
+}
+```
+Now, all of these will only affect tenant 1:
+```php
+User::query()->all();
+User::query()->count();
+User::query()->where('active', 1)->all();
+User::query()->delete();
+User::query()->update(['active' => 0]);
+```
+
+### Best Practices
+- Define global scopes for any rule that should always apply (tenancy, soft deletes, published status).
+- Be careful: global scopes apply to **all** queries, including destructive ones like `delete()` and `update()`.
+
+---
+
 ## Cast Into Array
 
 To convert loaded models into **array**, use `toArray()` method.

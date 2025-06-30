@@ -310,7 +310,7 @@ In above example, only user's name was changed, so before saving the profile, `$
 
 > Once the `insert()` or `update()` method is called on the model instance, the ORM clears all the dirty attributes. So `isDirty()` method returns **false** and `getDirty()` method returns **empty** array after model persistence.
 
-## Query Builder
+## Query Builders
 
 **Lightpack** models are capable [query builders](/query-builder) too. 
 
@@ -381,6 +381,93 @@ You can even pass a callback as **4th** parameter to `has()` method to add more 
 $products = Product::query()->has('orders', '>=', 2, function($q) {
     $q->where('paid', '=', true);
 });
+```
+
+## Query Filters
+
+Query filters provide a clean way to filter database records using model scopes. They allow you to encapsulate common query constraints and apply them dynamically.
+
+### Defining Filter Scopes
+
+Create filter scopes by adding methods prefixed with `scope` to your model:
+
+```php
+use Lightpack\Database\Lucid\Model;
+
+class User extends Model
+{
+    protected $table = 'users';
+
+    protected function scopeStatus($query, $value)
+    {
+        $query->where('status', $value);
+    }
+
+    protected function scopeType($query, $value)
+    {
+        $query->where('type', $value);
+    }
+
+    protected function scopeRole($query, $value)
+    {
+        $query->where('role', $value);
+    }
+
+    protected function scopeSearch($query, $value)
+    {
+        $query->where('name', 'LIKE', "%{$value}%");
+    }
+}
+```
+
+### Using Filters
+
+Apply filters using the static `filters()` method:
+
+```php
+// Fetch all users
+$users = User::filters(['status' => 'active'])->all();
+
+// Fetch active users
+$users = User::filters(['status' => 'active'])->all();
+
+// Combine multiple filters
+$users = User::filters([
+    'status' => 'active',
+    'role' => 'admin',
+    'search' => 'john'
+])->all();
+```
+
+### Type hint scope parameters
+
+You can type hint `$query` and `$value` parameters for better code clarity:
+
+```php
+class User extends Model
+{
+    protected function scopeTags(Query $query, array|string $value)
+    {
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        }
+        $query->whereIn('tag', $value);
+    }
+}
+```
+
+```php
+// Usage
+$users = User::filters([
+    'tags' => 'php,mysql,redis'
+])->all();
+```
+
+```php
+// Or with array
+$users = User::filters([
+    'tags' => ['php', 'mysql', 'redis']
+])->all();
 ```
 
 ## Cast Into Array

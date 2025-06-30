@@ -213,6 +213,52 @@ $product = $product->refetch();
 
 `$product` will contain the latest data. If the record was deleted or the primary key isn’t set, it will return `null`.
 
+## Attribute Casting
+Attribute casting converts model attributes to a specific type (like integer, boolean, array, or date) when you access them, and back to a database-friendly format when you save them.
+
+### Supported Cast Types
+
+| Cast Type           | Description & Example                                      |
+|---------------------|-----------------------------------------------------------|
+| `int` / `integer`   | Converts to integer: `'123'` → `123`                      |
+| `float` / `double`  | Converts to float: `'123.45'` → `123.45`                  |
+| `string`            | Converts to string: `123` → `'123'`                       |
+| `bool` / `boolean`  | Converts to boolean: `'1'`, `1`, `'true'` → `true`        |
+| `array` / `json`    | Converts JSON string to array and vice versa               |
+| `date`              | Converts to `Y-m-d` string or from `DateTime`             |
+| `datetime`          | Converts to `DateTime` object or from string              |
+| `timestamp`         | Converts to Unix timestamp (int or string)                |
+
+### Example Usage
+
+Suppose your `User` model has a `settings` column that stores JSON, and a `created_at` column for timestamps. You can define casts like this:
+
+```php
+class User extends Model
+{
+    protected $casts = [
+        'settings'   => 'array',
+        'created_at' => 'datetime',
+        'active'     => 'bool',
+        'score'      => 'int',
+    ];
+}
+```
+
+Now, whenever you access `$user->settings`, you’ll get an array. `$user->created_at` will be a `DateTime` object, and so on.
+
+### How Casting Works
+- **On retrieval:** The value is converted to the specified type automatically.
+- **On save:** The value is converted back (uncast) to a database-friendly format.
+- **Null values:** Always remain `null`—no conversion is performed.
+- **Unknown types:** The value is returned as-is.
+
+### Common Pitfalls
+- Make sure your database column type matches the cast (e.g., don’t cast a string column as an array unless it stores JSON).
+- Invalid input (like malformed JSON or dates) will throw exceptions—handle these in your code if needed.
+
+---
+
 ## Cloning a Model
 
 There may be times when you want to create a new record in your database that’s almost identical to an existing one—without re-entering all the data. The `clone` method makes this easy: it creates a new model instance with the same attribute values as the original, but leaves out the primary key and timestamps, so you can safely save it as a new record.
@@ -310,9 +356,9 @@ In above example, only user's name was changed, so before saving the profile, `$
 
 > Once the `insert()` or `update()` method is called on the model instance, the ORM clears all the dirty attributes. So `isDirty()` method returns **false** and `getDirty()` method returns **empty** array after model persistence.
 
-## Query Builder
+## Query Builders
 
-**Lightpack** models are capable [query builders](/query-builder) too. 
+**Lightpack** models are capable [query builders](/db-query-builder) too. 
 
 To get a query builder on a model, call the static method `query()`:
 
@@ -383,6 +429,274 @@ $products = Product::query()->has('orders', '>=', 2, function($q) {
 });
 ```
 
+## Query Filters
+
+Query filters provide a clean way to filter database records using model scopes. They allow you to encapsulate common query constraints and apply them dynamically.
+
+### Defining Filter Scopes
+
+Create filter scopes by adding methods prefixed with `scope` to your model:
+
+```php
+use Lightpack\Database\Lucid\Model;
+
+class User extends Model
+{
+    protected $table = 'users';
+
+    protected function scopeStatus($query, $value)
+    {
+        $query->where('status', $value);
+    }
+
+    protected function scopeType($query, $value)
+    {
+        $query->where('type', $value);
+    }
+
+    protected function scopeRole($query, $value)
+    {
+        $query->where('role', $value);
+    }
+
+    protected function scopeSearch($query, $value)
+    {
+        $query->where('name', 'LIKE', "%{$value}%");
+    }
+}
+```
+
+### Using Filters
+
+Apply filters using the static `filters()` method:
+
+```php
+// Fetch all users
+$users = User::filters(['status' => 'active'])->all();
+
+// Fetch active users
+$users = User::filters(['status' => 'active'])->all();
+
+// Combine multiple filters
+$users = User::filters([
+    'status' => 'active',
+    'role' => 'admin',
+    'search' => 'john'
+])->all();
+```
+
+### Type hint scope parameters
+
+You can type hint `$query` and `$value` parameters for better code clarity:
+
+```php
+class User extends Model
+{
+    protected function scopeTags(Query $query, array|string $value)
+    {
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        }
+        $query->whereIn('tag', $value);
+    }
+}
+```
+
+```php
+// Usage
+$users = User::filters([
+    'tags' => 'php,mysql,redis'
+])->all();
+```
+
+```php
+// Or with array
+$users = User::filters([
+    'tags' => ['php', 'mysql', 'redis']
+])->all();
+```
+
+## Global Scope
+
+Global scopes let you automatically apply common query conditions to all queries on a model—ensuring consistent, safe, and DRY data access. This is especially powerful for multi-tenant applications, or any scenario where you want to transparently filter data for all operations.
+
+### What is a Global Scope?
+A global scope is a rule that is always applied to every query for a model, whether you’re fetching, updating, deleting, or counting records. This helps prevent accidental data leaks and reduces repetitive code.
+
+### How to Define a Global Scope
+To add a global scope, override the inherited method `globalScope()` in your model. Any conditions you add to the `$query` will be automatically included in all queries for that model.
+
+**Example: Restricting by Tenant**
+
+```php
+class TenantModel extends Model
+{
+    public function globalScope(Query $query)
+    {
+        // Only show records for tenant_id = 1
+        $query->where('tenant_id', 1);
+    }
+}
+```
+Now, any model inheriting from `TenantModel` will always include `WHERE tenant_id = 1` in its queries—no matter what operation you perform.
+
+### Why is this Powerful?
+- **Security:** Prevents users from accessing data outside their tenant.
+- **Consistency:** No risk of forgetting to add the filter in a query.
+- **Simplicity:** Write your code as if you’re working with a single-tenant table.
+
+### Real-World Example
+Suppose you have a `users` table with a `tenant_id` column. By using a global scope, you can ensure that all queries only affect users belonging to the current tenant:
+
+```php
+class User extends TenantModel
+{
+    protected $table = 'users';
+}
+```
+Now, all of these will only affect tenant 1:
+```php
+User::query()->all();
+User::query()->count();
+User::query()->where('active', 1)->all();
+User::query()->delete();
+User::query()->update(['active' => 0]);
+```
+
+### Best Practices
+- Define global scopes for any rule that should always apply (tenancy, soft deletes, published status).
+- Be careful: global scopes apply to **all** queries, including destructive ones like `delete()` and `update()`.
+
+---
+
+## Model Hooks
+
+Lightpack Lucid models provide a set of protected lifecycle hook methods that allow you to inject custom logic before and after key persistence operations—**without global events, observers, or magic**. These hooks allow to extend model behavior making your code organized and discoverable
+
+### Available Hook Methods
+
+| Hook                | When is it called?                                 |
+|---------------------|---------------------------------------------------|
+| `beforeInsert()`    | Before `insert()`                                  |
+| `afterInsert()`     | After `insert()`                                   |
+| `beforeUpdate()`    | Before `update()`                                  |
+| `afterUpdate()`     | After `update()`                                   |
+| `beforeDelete()`    | Before `delete()`                                  |
+| `afterDelete()`     | After `delete()`                                   |
+
+---
+
+### How and Why to Use Hooks
+
+- **Validation:** Enforce business rules before DB changes
+- **Mutation:** Mutate/transform data (e.g., hash, normalize)
+- **Side Effects:** Trigger actions after DB changes (e.g., notifications, cache)
+- **Prevention:** Abort operation by throwing exceptions
+- **Audit/Logging:** Record changes or actions
+
+---
+
+### Practical Examples for Each Hook
+
+### beforeInsert()
+Called before inserting a new record:
+```php
+protected function beforeInsert()
+{
+    // Example: Hash password before storing
+    if (!empty($this->password)) {
+        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
+    }
+    // Example: Set created_by
+    $this->created_by = Auth::userId();
+}
+```
+
+### afterInsert()
+Called after inserting a new record:
+```php
+protected function afterInsert()
+{
+    // Example: Send welcome email
+    Mailer::sendWelcome($this->email);
+    // Example: Log creation
+    Audit::log('Created user: ' . $this->id);
+}
+```
+
+### beforeUpdate()
+Called before updating an existing record:
+```php
+protected function beforeUpdate()
+{
+    // Example: Prevent email change
+    if ($this->isDirty('email')) {
+        throw new \RuntimeException('Email cannot be changed.');
+    }
+    // Example: Update audit fields
+    $this->updated_by = Auth::userId();
+}
+```
+
+### afterUpdate()
+Called after updating an existing record:
+```php
+protected function afterUpdate()
+{
+    // Example: Invalidate related cache
+    Cache::forget('user_' . $this->id);
+    // Example: Notify admin
+    Notification::admin('User updated: ' . $this->id);
+}
+```
+
+### beforeDelete()
+Called before deleting a record:
+```php
+protected function beforeDelete()
+{
+    // Example: Prevent deletion if related orders exist
+    if ($this->orders()->count() > 0) {
+        throw new \RuntimeException('Cannot delete user with orders.');
+    }
+    // Example: Archive data
+    ArchiveService::archive($this->toArray());
+}
+```
+
+### afterDelete()
+Called after deleting a record:
+```php
+protected function afterDelete()
+{
+    // Example: Remove from search index
+    SearchIndex::remove('users', $this->id);
+    // Example: Log deletion
+    Audit::log('Deleted user: ' . $this->id);
+}
+```
+
+---
+
+### More Realistic Scenarios
+- **beforeInsert:** Generate a UUID PK for non-auto-increment models
+- **beforeUpdate:** Prevent updates to immutable fields (e.g., SSN)
+- **afterInsert:** Trigger onboarding workflow
+- **afterUpdate:** Sync changes to external APIs
+- **beforeDelete:** Clean up dependent child records (manual cascade)
+- **afterDelete:** Notify other systems of deletion
+
+---
+
+### Best Practices & Gotchas
+- **Keep hooks focused:** Only put logic relevant to that model and operation
+- **Throw exceptions to abort:** Any exception will prevent the operation
+- **Avoid heavy side effects in hooks:** For long-running tasks, consider queueing
+- **No global events:** All logic must be per-model, explicit, and discoverable
+- **Avoid external dependencies if possible:** Keep hooks self-contained
+
+---
+
 ## Cast Into Array
 
 To convert loaded models into **array**, use `toArray()` method.
@@ -396,3 +710,49 @@ $productArray = $product->toArray();
 $products = Product::query()->limit(10)->all();
 $productsArray = $products->toArray();
 ```
+
+## Hidden Attributes
+
+Sometimes, you don’t want certain model attributes to show up when converting your models to arrays or serializing them (for example, when returning JSON responses from an API). The `$hidden` property on your model lets you easily hide sensitive or irrelevant fields from output.
+
+### Why Hide Attributes?
+- **Security:** Prevent leaking sensitive data (like passwords, tokens, internal IDs).
+- **Clean Output:** Remove fields that aren’t needed by the client or API consumer.
+- **Consistency:** Ensure only intended data is exposed in API responses or exports.
+
+### How to Use
+
+Just define the `$hidden` property as an array of attribute names in your model:
+
+```php
+class User extends Model
+{
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'internal_notes',
+    ];
+}
+```
+
+Now, when you call `toArray()` or serialize the model (e.g., for JSON), these fields will be automatically excluded:
+
+```php
+$user = new User(23);
+$userArray = $user->toArray();
+// 'password', 'remember_token', and 'internal_notes' will NOT appear in $userArray
+```
+
+This also applies to collections:
+
+```php
+$users = User::query()->all();
+$usersArray = $users->toArray(); // All hidden fields are excluded for every user
+```
+
+### Best Practices
+- Always hide sensitive fields like passwords and tokens.
+- Only include what’s necessary for your consumers—less is more.
+- Hidden attributes only affect serialization/array conversion—they are still accessible in your code.
+
+---

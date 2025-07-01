@@ -1,11 +1,6 @@
 # Migrations
 
-**Lightpack** supports the concept of pure `SQL` based database migrations. So except learning a couple of migration commands to run, you need to learn nothing else.
-
-**The goal is to:**
-
-* reduce learning curve by not introducing another layer of classes and method APIs
-* and not make awesome tools like MySQL Workbench, Sequel Pro, phpMyAdmin, MyJetBrains DataGrip, etc. worthless.
+Migrations provide version control for your database schema. Each migration is a PHP class that represents a set of database changes.
 
 <p class="tip">Please note that only <b>MySQL/MariaDB</b> based migrations are supported.</p>
 
@@ -14,22 +9,19 @@
 To create a new migration file, fire this command from console:
 
 ```terminal
-php lucy create:migration add_products_table
+php lucy create:migration create_table_products
 ```
 
-This will create the migration file prefixed with current **datetime** in `database/migrations` folder. 
+This will create the migration file prefixed with current **datetime** in `database/migrations` folder. The migration class contains methods `up()` and `down()`.
 
-You can define all your migration scripts as pure **SQL** inside `up()` method. Any reverse operations should go inside `down()` folder.
+The `up()` method contains definition for required schema changes. Any reverse operations should go inside `down()` folder.
 
-```php
-public function up(): void
-{
-    $sql = "CREATE TABLE products (id int(11) NOT NULL AUTO_INCREMENT, `name` varchar(255) NOT NULL)";
+| Method  | Called when                | Purpose                                                                 | Common contents                                                   |
+|---------|----------------------------------|------------------------------------------------------------------------|-------------------------------------------------------------------|
+| `up()`  | When you apply or run a migration| Build or evolve the schema—create tables, add columns/indexes/constraints, insert seed data that must exist, rename things, etc. | DDL or data-manipulating statements written in the migration DSL   |
+| `down()`| When you roll back or undo a migration | Reverse whatever `up()` did so the database returns to its previous state | The inverse DDL (drop tables, remove columns, delete seed rows, etc.) |
 
-    // Execute the SQL 
-    $this->connection->query($sql);
-}
-```
+> In short: `up()` is the **do** part of a migration; `down()` is the **undo**.</p>
 
 ## Running Migrations
 

@@ -52,3 +52,187 @@ php lucy migrate:down --steps=2
 ```
 
 This will rollback last two **batches** of migrations if present.
+
+## Defining Migrations
+
+The following documentation details about creating/modifying tables, columns, and indexes.
+
+### Create Table
+
+```php
+public function up(): void
+{
+    $this->create('users', function(Table $table) {
+        $table->id();
+        $table->varchar('name');
+        $table->varchar('email');
+    });
+}
+
+public function down(): void
+{
+    $this->drop('users');
+}
+```
+
+### Rename Table
+
+```php
+public function up(): void
+{
+    $this->rename('users', 'customers');
+}
+
+public function down(): void
+{
+    $this->rename('customers', 'users');
+}
+```
+
+### Alter Table
+
+You may alter an existing table definition as documented below.
+
+#### Add New Columns
+
+```php
+public function up(): void
+{
+    $this->alter('users')->add(function(Table $table) {
+        $table->varchar('password');
+        $table->timestamps();
+    });
+}
+```
+
+#### Modify Existing Columns
+
+```php
+public function up(): void
+{
+    $this->alter('users')->modify(function(Table $table) {
+        $table->varchar('name', 55);
+    });
+}
+```
+
+#### Drop Existing Columns
+
+```php
+public function up(): void
+{
+    $this->alter('users')->modify(function(Table $table) {
+        $table->dropColumn('password');
+    });
+}
+```
+
+## Table Indexes
+
+**Supported Index Types**
+
+- **Primary Key**
+- **Unique Index**
+- **Regular Index**
+- **Fulltext Index**
+- **Spatial Index**
+
+---
+
+### primary() 
+
+- Defines a primary key (single or composite).
+- primary(string|array $columns)
+
+```php
+// single primary key
+$table->primary('id');
+
+// composite key
+$table->primary(['user_id', 'post_id']);
+```
+
+### dropPrimary()
+
+- Drops the primary key constraint (not the column).
+
+```php
+$table->dropPrimary();
+```
+
+### unique()
+
+- Adds a unique index to one or more columns.
+- `unique(string|array $columns, ?string $indexName = null)`
+- Supports custom unique index name.
+
+```php
+$table->unique('email');
+$table->unique(['first', 'last'], 'name_unique');
+```
+
+### dropUnique()
+
+- Drops a unique index by name.
+- `dropUnique(string $indexName)`
+
+```php
+$table->dropUnique('email');
+$table->unique(['first', 'last'], 'name_unique');
+```
+
+### index()
+- Adds a regular (non-unique) index.
+- `index(string|array $columns, ?string $indexName = null)`
+- Supports custom index name.
+
+```php
+$table->index('created_at');
+$table->index(['user_id', 'status'], 'user_status_idx');
+```
+
+### dropIndex()
+
+- Drops a regular index by name.
+- `dropIndex(string $indexName)`
+
+```php
+$this->dropIndex('user_status_idx');
+```
+
+### fulltext()
+- Adds a FULLTEXT index for text search.
+- `fulltext(string|array $columns, ?string $indexName = null)`
+- Supports custom full text index name.
+
+```php
+$table->fulltext('body');
+$table->fulltext(['title', 'body'], 'post_fulltext');
+```
+
+### dropFulltext() 
+- Drops one or more FULLTEXT indexes by name.
+- `dropFulltext(string ...$indexName)`
+
+```php
+$table->dropFulltext('post_fulltext');
+```
+
+### spatial()
+- Adds a SPATIAL index for GIS data.
+- `spatial(string|array $columns, ?string $indexName = null)`
+- Support passing custom spatial index name.
+
+```php
+$table->spatial('location', 'loc_idx');
+```
+
+### dropSpatial() 
+- Drops a SPATIAL index by name.
+- `dropSpatial(string $indexName)`
+
+```php
+$this->dropSpatial('loc_idx');
+```
+
+---

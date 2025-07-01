@@ -298,3 +298,31 @@ $this->dropSpatial('loc_idx');
 ```
 
 ---
+
+## Foreign Keys
+**Foreign keys** enforce referential integrity between tables, ensuring that a column (or set of columns) in one table matches the primary key or unique key in another table. Foreign keys can be defined during table creation or added/removed during schema alteration. The following document details the support for working with foreign keys.
+
+
+### foreignKey()
+
+- `foreignKey(string $column)`
+- Defines a foreign key on the specified column.
+
+```php
+$table->foreignKey('user_id')
+    ->references('id')
+    ->on('users')
+    ->onDelete('CASCADE') // CASCADE, SET NULL, RESTRICT
+    ->onUpdate('CASCADE'); // CASCADE, SET NULL, RESTRICT
+```
+
+### dropForeign()
+
+- `dropForeign(string ...$constraintNames)`
+- Drop one or more foreign key constraints by name.
+
+```php
+$table->dropForeign('users_user_id_foreign');
+```
+
+---

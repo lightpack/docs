@@ -178,7 +178,6 @@ All column methods return a `Column` object, allowing further configuration:
 - **nullable()**: Mark column as nullable
 - **attribute(string $attr)**: Add SQL attribute (e.g., UNSIGNED, ZEROFILL)
 - **increments()**: Set AUTO_INCREMENT
-- **enum(array $values)**: Set ENUM values
 
 **Example:**
 ```php

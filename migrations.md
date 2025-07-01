@@ -127,6 +127,68 @@ public function up(): void
 }
 ```
 
+## Table Columns
+
+This documentation summarizes all available column types, their configuration options, and usage patterns.
+
+### Numeric Columns
+- **id(string $name = 'id')**: BIGINT UNSIGNED AUTO_INCREMENT primary key
+- **int(string $name, int $length = 11)**: INT
+- **bigint(string $name)**: BIGINT
+- **smallint(string $name)**: SMALLINT
+- **tinyint(string $name)**: TINYINT
+- **decimal(string $name, int $precision = 10, int $scale = 2)**: DECIMAL(precision, scale)
+
+### String/Text Columns
+- **varchar(string $name, int $length = 255)**: VARCHAR(length)
+- **char(string $name, int $length = 255)**: CHAR(length)
+- **text(string $name)**: TEXT
+- **tinytext(string $name)**: TINYTEXT
+- **mediumtext(string $name)**: MEDIUMTEXT
+- **longtext(string $name)**: LONGTEXT
+- **enum(string $name, array $values)**: ENUM(values)
+- **json(string $name)**: JSON
+
+### Date/Time Columns
+- **date(string $name)**: DATE
+- **time(string $name)**: TIME
+- **datetime(string $name)**: DATETIME
+- **timestamp(string $name)**: TIMESTAMP
+- **year(string $name)**: YEAR
+- **createdAt()**: DATETIME, default CURRENT_TIMESTAMP
+- **updatedAt()**: DATETIME, nullable, ON UPDATE CURRENT_TIMESTAMP
+- **deletedAt()**: DATETIME, nullable
+- **timestamps()**: Adds both createdAt and updatedAt
+
+### Boolean/Bit Columns
+- **boolean(string $name, bool $default = false)**: TINYINT(1), default 0/1
+
+### Special Columns
+- **ipAddress(string $name = 'ip_address')**: VARCHAR(45) for IPv4/IPv6
+- **macAddress(string $name = 'mac_address')**: VARCHAR(17)
+- **morphs(string $name)**: Adds `{name}_id` (BIGINT UNSIGNED) and `{name}_type` (VARCHAR(255)) for polymorphic relations
+
+---
+
+### Column Configuration (via Column object)
+All column methods return a `Column` object, allowing further configuration:
+- **type(string $type)**: Set SQL type manually
+- **length(int $length)**: Set length for applicable types
+- **default(mixed $value)**: Set default value
+- **nullable()**: Mark column as nullable
+- **attribute(string $attr)**: Add SQL attribute (e.g., UNSIGNED, ZEROFILL)
+- **increments()**: Set AUTO_INCREMENT
+- **enum(array $values)**: Set ENUM values
+
+**Example:**
+```php
+$table->varchar('username', 50)->unique()->nullable();
+$table->int('age')->default(0);
+$table->decimal('balance', 12, 2)->attribute('UNSIGNED');
+```
+
+---
+
 ## Table Indexes
 
 **Supported Index Types**

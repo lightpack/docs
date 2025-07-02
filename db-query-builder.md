@@ -1,6 +1,6 @@
 # Query Builder
 
-While you can definitely write raw SQL queries, **Lightpack** does come with a sleek query builder that helps you build SQL queries programatically.
+While you can definitely write raw SQL queries, **Lightpack** does come with a fluent query builder that helps you build SQL queries programatically.
 
 It also helps you protect against SQL injection attacks by properly binding query parameters.
 
@@ -100,18 +100,25 @@ $products->where('id', '>', 2)->orWhere('color', '=', '#000')->all();
 
 ### Where in
 
+> **Note:** The SQL generated uses parentheses: `IN (?, ?, ?)`. If you pass an empty array to `whereIn`, the condition will always be false. If you pass an empty array to `whereNotIn`, the condition will always be true. You can also pass a closure for subqueries.
+
 ```php
-// SELECT * FROM products WHERE id IN ?, ?, ?
+// SELECT * FROM products WHERE id IN (?, ?, ?)
 $products->whereIn('id', [23, 24, 25])->all();
 
-// SELECT * FROM products WHERE id IN ?, ?, ? OR color IN ?, ?
+// SELECT * FROM products WHERE id IN (?, ?, ?) OR color IN (?, ?)
 $products->whereIn('id', [23, 24, 25])->orWhereIn('color', ['#000', '#FFF'])->all();
 
-// SELECT * FROM products WHERE id NOT IN ?, ?, ?
+// SELECT * FROM products WHERE id NOT IN (?, ?, ?)
 $products->whereNotIn('id', [23, 24, 25])->all();
 
-// SELECT * FROM products WHERE id NOT IN ?, ?, ? OR color NOT IN ?, ?
+// SELECT * FROM products WHERE id NOT IN (?, ?, ?) OR color NOT IN (?, ?)
 $products->whereNotIn('id', [23, 24, 25])->orWhereNotIn('color', ['#000', '#FFF'])->all();
+
+// Subquery support:
+$products->whereIn('size', function($q) {
+    $q->from('sizes')->select('id')->where('size', '=', 'XL');
+})->all();
 ```
 
 ### Where null
@@ -135,23 +142,25 @@ $products->whereNull('owner')->orWhereNotNull('weight')->all();
 
 ### Where between
 
+> **Note:** You must provide exactly two values for the between clause, e.g. `[min, max]`.
+
 ```php
-// SELECT * FROM products WHERE price BETWEEN ? AND ?';
+// SELECT * FROM products WHERE price BETWEEN ? AND ?
 $products->whereBetween('price', [10, 20]);
 ```
 
 ```php
-// SELECT * FROM products WHERE price NOT BETWEEN ? AND ?';
-$products->whereNotBetween('price', [10, 20])
+// SELECT * FROM products WHERE price NOT BETWEEN ? AND ?
+$products->whereNotBetween('price', [10, 20]);
 ```
 
 ```php
-// SELECT * FROM products WHERE price BETWEEN ? AND ? OR size BETWEEN ? AND ?';
+// SELECT * FROM products WHERE price BETWEEN ? AND ? OR size BETWEEN ? AND ?
 $products->whereBetween('price', [10, 20])->orWhereBetween('size', ['M', 'L']);
 ```
 
 ```php
-// SELECT * FROM products WHERE price NOT BETWEEN ? AND ? OR size NOT BETWEEN ? AND ?';
+// SELECT * FROM products WHERE price NOT BETWEEN ? AND ? OR size NOT BETWEEN ? AND ?
 $products->whereNotBetween('price', [10, 20])->orWhereNotBetween('size', ['M', 'L']);
 ```
 
@@ -195,7 +204,7 @@ $products->whereExists(function($q) {
 });
 ```
 
-To specify `WHERE NOT EXISTS` subquery, use `whereExists()` method.
+To specify `WHERE NOT EXISTS` subquery, use `whereNotExists()` method.
 
 ```php
 // SELECT * FROM products WHERE NOT EXISTS (SELECT id FROM sizes WHERE size = ?)';
@@ -316,7 +325,7 @@ You can also join multiple tables.
 $products->join('options', 'products.id', 'options.product_id')->all();
 
 // SELECT * FROM products LEFT JOIN options ON products.id = options.product_id
-$products->leftJoin('options', 'options.product_id', 'products.id')->all();
+$products->leftJoin('options', 'products.id', 'options.product_id')->all();
 
 // SELECT * FROM products RIGHT JOIN options ON products.id = options.product_id
 $products->rightJoin('options', 'products.id', 'options.product_id')->all();
@@ -327,7 +336,7 @@ $products->select('products.*', 'options.name AS oname')->join('options', 'produ
 
 ## Insert
 
-Use `insert()` method to insert a new record.
+Use `insert()` method to insert a new record. The method returns the result of the query execution (not the inserted ID).
 
 ```php
 // INSERT INTO products (name, color) VALUES (?, ?)
@@ -337,17 +346,34 @@ $products->insert([
 ]);
 ```
 
-### Bulk Insert
+> **Note:** To get the last inserted auto-incremented ID, use the `lastInsertId()` method after insert.
 
-Use `bulkInsert()` method to insert more than one record.
+### Get Last Inserted ID
+
+After performing an insert, you can retrieve the last auto-incremented primary key value using the `lastInsertId()` method. This is useful for working with records that use auto-incrementing IDs.
 
 ```php
-$products->bulkInsert([
+$products->insert([
+    'name' => 'Product 4',
+    'color' => '#CCC',
+]);
+
+$lastId = $products->lastInsertId(); // Gets the last inserted ID
+```
+
+### Bulk Insert
+
+To insert multiple records, simply pass an array of arrays to the `insert()` method:
+
+```php
+$products->insert([
     ['name' => 'Product 1', 'color' => '#CCC'],
     ['name' => 'Product 2', 'color' => '#DDD'],
     ['name' => 'Product 3', 'color' => '#EEE'],
 ]);
 ```
+
+> **Note:** There is no `bulkInsert()` method. Use `insert()` for both single and multiple records.
 
 ## Update
 
@@ -370,12 +396,40 @@ Use `delete()` method to delete an existing record.
 $products->where('id', '=', 23)->delete();
 ```
 
-# toSql
+
+## Insert Ignore
+
+Insert a record, ignoring errors (like duplicate keys):
+
+```php
+$products->insertIgnore([
+    'name' => 'Product 4',
+    'color' => '#CCC',
+]);
+```
+
+## Upsert (Insert or Update)
+
+Insert or update records using MySQL's ON DUPLICATE KEY UPDATE:
+
+```php
+$products->upsert(['id' => 1, 'name' => 'New Name']);
+```
+
+You can specify which columns to update:
+
+```php
+$products->upsert(['id' => 1, 'name' => 'New Name'], ['name']);
+```
+
+---
+
+## toSql
 
 To inspect the generated `SQL` query as string, use `toSql()` method:
 
 ```php
-$products->toSql(); // SELECT * FROM PRODUCTS
+$products->toSql(); // SELECT * FROM products
 ```
 
 Note that when you call `toSql()`, you cannot use methods that execute the query. For example, this is wrong to do:
@@ -387,3 +441,129 @@ $products->where('id', '=', 23)->delete()->toSql(); // Error
 ```
 
 This is because those methods actually execute the `SQL` query. So calling `toSql()` will result in error.
+
+---
+
+## Raw Select Expressions
+
+If you need to select expressions or use SQL functions, use `selectRaw()`:
+
+```php
+// SELECT id, SUM(score) AS total FROM products
+$products->select('id')->selectRaw('SUM(score) AS total')->groupBy('id')->all();
+```
+
+You can pass bindings as the second argument for safety:
+
+```php
+$products->selectRaw('SUM(score) > ? AS high', [100]);
+```
+
+---
+
+## HAVING Clauses
+
+You can filter groups after aggregation using `having()`, `orHaving()`, `havingRaw()`, and `orHavingRaw()`:
+
+```php
+// SELECT category, COUNT(*) FROM products GROUP BY category HAVING COUNT(*) > 5
+$products->select('category')->selectRaw('COUNT(*)')->groupBy('category')->having('COUNT(*)', '>', 5)->all();
+```
+
+For more complex conditions, use raw SQL:
+
+```php
+$products->havingRaw('SUM(score) > ?', [100]);
+```
+
+---
+
+## Row Locking
+
+You can lock rows for update using `forUpdate()`, or skip locked rows with `skipLocked()`:
+
+```php
+$products->where('stock', '>', 0)->forUpdate()->all();
+$products->where('stock', '>', 0)->forUpdate()->skipLocked()->all();
+```
+
+---
+
+## Full-Text Search
+
+To perform full-text search on indexed columns:
+
+```php
+// WHERE MATCH(title, body) AGAINST ('foo bar' IN BOOLEAN MODE)
+$products->search('foo bar', ['title', 'body'])->all();
+```
+
+---
+
+## Boolean Shortcuts
+
+You can quickly filter on boolean columns:
+
+```php
+$products->whereTrue('is_active')->all();
+$products->orWhereFalse('is_deleted')->all();
+```
+
+---
+
+## Conditional Query Building
+
+Add conditions only if a value is present:
+
+```php
+$products->whereIf($userId, 'user_id', '=', $userId);
+```
+
+Or, run a callback if a condition is true:
+
+```php
+$products->when($isAdmin, function($q) {
+    $q->where('is_admin', true);
+});
+```
+
+---
+
+## Increment/Decrement
+
+Atomically increase or decrease a column value:
+
+```php
+$products->where('id', 1)->increment('stock', 5);
+$products->where('id', 1)->decrement('stock', 2);
+```
+
+---
+
+## Chunked Processing
+
+Process large datasets in batches:
+
+```php
+$products->chunk(100, function($chunk) {
+    foreach ($chunk as $product) {
+        // Process each product
+    }
+});
+```
+
+---
+
+## Aggregates
+
+You can use the following methods for aggregate queries:
+
+```php
+$products->sum('price');
+$products->avg('rating');
+$products->min('created_at');
+$products->max('updated_at');
+$products->countBy('category'); // returns an array of objects with counts for each group
+```
+
+---

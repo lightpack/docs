@@ -1,7 +1,6 @@
 # Connecting to a Database
 
-Lightpack aims to provide a performant thin layer of abstraction for easing working with relational database systems. Currently it supports **PDO** adapters for
-<code>Sqlite</code> and <code>MySQL</code>.
+Lightpack aims to provide a performant thin layer of abstraction for easing working with relational database systems. Currently it supports **PDO** adapters for <code>MySQL/MariaDB</code>.
 
 ## Configuration
 
@@ -10,93 +9,113 @@ Before you get set with a databse connection, you need to configure database cre
 You can set your database credentials in the [environment configuration](/environments) file.
 
 ```php
-/**
- * MySQL settings.
- */
-
-'DB_HOST' => 'localhost',
-'DB_PORT' => 3306,
-'DB_NAME' => '',
-'DB_USER' => '',
-'DB_PSWD' => '',
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=mydb
+DB_USER=root
+DB_PSWD=password
 ``` 
 
 Now you can get a MySQL database connection by simply calling `db()` function.
 
-## Drivers
-
-You can change the database driver in [environment configuration](/environments) file. The two supported drivers are `mysql` and `sqlite`.
-
-```php
-DB_DRIVER => 'mysql';
-```
-
 ## Raw Queries
 
-<p class="tip">Once you make a database connection, you can start querying against it using the <a href="https://www.php.net/manual/en/book.pdo.php" target="_blank">PHP PDO APIs</a>.
-</p>
+> **Tip:** Once you have a database connection, you can use the full power of the [PHP PDO APIs](https://www.php.net/manual/en/book.pdo.php).
 
-You can execute raw queries against the database connection using the <code>query()</code>
-method.
+You can execute raw SQL queries using the `query()` method. This always returns a `PDOStatement` object, so you can fetch rows, columns, etc.
 
 ```php
-db()->query('SELECT * FROM products WHERE id = 23');
+// Select with no parameters
+$stmt = db()->query('SELECT * FROM products WHERE id = 23');
+$row = $stmt->fetch();
 ```
 
-This method optionally takes an array of parameters as its second argument to protect against SQL injection attacks.
+> **Warning:** Always use parameter binding to prevent SQL injection! Pass values as the second argument (positional or named):
 
 ```php
-db()->query('SELECT * FROM products WHERE price > ?', [500]);
+// Positional parameters
+$stmt = db()->query('SELECT * FROM products WHERE price > ?', [500]);
+
+// Named parameters
+$stmt = db()->query('SELECT * FROM products WHERE id = :id', [':id' => 23]);
 ```
 
-Ofcourse you can also use named **placeholders** in your raw queries.
+You can also execute **insert** and **update** queries safely:
 
 ```php
-db()->query('SELECT * FROM products WHERE id = :id', [':id' => 23]);
+// Insert
+$stmt = db()->query('INSERT INTO products (name) VALUES (?)', ['Blue Denim']);
+
+// Update
+$stmt = db()->query('UPDATE articles SET status = ?', ['active']);
 ```
 
-You can also execute **insert** and **update** raw queries.
-
-```php
-db()->query('INSERT INTO products (name) VALUES ('Blue Denim'));
-```
-
-```php
-db()->query('UPDATE articles SET status = ?', ['active']);
-```
+> **Note:** The `query()` method returns a `PDOStatement` for all query types. Use PDO methods like `fetch()`, `fetchAll()`, or `rowCount()` as needed.
 
 ## Query Logging
 
-To log queries that got executed throughout an application request lifecycle, there are two methods that you can work with.
+> **Tip:** Query logging helps you debug and optimize your database usage by recording every SQL statement executed during a request.
 
-To get all the query logs as an array:
+Query logging is **only enabled when `APP_DEBUG=true`** in your environment.
+
+To retrieve all query logs as an array:
 
 ```php
-db()->getQueryLogs();
+$logs = db()->getQueryLogs();
 ```
 
-To print all the query logs:
+To print all query logs (pretty-prints to output):
 
 ```php
 db()->printQueryLogs();
 ```
 
+To clear the query logs (useful in tests or long-running scripts):
+
+```php
+db()->clearQueryLogs();
+```
+
+> **Note:** Query logs contain both the SQL statements and their parameter bindings. This is invaluable for debugging complex issues or performance bottlenecks.
+
 ## Transactions
 
-To start a transaction, you can use the <code>begin()</code> method.
+Transactions can be managed manually or with a convenient closure-based API.
 
+### Manual Transaction Control
+
+Start a transaction:
 ```php
 db()->begin();
 ```
-
-To commit a transaction, you can use the <code>commit()</code> method.
-
+Commit the transaction:
 ```php
 db()->commit();
 ```
-
-To rollback a transaction, you can use the <code>rollback()</code> method.
-
+Rollback the transaction:
 ```php
 db()->rollback();
+```
+
+### Closure-Based Transactions (Recommended)
+
+The easiest and safest way to run multiple queries atomically is with a closure:
+
+```php
+db()->transaction(function() {
+    db()->query('INSERT INTO products (name) VALUES (?)', ['T-shirt']);
+    db()->query('UPDATE users SET points = points - 10 WHERE id = ?', [1]);
+});
+```
+
+- If the closure throws an exception, the transaction is automatically rolled back.
+- If it completes, the transaction is committed.
+
+> **Tip:** You can return a value from the closure:
+> 
+```php
+$id = db()->transaction(function() {
+    db()->query('INSERT INTO products (name) VALUES (?)', ['Sneakers']);
+    return db()->lastInsertId();
+});
 ```

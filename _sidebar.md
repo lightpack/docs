@@ -53,6 +53,7 @@
   * [Mails](mails.md)
   * [Jobs](jobs.md)
   * [Password](password.md)
+  * [Crypto](encryption-decryption-utils.md)
   * [Filters](filters.md)
   * [Events](events.md)
   * [Caching](caching.md)

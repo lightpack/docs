@@ -62,3 +62,5 @@
   * [CORS](cors.md)
   * [Console](console.md)
   * [Testing](testing.md)
+  * [Rate Limit](rate-limiter.md)
+  * [Mutex Lock](mutex-lock.md)

@@ -67,7 +67,7 @@ class DailyReportJob
 }
 ```
 
-### 2. Restricting multiple ongoing payment attempts
+### 2. Restricting multiple payment attempts
 
 Implement a simple concurrency limit for API endpoints:
 

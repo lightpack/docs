@@ -144,3 +144,5 @@ class ProductCache
    - Always handle lock acquisition failure gracefully
    - Have a fallback plan when locks can't be acquired
    - Log lock-related issues for monitoring
+
+---

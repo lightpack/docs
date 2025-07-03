@@ -19,15 +19,21 @@ The **rate limiter** uses Lightpack's Cache system, supporting multiple drivers:
 
 ## Usage
 
-Call the `attempt()` method of **Lightpack\Utils\Limiter** class instance to rate limit a block of code or an operation to be executed.
+You may create an instance of Lock class:
+
+```php
+$limiter = new Lightpack\Utils\Limiter;
+```
+
+Or simply call the utility function `limiter()` which returns **Limiter** class instance.
+
+Call the `attempt()` method of **Limiter** class instance to rate limit a block of code or an operation to be executed.
 
 `attempt(string $key, int $max, int $seconds)`
 
 - The **first** argument is a unique key (e.g., user ID, IP address, or action).
 - The **second** argument is the max allowed attempts.
 - The **third** argument is the window (in seconds).
-
-Lightpack does provider a simple utility function named `limiter()` which returns an instance of **Limiter** class.
 
 **Example:** Rate limit user login to max 5 attempts per 60 seconds
 

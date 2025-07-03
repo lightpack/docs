@@ -67,3 +67,4 @@
   * [Mutex Lock](mutex-lock.md)
   * [Process](process.md)
   * [Array](array-utils.md)
+  * [String](string-utils.md)

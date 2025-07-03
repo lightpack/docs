@@ -1,287 +1,213 @@
-# Moment
+# Moment Utility
 
-<p class="tip">Moment is Lightpack's date and time utility class.</p>
+Lightpack’s `Moment` is a simple, expressive, and timezone-aware date/time utility for PHP. It is designed for clarity, practical use, and covers the most common date/time operations with a clean, chainable API.
 
-Designing a highly flexible date and time library can be daunting. At the same time it can become so big that it may demand its own separate project.
+---
 
-**Moment** tries to solve some of the most frequently accessed date and time functions keeping its core dead simple and small. You can access an instance of Moment class by calling `moment()` function.
+## Key Features
+- **Timezone support:** Default is UTC, but you can set any valid timezone.
+- **Flexible formatting:** Chain `format()` to set output format for all methods.
+- **Chainable configuration:** All config methods return `$this` for fluent API.
+- **Safe error handling:** Throws `InvalidArgumentException` for invalid timezones or date strings.
+- **Comprehensive:** Covers today, tomorrow, yesterday, next/last weekday, month ends, travel, diff, human-friendly differences, and more.
+
+---
+
+## Instantiation & Timezone
+
+```php
+use Lightpack\Utils\Moment;
+
+$moment = new Moment(); // Defaults to UTC
+$moment = new Moment('Asia/Kolkata'); // Custom timezone
+
+// Change timezone on the fly (chainable)
+$moment->setTimezone('Europe/Berlin');
+
+// Get current timezone
+$tz = $moment->getTimezone(); // e.g. 'Europe/Berlin'
+```
+
+---
 
 ## Formatting
 
-By default, **Moment** returns **datetime** in `Y-m-d H:i:s` format. To change this, you can use `format()` method.
-
-For example:
-
-```php
-moment()->format('d-M, Y H:ia');
-```
-
-## Available methods:
-
-Below we document all the utilities provided by **Moment**.
-
-### now()
-
-To get current **datetime**:
+- Default output: `Y-m-d H:i:s`
+- Use `format()` to change output format (chainable)
 
 ```php
-moment()->now();
+$moment->format('d-M, Y H:ia')->now();
+$moment->format('Y/m/d')->today();
 ```
 
-You can optionally pass it the **datetime** format as string.
+---
+
+## Core Methods
+
+### now
+Returns current date/time (in set timezone).
+
+**Parameters:**
+- `?format` (string, optional): Output format. Defaults to the format set by `format()` or `Y-m-d H:i:s`.
+
+**Examples:**
+```php
+$moment->now();
+$moment->now('d-M, Y');
+```
+
+### today, tomorrow, yesterday
+Returns the respective date string in the current timezone.
+
+**Parameters:**
+- `?format` (string, optional): Output format.
+
+**Examples:**
+```php
+$moment->today();
+$moment->tomorrow('d-M, Y');
+$moment->yesterday();
+```
+
+### next, last
+Returns the date string for the next or last occurrence of a weekday.
+
+**Parameters:**
+- `dayName` (string): Full or short weekday name (e.g., 'monday', 'mon').
+- `?format` (string, optional): Output format.
+
+**Examples:**
+```php
+$moment->next('monday');
+$moment->last('fri', 'Y-m-d');
+```
+
+### thisMonthEnd, nextMonthEnd, lastMonthEnd
+Returns the last day of the current, next, or last month.
+
+**Parameters:**
+- `?format` (string, optional): Output format.
+
+**Examples:**
+```php
+$moment->thisMonthEnd();
+$moment->nextMonthEnd('Y-m-d');
+$moment->lastMonthEnd();
+```
+
+### travel
+Returns a date/time string after applying a modifier to the current date/time.
+
+**Parameters:**
+- `modifier` (string): Any string accepted by `DateTime::modify()` (e.g., '+5 days', '-2 hours', 'noon', 'last day of next month').
+- `?format` (string, optional): Output format.
+
+**Examples:**
+```php
+$moment->travel('+5 days');
+$moment->travel('last day of this month', 'd-M, Y');
+```
+
+### diff
+Returns a `DateInterval` object for the absolute difference between two datetimes.
+
+**Parameters:**
+- `datetime1` (string)
+- `datetime2` (string)
+
+**Examples:**
+```php
+$diff = $moment->diff('2021-07-23 14:25:45', '2019-03-14 08:23:12');
+$diff->y; // years
+$diff->m; // months
+$diff->d; // days
+$diff->h; // hours
+$diff->i; // minutes
+$diff->s; // seconds
+```
+
+### daysBetween
+Returns the number of days between two dates (absolute).
+
+**Parameters:**
+- `datetime1` (string)
+- `datetime2` (string)
+
+**Examples:**
+```php
+$days = $moment->daysBetween('2021-07-23', '2021-05-18');
+```
+
+### fromNow
+Returns a human-friendly difference string (e.g., 'just now', '5 minutes ago', '2 weeks ago').
+
+**Parameters:**
+- `datetime` (string, optional): Date/time string to compare to now. Defaults to `'now'`.
+
+**Examples:**
+```php
+$moment->fromNow('2021-07-20 11:30:45');
+// Output: 'x days ago', etc.
+```
+
+### create
+Returns a `DateTime` object in the current timezone. Throws on invalid input.
+
+**Parameters:**
+- `datetime` (string, optional): Date/time string. Defaults to `'now'`.
+
+**Examples:**
+```php
+$dt = $moment->create();
+$dt = $moment->create('2021-07-23');
+$dt = $moment->create('2021-07-23 10:00:00');
+
+// Use all native DateTime methods:
+$moment->create()->modify('+2 hours')->format('Y-m-d H:i:s');
+```
+
+---
+
+## Practical Examples
+
+### Chainable Formatting & Timezone
 
 ```php
-moment()->now('d-M, Y');
+$moment->format('Y-m-d')->setTimezone('Asia/Kolkata')->now();
 ```
 
-### travel()
-
-To travel ahead of or behind of current date and time:
+### Get the next Friday in custom format
 
 ```php
-moment()->travel('+5 minutes');
-moment()->travel('-5 minutes');
-moment()->travel('+5 hours');
-moment()->travel('-5 hours');
-moment()->travel('+5 days');
-moment()->travel('-5 days');
-moment()->travel('+5 weeks');
-moment()->travel('-5 weeks');
-moment()->travel('2 AM');
-moment()->travel('2 PM');
-moment()->travel('noon');
-moment()->travel('midnight');
-moment()->travel('last day of this month');
-moment()->travel('last day of next month');
-moment()->travel('last day of previous month');
-moment()->travel('first day of april');
-moment()->travel('last day of april');
-moment()->travel('first day of april last year');
-moment()->travel('first day of april next year');
+$moment->next('friday', 'd/m/Y');
 ```
 
-You can optionally pass the **datetime** format as second argument.
+### Get human-friendly difference
 
 ```php
-moment()->travel('+5 days', 'd-M, Y');
+$moment->fromNow('2023-06-15 10:00:00'); // e.g. 'a year ago'
 ```
 
-### today()
-
-To get **today's** date:
+### Calculate days between two dates
 
 ```php
-moment()->today();
+$days = $moment->daysBetween('2024-01-01', '2024-01-31'); // 30
 ```
 
-You can optionally pass it the **datetime** format as string.
+### Error Handling
 
 ```php
-moment()->today('d-M, Y');
+try {
+    $moment->setTimezone('Invalid/Zone');
+} catch (\InvalidArgumentException $e) {
+    // Handle invalid timezone
+}
+
+try {
+    $moment->create('invalid-date');
+} catch (\InvalidArgumentException $e) {
+    // Handle invalid date string
+}
 ```
 
-### tomorrow()
-
-To get **tomorrow's** date:
-
-```php
-moment()->tomorrow();
-```
-
-You can optionally pass it the **datetime** format as string.
-
-```php
-moment()->tomorrow('d-M, Y');
-```
-
-### yesterday()
-
-To get **yesterday's** date:
-
-```php
-moment()->yesterday();
-```
-
-You can optionally pass it the **datetime** format as string.
-
-```php
-moment()->yesterday('d-M, Y');
-```
-
-### next()
-
-To get the date of **upcoming** next day by name:
-
-```php
-moment()->next('monday');
-moment()->next('tuesday');
-moment()->next('wednesday');
-moment()->next('thursday');
-moment()->next('friday');
-moment()->next('saturday');
-moment()->next('sunday');
-```
-
-You can optionally pass it the **datetime** format as string.
-
-```php
-moment()->next('sunday', 'd-M, Y');
-```
-
-### last()
-
-To get the date of **last** day by name:
-
-```php
-moment()->last('monday');
-moment()->last('tuesday');
-moment()->last('wednesday');
-moment()->last('thursday');
-moment()->last('friday');
-moment()->last('saturday');
-moment()->last('sunday');
-```
-
-You can optionally pass it the **datetime** format as string.
-
-```php
-moment()->last('sunday', 'd-M, Y');
-```
-
-### thisMonthEnd()
-
-To get the date of last day of **current** month:
-
-```php
-moment()->thisMonthEnd();
-```
-
-You can optionally pass it the **datetime** format as string.
-
-```php
-moment()->thisMonthEnd('d-M, Y');
-```
-
-### nextMonthEnd()
-
-To get the date of last day of **next** month:
-
-```php
-moment()->nextMonthEnd();
-```
-
-You can optionally pass it the **datetime** format as string.
-
-```php
-moment()->nextMonthEnd('d-M, Y');
-```
-
-### lastMonthEnd()
-
-To get the date of **last day** of last month:
-
-```php
-moment()->lastMonthEnd();
-```
-
-You can optionally pass it the **datetime** format as string.
-
-```php
-moment()->lastMonthEnd('d-M, Y');
-```
-
-### daysBetween()
-
-To get the **number** of days between two dates:
-
-```php
-moment()->daysBetween('2021-07-23', '2021-05-18');
-```
-
-### diff()
-
-To get the difference between two **datetimes** as an interval:
-
-```php
-$diff = moment()->diff('2021-07-23 14:25:45', '2019-03-14 08:23:12');
-```
-
-Now you can access a number of properties on `$diff` object:
-
-```php
-$diff->y; // Number of years.
-$diff->m; // Number of months.
-$diff->d; // Number of days.
-$diff->h; // Number of hours.
-$diff->i; // Number of minutes.
-$diff->s; // Number of seconds.
-```
-
-For example:
-
-```php
-// 2 years, 4 months, 9 days
-"{$diff->y} years, {$diff->m} months, {$diff->d} days";
-```
-
-### fromNow()
-
-Use this function to get date and time as a friendly text like following:
-
-```text
-just now
-a minute ago
-5 minutes ago
-an hour ago
-10 hours ago
-yesterday
-5 days ago
-a week ago
-2 weeks ago
-a month ago
-5 months ago
-a year ago
-3 years ago
-```
-
-Pass it the **datetime** string you want to compare:
-
-```php
-moment()->fromNow('2021-07-20 11:30:45');
-```
-
-### create()
-
-Use this function to create a `DateTime` object. Optionally pass it the **datetime** string as argument which defaults to `now`.
-
-Create a DateTime object with datetime `now`:
-
-```php
-moment()->create();
-```
-
-Or, create a DateTime object with datetime `2021-07-23`:
-
-```php
-moment()->create('2021-07-23');
-```
-
-Because it returns `DateTime` object, hence you can apply all the methods exposed via `DateTime` class in **PHP**.
-
-For example:
-
-```php
-// Add 2 hours in current datetime and
-// return datetime in Y-m-d H:i:s format
-
-moment()->create()->modify('+2 hours')->format('Y-m-d H:i:s');
-```
-
-Another example:
-
-```php
-// Add 5 days in 2021-07-23 and 
-// return datetime in Y-m-d format
-
-moment()->create('2021-07-23')->modify('+5 days')->format('Y-m-d'),
-```
+---

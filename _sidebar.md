@@ -48,12 +48,26 @@
     * [Extending Auth](custom-auth.md)
     * [Route Filters](auth-filters.md)
 
+* Utilities
+
+  * [Password](password.md)
+  * [Crypto](encryption-decryption-utils.md)
+  * [URL](url.md)
+  * [Image](image-utils.md)
+  * [Rate Limit](rate-limiter.md)
+  * [Mutex Lock](mutex-lock.md)
+  * [Process](process.md)
+  * [Array](array-utils.md)
+  * [String](string-utils.md)
+  * [OTP](otp-utils.md)
+  * [Assets](asset-loading-utils.md)
+  * [CSV](csv-utils.md)
+  * [PHP to JS](js-utils.md)
+
 * Advanced
 
   * [Mails](mails.md)
   * [Jobs](jobs.md)
-  * [Password](password.md)
-  * [Crypto](encryption-decryption-utils.md)
   * [Filters](filters.md)
   * [Events](events.md)
   * [Caching](caching.md)
@@ -63,14 +77,3 @@
   * [CORS](cors.md)
   * [Console](console.md)
   * [Testing](testing.md)
-  * [URL](url.md)
-  * [Image](image-utils.md)
-  * [Rate Limit](rate-limiter.md)
-  * [Mutex Lock](mutex-lock.md)
-  * [Process](process.md)
-  * [Array](array-utils.md)
-  * [String](string-utils.md)
-  * [OTP](otp-utils.md)
-  * [PHP to JS](js-utils.md)
-  * [Assets](asset-loading-utils.md)
-  * [CSV](csv-utils.md)

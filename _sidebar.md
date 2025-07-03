@@ -64,6 +64,7 @@
   * [Console](console.md)
   * [Testing](testing.md)
   * [URL](url.md)
+  * [Image](image-utils.md)
   * [Rate Limit](rate-limiter.md)
   * [Mutex Lock](mutex-lock.md)
   * [Process](process.md)

@@ -26,6 +26,7 @@
   <!-- * [Pagination](db-pagination.md) -->
   * [Migrations](migrations.md)
   * [Seeding](seeding.md)
+  * [Factory](factory.md)
 
 * Lucid ORM
 

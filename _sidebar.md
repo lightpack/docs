@@ -81,3 +81,4 @@
   * [Settings](settings.md)
   * [Tags](tags.md)
   * [Taxonomies](taxonomies.md)
+  * [Faker](faker.md)

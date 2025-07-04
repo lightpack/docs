@@ -1,10 +1,10 @@
-# ⚙️ Lightpack Settings
+# Lightpack Settings
 
 Modern web applications need dynamic, database-driven settings to power everything from feature toggles and branding to user preferences and operational parameters.
 
 ---
 
-## 🚀 Why Database-Driven Settings?
+## Why Database-Driven Settings?
 - **Instant updates:** Change app behavior without code deploys.
 - **Multi-tenant support:** Each user, organization, product, or any model can have their own settings.
 - **Feature toggles:** Enable/disable features on the fly.
@@ -13,7 +13,7 @@ Modern web applications need dynamic, database-driven settings to power everythi
 
 ---
 
-## 🗄️ Data Model
+## Data Model
 
 **settings table**
 
@@ -33,7 +33,7 @@ Modern web applications need dynamic, database-driven settings to power everythi
 ---
 
 
-## 🛠️ Migration Example
+## Migration
 
 Run this command to generate a migration file:
 
@@ -82,7 +82,7 @@ Look into `config/settings.php` file for configuration related options:
 
 ---
 
-## 🧩 Settings API: Simple & Explicit
+## Settings API: Simple & Explicit
 
 ### Core API (via Model Trait)
 On any model using `SettingsTrait` trait:
@@ -149,7 +149,7 @@ $product->settings()->set('tax_rate', 0.18);
 
 ---
 
-## 🔍 Design Principles
+## Design Principles
 
 - **Explicit API:** No global helpers or magic loading—always opt-in via trait or direct instantiation.
 - **No Magic:** Settings are loaded only when requested, not injected everywhere.
@@ -161,7 +161,7 @@ $product->settings()->set('tax_rate', 0.18);
 
 ---
 
-## 🌟 Advanced Features
+## Advanced Features
 
 - **JSON/Array Support:** Store and retrieve structured data with automatic (de)serialization.
 - **Caching:** Settings are cached per group/owner (using Lightpack's cache system), and cache is invalidated on update/delete for consistency and performance.

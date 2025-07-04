@@ -77,3 +77,4 @@
   * [CORS](cors.md)
   * [Console](console.md)
   * [Testing](testing.md)
+  * [Secrets](secrets.md)

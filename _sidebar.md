@@ -84,3 +84,5 @@
   * [Tags](tags.md)
   * [Taxonomies](taxonomies.md)
   * [Faker](faker.md)
+  * [Audit](audit.md)
+  * [RBAC](rbac.md)

@@ -80,3 +80,4 @@
   * [Secrets](secrets.md)
   * [Settings](settings.md)
   * [Tags](tags.md)
+  * [Taxonomies](taxonomies.md)

@@ -79,38 +79,53 @@ public function down(): void
 
 ---
 
-## Secrets API (Framework Service)
-
-Instantiate via container or you can type hint **Secrets** as your controller's method dependency. 
+## Core API (via Model Trait)
+On any model using `SecretsTrait`:
 
 ```php
-$secrets = app('secrets');
+class User extends Model
+{
+    use Lightpack\Secrets\SecretsTrait;
+}
 ```
+
+```php
+$user->secrets()->set('api_token', 'secret-value');
+$user->secrets()->get('api_token');
+$user->secrets()->delete('api_token');
+```
+
+## Global/App Settings
+Instantiate via container or you can type hint **Secrets** as your controller's method dependency.
 
 ### Set a Secret
 ```php
-$secrets->group('users')
+app('secrets')
+    ->group('users')
     ->owner(42)
     ->set('api_token', 'secret-value');
 ```
 
 ### Get a Secret
 ```php
-$token = $secrets->group('users')
+$token = app('secrets')
+    ->group('users')
     ->owner(42)
     ->get('api_token');
 ```
 
 ### Delete a Secret
 ```php
-$secrets->group('users')
+app('secrets')
+    ->group('users')
     ->owner(42)
     ->delete('api_token');
 ```
 
 ### Change Group/Owner Scope
 ```php
-$secrets->group('global')
+app('secrets')
+    ->group('global')
     ->owner(null)
     ->set('service_key', 'xyz');
 ```
@@ -119,14 +134,14 @@ $secrets->group('global')
 
 ## Key Rotation (Re-encrypt All Secrets)
 
-Lightpack provides a **framework-level method** for rotating your secrets encryption key:
+Lightpack supports secrets rotation by exposing `rotateKey()` method:
 
 ```php
 $oldKey = get_env('OLD_SECRETS_KEY');
 $newKey = get_env('NEW_SECRETS_KEY');
 
 // Rotate secrets in batch size of 100 (optional)
-$result = $secrets->rotateKey($oldKey, $newKey, 100); 
+$result = app('secrets')->rotateKey($oldKey, $newKey, 100); 
 
 // $result = ['success' => <count>, 'fail' => <count>]
 // log the result for inspection

@@ -276,3 +276,121 @@ Taxonomy::bulkMove([3, 4], 5); // Move nodes 3 and 4 under node 5
 - **Empty state:** All tree and forest helpers handle empty trees gracefully.
 
 ---
+
+## Practical End-to-End Examples
+
+Below are practical, real-world scenarios that demonstrate how to use Lightpack Taxonomies in your application. These examples cover taxonomy creation, building a tree, attaching to models, querying, and navigation.
+
+### 1. Creating a Category Tree
+
+```php
+// Create root categories
+$news = new Taxonomy();
+$news->name = 'News';
+$news->slug = 'news';
+$news->type = 'category';
+$news->save();
+
+$opinion = new Taxonomy();
+$opinion->name = 'Opinion';
+$opinion->slug = 'opinion';
+$opinion->type = 'category';
+$opinion->save();
+
+// Create children
+$local = new Taxonomy();
+$local->name = 'Local';
+$local->slug = 'local';
+$local->type = 'category';
+$local->parent_id = $news->id;
+$local->save();
+
+$global = new Taxonomy();
+$global->name = 'Global';
+$global->slug = 'global';
+$global->type = 'category';
+$global->parent_id = $news->id;
+$global->save();
+```
+
+### 2. Attaching Taxonomies to a Model
+
+```php
+// Assume Post model uses TaxonomyTrait
+$post = Post::find(101);
+
+// Attach categories by ID
+$post->attachTaxonomies([$news->id, $local->id]);
+```
+
+### 3. Querying Posts by Taxonomy
+
+```php
+// Get all posts tagged as 'News' OR 'Local'
+$posts = Post::filters(['taxonomies' => [$news->id, $local->id]])->all();
+```
+
+### 4. Navigating the Taxonomy Tree
+
+```php
+// Get all children of 'News'
+$children = $news->children()->all(); // ['Local', 'Global']
+
+// Get all ancestors of 'Local'
+$ancestors = $local->ancestors(); // ['News']
+
+// Get full slug for 'Local'
+$slug = $local->fullSlug(); // 'news/local'
+
+// Get breadcrumbs for 'Local'
+$trail = $local->breadcrumbs(); // ['News', 'Local']
+```
+
+### 5. Moving and Reordering Taxonomies
+
+```php
+// Move 'Local' under 'Opinion'
+$local->moveTo($opinion->id);
+
+// Bulk reorder children of 'News'
+Taxonomy::reorder([
+    $global->id => 1, // 'Global' first
+    $local->id => 2,  // 'Local' second
+]);
+```
+
+### 6. Building a Complete Tree or Forest
+
+```php
+// Get the full tree for 'News'
+$newsTree = $news->tree();
+
+// Get all taxonomy trees (forest)
+$forest = Taxonomy::forest();
+```
+
+### 7. Using Meta Fields
+
+```php
+$news->meta = [
+    'icon' => 'fa-newspaper',
+    'color' => '#3366cc',
+    'description' => 'All news articles',
+];
+$news->save();
+
+// Access meta
+$icon = $news->meta['icon'];
+```
+
+---
+
+These examples show how to:
+- Build and manage a taxonomy tree
+- Attach taxonomies to your models
+- Query and filter by taxonomy
+- Navigate and display hierarchical data
+- Move and reorder nodes safely
+- Store custom data in meta fields
+
+---

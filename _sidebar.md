@@ -79,3 +79,4 @@
   * [Testing](testing.md)
   * [Secrets](secrets.md)
   * [Settings](settings.md)
+  * [Tags](tags.md)

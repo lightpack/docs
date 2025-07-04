@@ -41,7 +41,7 @@ Run this command to generate a migration file:
 php console create:migration create_table_settings
 ```
 
-Use the following code for the up() and down() methods:
+Use the following code for the `up()` and `down()` methods:
 
 ```php
 public function up(): void
@@ -82,10 +82,8 @@ Look into `config/settings.php` file for configuration related options:
 
 ---
 
-## Settings API: Simple & Explicit
-
-### Core API (via Model Trait)
-On any model using `SettingsTrait` trait:
+## Core API (via Model Trait)
+On any model using `SettingsTrait`:
 
 ```php
 class User extends Model
@@ -101,7 +99,7 @@ $all = $user->settings()->all();
 $user->settings()->forget('key');
 ```
 
-### Global/App Settings
+## Global/App Settings
 
 Instantiate via container or you can type hint **Settings** as your controller's method dependency.
 
@@ -119,7 +117,7 @@ $name = app('settings')
     ->get('site_name', 'Default Name');
 ```
 
-### Owner/Tenant/Model specific
+## Owner/Tenant/Model specific
 
 ```php
 app('settings')

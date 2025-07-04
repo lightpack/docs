@@ -1,10 +1,10 @@
-# 🔐 Lightpack Secrets
+# Lightpack Secrets
 
 Lightpack Secrets is a robust, framework-level solution for managing sensitive credentials (API keys, tokens, passwords, and more) with end-to-end encryption, explicit APIs, and full developer control.
 
 ---
 
-## 🚨 Why Use Lightpack Secrets?
+## Why Use Lightpack Secrets?
 - **Protect sensitive credentials:** Prevent accidental leaks and unauthorized access.
 - **Zero plaintext at rest:** All secrets are always encrypted in the database.
 - **Multi-tenant ready:** Secrets can be scoped to users, apps, or organizations.
@@ -13,7 +13,7 @@ Lightpack Secrets is a robust, framework-level solution for managing sensitive c
 ---
 
 
-## 🛡️ Encryption & Key Management
+## Encryption & Key Management
 - **AES-256-CBC encryption** with random IV per secret (non-deterministic ciphertext).
 - **Master key** is required and must be set in your config/env as `app.secrets_key`.
 - **Key never stored in DB**—only in your environment/config.
@@ -22,7 +22,7 @@ Lightpack Secrets is a robust, framework-level solution for managing sensitive c
 
 ---
 
-## 🗄️ Data Model: `secrets` Table
+## Data Model: `secrets` Table
 | Column      | Type      | Notes                                     |
 |-------------|-----------|-------------------------------------------|
 | id          | int       | PK, auto-increment                        |
@@ -37,7 +37,7 @@ Lightpack Secrets is a robust, framework-level solution for managing sensitive c
 ---
 
 
-## 🛠️ Migration
+## Migration
 
 Run this command to generate a migration file:
 
@@ -69,7 +69,7 @@ public function down(): void
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 - Set your secrets key in your config or `.env`:
   ```env
   SECRETS_KEY=your-32-byte-random-string
@@ -79,7 +79,7 @@ public function down(): void
 
 ---
 
-## 🔑 Secrets API (Framework Service)
+## Secrets API (Framework Service)
 
 Instantiate via container or you can type hint **Secrets** as your controller's method dependency. 
 
@@ -117,7 +117,7 @@ $secrets->group('global')
 
 ---
 
-## 🔁 Key Rotation (Re-encrypt All Secrets)
+## Key Rotation (Re-encrypt All Secrets)
 
 Lightpack provides a **framework-level method** for rotating your secrets encryption key:
 
@@ -136,7 +136,7 @@ $result = $secrets->rotateKey($oldKey, $newKey, 100);
 - **Safe:** Only updates secrets that decrypt successfully; failures are reported.
 - **Flexible:** Use in CLI, web, or migration context—your choice.
 
-### ⚠️ Key Rotation Checklist
+### Key Rotation Checklist
 - **Backup both old and new keys** in a secure password manager or vault before rotating.
 - **Test rotation in staging** before production.
 - **Update your config/env** to use the new key after rotation.
@@ -144,13 +144,13 @@ $result = $secrets->rotateKey($oldKey, $newKey, 100);
 
 ---
 
-## 🧠 Advanced Usage
+## Advanced Usage
 - **Batch size for rotation:** Tune the batch size for your environment (memory vs. speed).
 - **Type safety:** Secrets are JSON-encoded, so you can store arrays, objects, or scalars.
 - **Integration:** Use in CLI scripts, web admin panels, or migrations as needed.
 ---
 
-## 🔒 Security Model
+## Security Model
 - **No caching:** Secrets are always fetched from DB and decrypted on demand for maximum security.
 - **No plaintext at rest:** All values are encrypted.
 - **No fallback:** If the key is lost, secrets are unrecoverable.

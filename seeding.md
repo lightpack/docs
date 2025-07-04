@@ -68,4 +68,12 @@ As a final step, you need to execute all your seeders. For that, simply execute 
 php lucy db:seed
 ```
 
-That's it!!
+## Model Factory
+
+In any robust application, realistic data is the foundation for meaningful development, testing, and demonstration. But handcrafting this data—or relying on repetitive, hardcoded examples—quickly becomes tedious and brittle as your project grows. This is where model factories come in: they empower you to generate rich, dynamic, and scalable datasets that mirror real-world scenarios with minimal effort.
+
+Whether you’re populating a development environment, stress-testing features, or preparing impressive demos, model factories transform seeding from a chore into a powerful tool for quality and innovation.
+
+Read the details about Lightpack's support for model factories in the [Factory document](/factory.md).
+
+---

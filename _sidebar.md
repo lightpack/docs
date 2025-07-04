@@ -76,6 +76,7 @@
   * [Providers](providers.md)
   * [Containers](containers.md)
   * [CORS](cors.md)
+  * [HTTP Client](http-client.md)
   * [Console](console.md)
   * [Testing](testing.md)
   * [Secrets](secrets.md)

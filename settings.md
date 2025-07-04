@@ -41,7 +41,7 @@ Run this command to generate a migration file:
 php console create:migration create_table_settings
 ```
 
-Use the following code for the up() and down() methods:
+Use the following code for the `up()` and `down()` methods:
 
 ```php
 public function up(): void

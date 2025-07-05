@@ -82,9 +82,9 @@ echo $result['text'];
 
 ---
 
-## taks(): Structured AI Response
+## task()
 
-The `TaskBuilder` enables advanced, schema-aware structured AI tasks:
+The `TaskBuilder` enables advanced, schema-aware structured AI response:
 
 ```php
 // Get a structured JSON object with validation
@@ -102,7 +102,7 @@ if ($result['success']) {
 }
 ```
 
-### Features
+**It exposes following capabilities:**
 
 - **expect(array $schema):** Specify expected keys/types for JSON output.
 - **required(...$fields):** Mark fields as required (fail if missing/null).
@@ -110,6 +110,17 @@ if ($result['success']) {
 - **example(array $example):** Provide an example for the model.
 - **messages/system:** Compose multi-turn, role-based conversations.
 - **Robust JSON extraction:** Handles messy LLM output.
+
+**The returned response contains:**
+
+```php
+[
+    'text' => 'The generated content.',
+    'finish_reason' => 'stop', // or other reason, if available
+    'usage' => [...],          // token stats, if available
+    'raw' => [...],            // full provider response
+]
+```
 
 ---
 
@@ -154,21 +165,6 @@ $result = ai()->generate([
 - All providers cache results by default (configurable via `cache` and `cache_ttl` keys).
 - To bypass cache for direct calls: `ai()->generate(['cache' => false ])`
 - **Note:** When using the TaskBuilder (`ai()->task()->...->run()`), caching uses the provider’s default settings and cannot be overridden per request via the builder.
-
----
-
-## Output Structure
-
-All `generate()` calls return:
-
-```php
-[
-    'text' => 'The generated content.',
-    'finish_reason' => 'stop', // or other reason, if available
-    'usage' => [...],          // token stats, if available
-    'raw' => [...],            // full provider response
-]
-```
 
 ---
 

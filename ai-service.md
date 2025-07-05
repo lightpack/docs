@@ -2,14 +2,16 @@
 
 A unified, explicit, and extensible interface for text generation, summarization, and structured AI tasks in your Lightpack apps. Supports multiple providers, robust schema validation, and a fluent builder for advanced use cases.
 
----
-
-## What is Lightpack AI?
-
 - **Purpose:** Seamlessly add AI/ML-powered text, content, and structured data generation to any Lightpack project.
 - **Where to Use:** Blog/content generation, summarization, Q&A, code generation, structured data extraction, creative writing, and more.
 
----
+**Lightpack AI** exposes two super easy to use methods:
+
+```php
+ai()->ask(); // Simple question-answer
+
+ai()->task(); // Structured text output
+```
 
 ## Supported Providers
 
@@ -21,9 +23,6 @@ A unified, explicit, and extensible interface for text generation, summarization
 | `groq`      | `Providers\Groq`             | Groq API                 |
 
 **Add your own:** Implement `ProviderInterface` and register in config.
-
----
-
 
 ## Configuration
 
@@ -42,18 +41,11 @@ All settings live in `config/ai.php`:
 | `providers.<driver>.model`   | Default model for driver                 |                           |
 | `providers.<driver>.key`     | API key for driver                       |                           |
 
----
+## Usage
 
-## Service Registration
+Use `ai()` helper as convinience to access the current provider. The document below explains how to use the supported AI features.
 
-- The `AiProvider` registers the `ai` service with the container.
-- The active driver is set via `config/ai.php` in your config.
-- Use `ai()` helper as convinience to access the current provider.
-
----
-
-
-## ask()
+### ask()
 
 For simple, one-off questions, use the `ask()` method:
 
@@ -66,23 +58,8 @@ echo $answer; // "Paris"
 
 ---
 
-## generate()
 
-```php
-// Generate text using the configured provider
-$result = ai()->generate([
-    'prompt' => 'Suggest 5 catchy blog titles for ecommerce.',
-]);
-
-echo $result['text'];
-```
-
-- Returns an array: `['text' => ..., 'finish_reason' => ..., 'usage' => ..., 'raw' => ...]`
-- All parameters can be overridden per call.
-
----
-
-## task()
+### task()
 
 The `TaskBuilder` enables advanced, schema-aware structured AI response:
 
@@ -124,7 +101,7 @@ if ($result['success']) {
 
 ---
 
-### Example Recipes
+**Example Recipes**
 
 #### 1. Validate Array of Objects
 
@@ -162,19 +139,21 @@ $result = ai()->generate([
 
 #### 4. Caching
 
-- All providers cache results by default (configurable via `cache` and `cache_ttl` keys).
-- To bypass cache for direct calls: `ai()->generate(['cache' => false ])`
-- **Note:** When using the TaskBuilder (`ai()->task()->...->run()`), caching uses the provider’s default settings and cannot be overridden per request via the builder.
-
----
+- All providers cache results by default (configurable via `cache` and `cache_ttl` keys or your config).
+- You can bypass **cache** or set **TTL** for a task:
+  ```php
+ai()->task()
+    ->prompt('...')
+    ->cache(false)    // disables cache for this run
+    ->cacheTtl(60)    // sets cache TTL to 60 seconds
+    ->run();
+  ```
 
 ## Error Handling
 
 - Transport/API call related errors throw exceptions.
 - Validation errors (missing required fields, schema mismatch) are in `$result['errors']`.
 - Always check `$result['success']` when using `TaskBuilder`.
-
----
 
 ## Security & Best Practices
 

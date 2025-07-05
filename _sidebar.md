@@ -88,3 +88,4 @@
   * [RBAC](rbac.md)
   * [Captcha](captcha.md)
   * [Webhook](webhook.md)
+  * [AI](ai-service.md)

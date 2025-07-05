@@ -69,6 +69,7 @@
 
   * [Mails](mails.md)
   * [Jobs](jobs.md)
+  * [Schedule](schedule.md)
   * [Filters](filters.md)
   * [Events](events.md)
   * [Caching](caching.md)

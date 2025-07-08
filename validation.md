@@ -127,6 +127,75 @@ $validator->field('photos')
 
 ---
 
+## Error Handling & Messages
+
+- `getErrors()` — All errors as `[field => message]`
+- `getError('field')` — First error for a field
+- `getFieldErrors('field')` — All errors for a field
+
+### Custom error messages
+
+```php
+$validator->field('age')
+    ->numeric()
+    ->message('Age must be a number')
+    ->between(18, 100)
+    ->message('Age must be between 18 and 100');
+```
+
+---
+
+## Example: Password Strength
+
+```php
+$validator->field('password')
+    ->required()
+    ->between(8, 32)
+    ->hasUppercase()
+    ->hasLowercase()
+    ->hasNumber()
+    ->hasSymbol();
+```
+
+---
+
+## Example: User Registration
+
+```php
+$validator
+    ->field('username')->required()->string()->min(3)->max(50)->alphaNum()
+    ->field('email')->required()->email()
+    ->field('password')->required()->between(8, 32)->hasUppercase()->hasLowercase()->hasNumber()->hasSymbol()
+    ->field('avatar')->nullable()->image([
+        'max_width' => 1000,
+        'max_height' => 1000,
+        'max_size' => '1M'
+    ]);
+```
+
+---
+
+## Nested & Conditional Validation
+
+```php
+$validator
+    ->field('user.profile.name')->required()
+    ->field('user.profile.age')->required()->int()->custom(fn($v) => $v >= 18, 'Must be 18 or older');
+
+$validator
+    // Only one address can be primary
+    ->field('user.addresses')->custom(function($addresses) {
+        $primaryCount = 0;
+        foreach ($addresses as $address) {
+            if ($address['is_primary']) {
+                $primaryCount++;
+            }
+        }
+        return $primaryCount === 1;
+    }, 'Only one address can be marked as primary');
+```
+
+
 ## Custom Rules & Transformers
 
 ### Register a custom rule globally
@@ -196,75 +265,5 @@ $validator->field('email')
 - The rule can accept constructor arguments (e.g., `$excludeId` for updates).
 - The validator will call the class as an invokable (`__invoke`) object.
 - This pattern keeps business logic clean, testable, and reusable.
-
----
-
-## Error Handling & Messages
-
-- `getErrors()` — All errors as `[field => message]`
-- `getError('field')` — First error for a field
-- `getFieldErrors('field')` — All errors for a field
-
-### Custom error messages
-
-```php
-$validator->field('age')
-    ->numeric()
-    ->message('Age must be a number')
-    ->between(18, 100)
-    ->message('Age must be between 18 and 100');
-```
-
----
-
-## Advanced: Password Strength
-
-```php
-$validator->field('password')
-    ->required()
-    ->between(8, 32)
-    ->hasUppercase()
-    ->hasLowercase()
-    ->hasNumber()
-    ->hasSymbol();
-```
-
----
-
-## Example: User Registration
-
-```php
-$validator
-    ->field('username')->required()->string()->min(3)->max(50)->alphaNum()
-    ->field('email')->required()->email()
-    ->field('password')->required()->between(8, 32)->hasUppercase()->hasLowercase()->hasNumber()->hasSymbol()
-    ->field('avatar')->nullable()->image([
-        'max_width' => 1000,
-        'max_height' => 1000,
-        'max_size' => '1M'
-    ]);
-```
-
----
-
-## Advanced: Nested & Conditional Validation
-
-```php
-$validator
-    ->field('user.profile.name')->required()
-    ->field('user.profile.age')->required()->int()->custom(fn($v) => $v >= 18, 'Must be 18 or older');
-
-$validator
-    // Only one address can be primary
-    ->field('user.addresses')->custom(function($addresses) {
-        $primaryCount = 0;
-        foreach ($addresses as $address) {
-            if ($address['is_primary']) {
-                $primaryCount++;
-            }
-        }
-        return $primaryCount === 1;
-    }, 'Only one address can be marked as primary');
-```
 
 ---

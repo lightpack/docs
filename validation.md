@@ -1,430 +1,269 @@
-# Data Validation
+# Lightpack Validation
 
-When accepting data from a source such as form input, you may want to validate data
-itself to ensure you get the data as expected. `Lightpack` gives you a simple approach
-to validate data for most of the use cases. 
+Lightpack provides robust data validation support. This can be helpful when validating form inputs or data to be stored in database.
 
-<p class="tip">While you are free to use any data validation library of your choice, Lightpack provides <code>Lightpack\Validator\Validator</code> class for data validation which you might find handy enough
-for your data validation needs.</p>
+## Quick Start
 
-## Quick example
-
-First create an instance of `Lightpack\Validator\Validator` passing it the data source as an array
-of `key, value` pairs. For example, in case of a form submission via `POST` method, the data source 
-can be `$_POST`.
+In your controller's method, you can typehint `Lightpack\Validation\Validator` as dependency or you can call the `validator()` helper function.
 
 ```php
-<?php
+$validator = validator();
 
-use Lightpack\Validator\Validator;
+$validator
+    ->field('username')->required()->string()->min(3)->max(50)
+    ->field('email')->required()->email()
+    ->field('age')->int()->between(18, 100);
 
-$validator = new Validator($_POST);
+$validator->validate($_POST);
+
+if ($validator->fails()) {
+    $errors = $validator->getErrors();
+}
 ```
 
-Now set validation rules per field
+---
 
-```php
-$validator->setRules([
-    'name' => 'required|alpha',
-    'email' => 'required|email',
-    'password' => 'required|min:8',
-]);
-```
+## How Validation Works
 
-Finally run validation
+1. **Define fields and rules** using the fluent API.
+2. **Call `validate($input)`** to run validation.
+3. **Check results** with `passes()`, `fails()`, `getErrors()`, or `getError('field')`.
 
-```php
-$validator->run();
-```
+---
 
-Check if data validation failed.
+## Available Rules
 
-```php
-$validator->hasErrors(); // boolean
-```
+### String Rules
+- `required()` — Field must be present and not empty
+- `string()` — Must be a string
+- `min($n)` / `max($n)` — Length constraints
+- `length($n)` — Exact length
+- `alpha()` / `alphaNum()` — Only letters or letters/numbers
+- `regex($pattern)` — Custom regex
+- `slug()` — URL-friendly string
 
-Get all validation errors as an array
+### Numeric Rules
+- `numeric()` — Any number
+- `int()` / `float()` — Integer or float
+- `between($min, $max)` — Value range
+- `min($n)` / `max($n)` — Value constraints
 
-```php
-$validator->getErrors();
-```
+### Date/Time Rules
+- `date($format = null)` — Valid date (optionally with format)
+- `before($date, $format = null)` / `after($date, $format = null)` — Date comparison
 
-Now that you have a quick start with data validation in `Lightpack`, let us go through docs in detail.
+### Boolean Rules
+- `bool()` — Must be boolean
 
-## Setting Rules
+### Array Rules
+- `array($min = null, $max = null)` — Must be array, with optional length
+- `in($values)` / `notIn($values)` — Value must (not) be in list
+- `unique()` — All values must be unique
 
-You can specify rules per field either individually using `setRule()` or all together at once using 
-`setRules()` method.
+### Comparison Rules
+- `same($field)` — Must match another field
+- `different($field)` — Must not match another field
 
-### Setting rules individually
+### File & Image Rules
+- `file()` — Valid file upload
+- `fileSize($size)` — Max file size (e.g. '2M', '500K')
+- `fileType($types)` — Allowed MIME types
+- `fileExtension($exts)` — Allowed extensions
+- `files($min = null, $max = null)` — Multiple files
+- `image($options)` — Image validation (width, height, ratio)
 
-To set rules for an individual field, call `setRule()` method:
+### Custom & Advanced Rules
+- `custom($fn, $message)` — Custom closure for validation
+- `transform($fn)` — Preprocess value before validation
+- `nullable()` — Field can be null or empty
 
-```php
-$validator->setRule('email', 'required|email');
-$validator->setRule('password', 'required|min:8');
-```
+---
 
-You can also chain calls to `setRule()` method:
+## Wildcards & Nested Validation
+
+Validate arrays of objects or deeply nested data with wildcards:
 
 ```php
 $validator
-    ->setRule('email', 'required|email');
-    ->setRule('password', 'required|min:8');
+    ->field('users.*.email')->required()->email()
+    ->field('users.*.roles')->array()->in(['admin', 'user']);
+
+$input = [
+    'users' => [
+        ['email' => 'john@example.com', 'roles' => ['admin']],
+        ['email' => 'jane@example.com', 'roles' => ['user']],
+    ]
+];
+
+$validator->validate($input);
 ```
 
-### Setting rules together
+---
 
-To set rules for multiple fields together, call `setRules()` method:
+## File & Image Validation
 
 ```php
-$validator->setRules([
-    'email' => 'required|email',
-    'password' => 'required|min:8',
-]);
+$validator->field('avatar')
+    ->file()
+    ->fileSize('1M')
+    ->fileType(['image/jpeg', 'image/png'])
+    ->image([
+        'min_width' => 100,
+        'max_width' => 1000,
+        'min_height' => 100,
+        'max_height' => 1000,
+        'ratio' => '1:1'
+    ]);
 ```
 
-## Running Validation
-
-Once you are done specifying rules, you first need to call `run()` method to process
-data validation.
+Multiple files:
 
 ```php
-$validator->run();
+$validator->field('photos')
+    ->files(1, 5)
+    ->fileSize('2M')
+    ->fileType(['image/jpeg', 'image/png']);
 ```
 
-This will process validation rules for all fields and populate appropriate error messages
-in case a field data violates a rule. You can customize these error messages which has been 
-documented below.
+---
 
-## Validation Errors
+## Error Handling & Messages
 
-You can check if validation has failed by calling `hasErrors()` method. This method returns
-a boolean `TRUE` if validation failed, otherwise `FALSE`.
-
-```php
-if($validator->hasErrors()) {
-    // ...
-}
-```
-
-**NOTE**: You can chain together the calls to `run()` and `hasErrors()` methods.
-
-```php
-if($validator->run()->hasErrors()) {
-    // ...
-}
-```
-
-### Getting validation errors
-
-To get all error messages together as an array, call `getErrors()` method.
-
-```php
-$validator->getErrors(); 
-```
-
-To get error message for an individual field, call `getError()` method. It returns the error message
-string text or an empty string if the field has no validation error.
-
-```php
-$validator->getError('email');
-```
+- `getErrors()` — All errors as `[field => message]`
+- `getError('field')` — First error for a field
+- `getFieldErrors('field')` — All errors for a field
 
 ### Custom error messages
 
-By default the validation will create error messages for fields
-which will be sufficient enough in most cases. But if you want to customize an error
-message for a field, you can do that too.
-
-To customze an error message for a field, pass an array of rules and custom message.
-
 ```php
-$validator->setRules([
-    'email' => [
-        'rules' => 'required|email',
-        'error' => 'Email appears to be invalid.',
-    ],
-    'password' => [
-        'rules' =>'required|min:8',
-        'error' => 'Your password must be atleast 8 characters long.',
-    ]
-]);
+$validator->field('age')
+    ->numeric()
+    ->message('Age must be a number')
+    ->between(18, 100)
+    ->message('Age must be between 18 and 100');
 ```
 
-You can also specify custom error message individually.
+---
+
+## Example: Password Strength
 
 ```php
-$validator->setRule('email', [
-    'rules' => 'required|email',
-    'error'=> 'Email appears to be invalid',
-]);
+$validator->field('password')
+    ->required()
+    ->between(8, 32)
+    ->hasUppercase()
+    ->hasLowercase()
+    ->hasNumber()
+    ->hasSymbol();
 ```
 
-### Custom error labels
+---
 
-By default the validator will produce error messages using data field name. But sometimes
-you might need to customize the field label. For that pass a `label` key with custom label value.
-
-For example, consider this form:
+## Example: User Registration
 
 ```php
-<form method="post">
-    <input name="fname">
-</form>
+$validator
+    ->field('username')->required()->string()->min(3)->max(50)->alphaNum()
+    ->field('email')->required()->email()
+    ->field('password')->required()->between(8, 32)->hasUppercase()->hasLowercase()->hasNumber()->hasSymbol()
+    ->field('avatar')->nullable()->image([
+        'max_width' => 1000,
+        'max_height' => 1000,
+        'max_size' => '1M'
+    ]);
 ```
 
-To validate form data:
+---
+
+## Nested & Conditional Validation
 
 ```php
-$validator->setRule('fname', 'required');
+$validator
+    ->field('user.profile.name')->required()
+    ->field('user.profile.age')->required()->int()->custom(fn($v) => $v >= 18, 'Must be 18 or older');
+
+$validator
+    // Only one address can be primary
+    ->field('user.addresses')->custom(function($addresses) {
+        $primaryCount = 0;
+        foreach ($addresses as $address) {
+            if ($address['is_primary']) {
+                $primaryCount++;
+            }
+        }
+        return $primaryCount === 1;
+    }, 'Only one address can be marked as primary');
 ```
 
-If you echo the error message in case form field is empty, it will produce error message using
-`fname` as label.
+
+## Custom Rules & Transformers
+
+### Register a custom rule globally
 
 ```php
-echo $validator->getError('fname'); // Fname is required
+$validator->addRule('uppercase', function($value) {
+    return strtoupper($value) === $value;
+}, 'Must be uppercase');
+
+$validator->field('code')->uppercase();
 ```
 
-This is because the validator tries to convert the field `fname` to human readable format. To make
-things better, either you provide custom error message:
+### Custom rule per field
 
 ```php
-$validaor->setRule('fname' =>[
-    'rules' =>'required',
-    'error' => 'Please provide you first name'
-]);
+$validator->field('code')->custom(function($value) {
+    return preg_match('/^CODE-\\d{6}$/', $value);
+}, 'Invalid code format');
 ```
 
-Or to avoid setting custom message, simply specify a custom label:
+### Transform values before validation
 
 ```php
-$validator->setRule('fname', [
-    'rules' => 'required',
-    'label' => 'First name'
-]);
+$validator->field('tags')
+    ->transform(fn($v) => explode(',', $v))
+    ->array();
 ```
 
-Now this will produce error message with provided label.
+### Class-Based Custom Rules
+
+For advanced scenarios, you can use **invokable classes** as custom validation rules. This is ideal for business logic that needs dependencies, database access, or configuration.
+
+**Example: Unique Email Rule**
 
 ```php
-echo $validator->getError('fname'); // First name is required
-```
+namespace App\Rules;
 
-## Validating Nested Array
+use App\Models\User;
 
-You can validate nested array data as well. For example imagine you have a form with a nested array:
+class UniqueEmailRule
+{
+    public const MESSAGE = 'Email already exists';
 
-```php
-<form method="post">
-    <input name="title">
-    <input name="address[city]">
-    <input name="address[state]">
-    <input name="address[zip]">
-</form>
-```
+    public function __construct(
+        private ?int $excludeId = null
+    ) {}
 
-When the form is submitted, `$_POST` may look like this:
-
-```php
-$_POST = [
-    'title' => 'My Title',
-    'address' => [
-        'city' => 'My City',
-        'state' => 'My State',
-        'zip' => 'My Zip',
-    ],
-];
-```
-
-To validate this data, you can use `setRules()` method to set rules for each field using `dot` syntax.
-
-```php
-$validator->setRules([
-    'title' => 'required|alpha',
-    'address.city' => 'required',
-    'address.state' => 'required',
-    'address.zip' => 'required|numeric',
-]);
-```
-
-## Callbacks as rules
-
-There might be cases when you might want to set your own custom rules. You can do so using **callbacks** as rules.
-
-Pass a `closure` and define your own rule logic that should return a `boolean` value.
-
-```php
-$validator->setRule('visibility', function($status) {
-    return $status === 'active'; 
-});
-```
-
-You can also explicitly specify the **callback** in `rules` key:
-
-```php
-$validator->setRule('visibility', [
-    'rules' => function($status) { 
-        return $status === 'active'; 
+    public function __invoke(string $email): bool
+    {
+        return User::query()
+            ->where('email', '=', $email)
+            ->whereIf($this->excludeId, 'id', '!=', $this->excludeId)
+            ->notExists();
     }
-]);
+}
 ```
 
-## Available Validation Rules
-
-Lightpack provides a good number of validation rules for most frequently
-used scenarios. Below is a list of available rules with example.
-
-### required
-
-This rule validates if a data field is not empty.
+**Usage:**
 
 ```php
-$validator->setrule('password', 'required');
+$validator->field('email')
+    ->required()
+    ->email()
+    ->custom(new UniqueEmailRule, UniqueEmailRule::MESSAGE);
 ```
 
-### alpha
+- The rule can accept constructor arguments (e.g., `$excludeId` for updates).
+- The validator will call the class as an invokable (`__invoke`) object.
+- This pattern keeps business logic clean, testable, and reusable.
 
-This rule validates that a field has only ASCII characters `A-Z, a-z`.
-
-```php
-$validator->setrule('name', 'alpha');
-```
-
-### alnum
-
-This rule validates that a field has only ASCII characters `A-Z, a-z, 0-9`.
-
-```php
-$validator->setrule('username', 'alnum');
-```
-
-### email
-
-This rule check for a valid email.
-
-```php
-$validator->setrule('email', 'email');
-```
-
-### slug
-
-This rule validates that a field has a valid slug text. That means any combination
-of `A-Z, a-z, 0-9, -, _` characters is valid.
-
-```php
-$validator->setrule('id', 'slug');
-```
-
-### url
-
-This rule validates that a field has a valid URL.
-
-```php
-$validator->setrule('website', 'url');
-```
-
-### ip
-
-This rule validates that a field has a valid IP address.
-
-```php
-$validator->setrule('server', 'ip');
-```
-
-### length
-
-This rule checks that a field has exactly `N` ASCII characters where `N` is an integer.
-
-```php
-$validator->setRule('phone', 'length:10');
-```
-
-### min
-
-This rule checks whether a field has a minimum value provided as an integer.
-
-```php
-$validator->setRule('name', 'min:3');
-```
-
-### max
-
-This rule checks whether a field exceeds maximum value provided as an integer.
-
-```php
-$validator->setRule('name', 'max:25');
-```
-
-### between
-
-This rule checks if a field has a value between a minimum and maxium value.
-
-```php
-$validator->setRule('age', 'between:18,30');
-```
-
-**NOTE** The `between` filter also includes the range values. So the above example specifies
-to validate the field where `18 <= age <= 30`.
-
-### date
-
-This rule check if a field has valid date format. You need to provide a valid
-date format seperated by ':'.
-
-```php
-$validator->setRule('birthday', 'date:d-m-Y');
-$validator->setRule('last_login', 'date:YYYY-MM-DD');
-```
-
-### before
-
-This rule checks if a field has date value before a given date.
-
-```php
-$validator->setRule('registration_date', 'before:/d-m-Y,12-09-2021/');
-```
-
-Notice the syntax for providing before date filter. You must provide a valid
-date format and a date value seperatedby a comma.
-
-### after
-
-This rule checks if a field has date value after a given date.
-
-```php
-$validator->setRule('last_payment', 'after:/d-m-Y,12-09-2020/');
-```
-
-Notice the syntax for providing before date filter. You must provide a valid
-date format and a date value seperatedby a comma.
-
-### match
-
-This rule checks if a field has same value as with another field. For example, consider this form:
-
-```php
-<form method="post">
-    <input type="password" name="password">
-    <input type="password" name="confirm_password">
-</form>
-```
-
-When the above is posted, we might want to validate that `confirm_password` field has same value 
-as that of `password` field. Use the `matches` filter to do so.
-
-```php
-$validator->setRule('password', 'required|min:8|max:45');
-$validator->setRule('confirm_password', 'match:password=' . $_POST['password']);
-```
-
-**NOTE:** You must pass the matching field name and its value seperated by `=` equals sign. 
-
-### regex
-
-Custom `regular expression` based validation logic is also supported.
-
-```php
-$validator->setRule('phone', 'regex:/^\d{3}-\d{3}-\d{4}$/');
-```
+---

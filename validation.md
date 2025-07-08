@@ -41,6 +41,9 @@ if ($validator->fails()) {
 - `alpha()` / `alphaNum()` — Only letters or letters/numbers
 - `regex($pattern)` — Custom regex
 - `slug()` — URL-friendly string
+- `email()` — Valid email address
+- `url()` — Valid URL
+- `ip()` / `ip('v6')` - Valid IPv4 or IPv6 address
 
 ### Numeric Rules
 - `numeric()` — Any number

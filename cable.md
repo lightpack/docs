@@ -1,25 +1,16 @@
-# Lightpack Cable – Real-Time Communication for Everyone
+# Cable: Real-Time Communication for Lightpack
 
-**Cable** is Lightpack’s **HTTP Polling** based soft real-time communication layer. With **Cable**, you can build live dashboards, notifications, presence channels, chat messages and more. It is a great fit for your relatime notifications where the complexities of `websockets` or `SSE` is not justified.
+**Cable** is Lightpack's elegant solution for real-time communication between your server and clients. With a Socket.io-like API and a focus on simplicity and efficiency, **Cable** provides powerful real-time features without external dependencies.
 
-It support `MySQL` and `Redis` based backends for enabling realtime support and ships with a **JavaScript** client `cable.js` to make it painless to build on it. Under the hood, here’s how it works:
+You can build live dashboards, notifications, presence channels, chat messages and more with minimal friction. It uses an efficient `HTTP Polling` mechanism to provide real-time communication capabilities:
 
-1. **Event Emission (PHP Side):**
-    - Your PHP code emits events to a channel using Cable’s API (e.g., `$cable->to('chat:42')->emit('message:new', [...])`).
-    - These events are stored by a driver—either in a database table or Redis sorted set, depending on your configuration.
+- **Socket.io-like API**: Familiar, event-based programming model
+- **Channel-based messaging**: Target specific users or groups
+- **Presence channels**: Track which users are online
+- **DOM updates**: Directly update page elements
+- **Driver architecture**: Support for database and Redis backends
 
-2. **Polling (Browser Side):**
-    - The browser uses `cable.js` to subscribe to one or more channels.
-    - Instead of keeping a persistent WebSocket connection, the client periodically (e.g., every 3 seconds) polls a lightweight HTTP endpoint (e.g., `/cable/poll`) to fetch new events for its channels.
-    - Each poll includes the last received message ID, so only new events are delivered.
-
-3. **Event Delivery:**
-    - The backend responds with all new events since the last poll.
-    - The client triggers your JavaScript handlers for each event (e.g., updating the UI, playing a sound, etc.).
-
-4. **Presence & Batching:**
-    - Presence channels track which users are online, using the same driver-based approach.
-    - Message batching reduces backend writes by grouping many events into a single batch.
+Unlike WebSockets, Cable works with any hosting environment and doesn't require special server configurations.
 
 ## Cable Event Flow (Lifecycle)
 
@@ -92,13 +83,13 @@ public function down(): void
 }
 ```
 
-### 2. Server-Side Setup
+### 2. Configure Cable
+
+You can view available configurations in `config/cable.php` file.
 
 **Choose a driver:**
    - Database (default, simple, persistent storage)
    - Redis (high-performance, temporary storage)
-    
-You can view available configurations in `config/cable.php` file.
 
 ### 3. Define Route
 
@@ -108,17 +99,17 @@ route()->post('/realtime/send-message', RealtimeController::class, 'triggerMessa
 
 This route will forward the `POST /realtime/send-message` request to **RealtimeController**'s triggerMessage() method.
 
-### 4. Emitting Events
+### 4. Emit Events
 
-In your controller's method, emit an event `message:new` to the `hello` channel with required payload:
+In your controller's method, emit an event `message:new` to the `notifications` channel with required payload:
 
 ```php
 class RealtimeController
 {
     public function triggerMessage(Cable $cable)
     {
-        $cable->to('hello')->emit('message:new', [
-            'message' => request()->input('message'),
+        $cable->to('notifications')->emit('message:new', [
+            'text' => request()->input('message'),
         ]);
     
         return response()->json(['success' => true]);
@@ -134,16 +125,19 @@ In your frontend, include the `cable.js` script file:
 <?= asset()->load('js/cable.js') ?>
 ```
 
-Initialize `cable` client and subscribe to `hello` channel events:
+Initialize `cable` client and subscribe to `notifications` channel events:
 
-```js
-document.addEventListener('DOMContentLoaded', function() {
+```javascript
+// Connect to Cable
+const socket = cable.connect();
 
-    cable.connect().subscribe('hello', {
-        'message:new': payload => {
-            console.log(payload.message);
-        },
-    });
+// Subscribe to a channel
+socket.subscribe('notifications', {
+
+    // Handle events and payload data
+    'message:new': function(data) {
+        console.log('New message:', data.text);
+    }
 
 });
 ```
@@ -200,6 +194,82 @@ $cable->cleanup(3600);
 ```
 
 > You can run a schedule to routinely cleanup old messages.
+
+
+## Channel-Based Communication
+
+Channels allow you to organize your real-time communication:
+
+```php
+// Send to a specific user
+$cable->to("user.{$userId}")->emit('private-message', [
+    'text' => 'This is a private message'
+]);
+```
+```php
+// Send to a group
+$cable->to('admin-notifications')->emit('system-alert', [
+    'level' => 'warning',
+    'message' => 'Disk space is low'
+]);
+```
+
+```php
+// Broadcast to everyone
+$cable->to('broadcasts.all')->emit('announcement', [
+    'message' => 'Site maintenance in 10 minutes'
+]);
+```
+
+## Subscribing to Events
+
+Your frontend client can subscribe to emitted events:
+
+```javascript
+socket.subscribe('my-channel', {
+    // Single event handler
+    'event-name': function(data) {
+        console.log('Event received:', data);
+    }
+});
+```
+
+Or add handlers later:
+
+```javascript
+const subscription = socket.subscribe('another-channel');
+
+subscription.on('event-one', function(data) {
+    console.log('Event one:', data);
+});
+
+subscription.on('event-two', function(data) {
+    console.log('Event two:', data);
+});
+```
+
+
+## DOM Updates
+
+Cable can directly update DOM elements without writing custom JavaScript:
+
+```php
+// Update a specific element by selector
+$cable->to('dashboard')->update(
+    '#user-count', 
+    "<strong>{$userCount}</strong> users online"
+);
+```
+
+```php
+// Update multiple elements with the same selector
+$cable->to('dashboard')->update(
+    '.status-indicator', 
+    '<span class="online"></span>'
+);
+```
+
+> On the client-side, this is handled automatically - no additional code needed!
 
 ## Presence Channels
 

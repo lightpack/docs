@@ -453,52 +453,25 @@ If required, you can manually flush the batch of events:
 socket.flushOutgoingBatch();
 ```
 
-## Client-Side Integration: cable.js
+## Notification Sounds
+An interesting feature of Lightpack `cable.js` client is that it can play sounds for subcribed events:
 
-Cable’s JavaScript client brings real-time to your browser with a Socket.io-like API, but uses efficient polling for broad compatibility and simplicity.
-
-### Features
-- Subscribe to channels and events
-- Event filtering
-- Batched event support
-- DOM updates
-- Notification sounds
-- Robust reconnect and polling logic
-
-### Example Usage
-```js
-cable.connect().subscribe('chat:42', {
-    'message:new': (payload) => {
-        // Handle new message
-    },
-    'dom-update': (payload) => {
-        // Live update UI
-    }
-});
-
-// Advanced: filter events
-socket
-    .subscribe('metrics')
-    .filter(payload => payload.cpu > 80)
-    .on('metric:update', payload => {
-        alert('High CPU!');
-    });
-```
-
-### DOM Updates
-Cable supports emitting `dom-update` events for live UI changes:
-```php
-$cable->to('dashboard')->update('#status', '<span>Online</span>');
-```
-Client-side:
-```js
-document.querySelector(payload.selector).innerHTML = payload.html;
-```
-
-### Notification Sounds
-Cable.js can play sounds for events:
-```js
+```javascript
 cable.playSound('/sounds/notify.mp3');
 ```
 
----
+
+**For example:**
+
+- You can put the **notify.mp3** file in `public/sounds` folder.
+- Optionally, set the volume by passing a value between 0 to 1.
+
+```javascript
+socket
+    .subscribe('notifications')
+    .on('message', function(data) {
+        cable.playSound('/sounds/notify.mp3', 0.7);
+    });
+```
+
+```

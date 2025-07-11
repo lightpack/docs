@@ -1,6 +1,6 @@
 # Cable: Real-Time Communication for Lightpack
 
-**Cable** is Lightpack's elegant solution for real-time communication between your server and clients. With a Socket.io-like API and a focus on simplicity and efficiency, **Cable** provides powerful real-time features without external dependencies.
+**Cable** is Lightpack's elegant solution for real-time communication between your server and clients. With a Socket.io-like API familiarity and a focus on simplicity and efficiency, **Cable** provides powerful real-time features without external dependencies.
 
 You can build live dashboards, notifications, presence channels, chat messages and more with minimal friction. It uses an efficient `HTTP Polling` mechanism to provide real-time communication capabilities:
 
@@ -9,8 +9,6 @@ You can build live dashboards, notifications, presence channels, chat messages a
 - **Presence channels**: Track which users are online
 - **DOM updates**: Directly update page elements
 - **Driver architecture**: Support for database and Redis backends
-
-Unlike WebSockets, Cable works with any hosting environment and doesn't require special server configurations.
 
 ## Cable Event Flow (Lifecycle)
 
@@ -141,60 +139,6 @@ socket
     });
 ```
 
-## Cable API Reference
-
-### Cable Class & Methods
-
-#### `to(string $channel): self`
-Targets a specific channel for subsequent events.
-
-```php
-// Targeting a chat channel
-$chat = $cable->to('chat:42');
-```
-
-#### `emit(string $event, array $payload = [])`
-Sends an event (with payload) to the current channel.
-
-```php
-// Emitting a new chat message
-$cable->to('chat:42')->emit('message:new', [
-    'user' => 'alice',
-    'text' => 'Hello, world!'
-]);
-```
-
-#### `update(string $selector, string $html)`
-
-Emits a `dom-update` event, allowing you to update parts of the UI in real time.
-
-```php
-// Live update a status element on all dashboards
-$cable->to('dashboard')->update('#status', '<span>Online</span>');
-```
-
-#### `getMessages(?string $channel = null, ?int $lastId = null): array`
-Retrieves new messages for a channel since a given message ID. Used by polling clients (normally not called directly).
-
-```php
-// Fetch new messages for chat:42 since message ID 100
-$messages = $cable->getMessages('chat:42', 100);
-foreach ($messages as $msg) {
-    echo $msg->event . ': ' . json_encode($msg->payload);
-}
-```
-
-#### `cleanup(int $olderThanSeconds = 86400)`
-Deletes old messages from the backend (maintenance/housekeeping).
-
-```php
-// Remove messages older than 1 hour
-$cable->cleanup(3600);
-```
-
-> You can run a schedule to routinely cleanup old messages.
-
-
 ## Channel-Based Communication
 
 Channels allow you to organize your real-time communication. Your application emits events on a channel, whereas your frontend client subscribes to events on a channel.
@@ -251,7 +195,8 @@ const socket = cable.connect(
 )
 ```
 
-## DOM Updates
+
+### DOM Updates
 
 Cable can directly update DOM elements without writing custom JavaScript:
 
@@ -272,6 +217,62 @@ $cable->to('dashboard')->update(
 ```
 
 > On the client-side, this is handled automatically - no additional code needed!
+
+
+### Cable API Reference
+
+`to(string $channel): self`
+
+Targets a specific channel for subsequent events.
+
+```php
+// Targeting a chat channel
+$chat = $cable->to('chat:42');
+```
+
+`emit(string $event, array $payload = [])`
+
+Sends an event (with payload) to the current channel.
+
+```php
+// Emitting a new chat message
+$cable->to('chat:42')->emit('message:new', [
+    'user' => 'alice',
+    'text' => 'Hello, world!'
+]);
+```
+
+`update(string $selector, string $html)`
+
+Emits a `dom-update` event, allowing you to update parts of the UI in real time.
+
+```php
+// Live update a status element on all dashboards
+$cable->to('dashboard')->update('#status', '<span>Online</span>');
+```
+
+`getMessages(?string $channel = null, ?int $lastId = null): array`
+
+Retrieves new messages for a channel since a given message ID. Used by polling clients (normally not called directly).
+
+```php
+// Fetch new messages for chat:42 since message ID 100
+$messages = $cable->getMessages('chat:42', 100);
+foreach ($messages as $msg) {
+    echo $msg->event . ': ' . json_encode($msg->payload);
+}
+```
+
+`cleanup(int $olderThanSeconds = 86400)`
+
+Deletes old messages from the backend (maintenance/housekeeping).
+
+```php
+// Remove messages older than 1 hour
+$cable->cleanup(3600);
+```
+
+> You can run a schedule to routinely cleanup old messages.
 
 ## Presence Channels
 

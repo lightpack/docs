@@ -356,6 +356,23 @@ socket.subscribe(channel)
     });
 ```
 
+
+### Presence Channel Configuration
+
+```javascript
+// Join a presence channel with custom endpoint
+presence.join('/custom/join/endpoint');
+
+// Leave a presence channel with custom endpoint
+presence.leave('/custom/leave/endpoint);
+
+// Start heartbeat with custom interval and endpoint
+presence.startHeartbeat(30000, '/custom/heartbeat/endpoint');
+
+// Get users with custom endpoint
+presence.getUsers('/custom/users/endpoint');
+```
+
 ## Message Batching
 
 You can batch multiple messages together to promote better performance:

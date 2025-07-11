@@ -131,15 +131,12 @@ Initialize `cable` client and subscribe to `notifications` channel events:
 // Connect to Cable
 const socket = cable.connect();
 
-// Subscribe to a channel
-socket.subscribe('notifications', {
-
-    // Handle events and payload data
-    'message:new': function(data) {
+// Subscribe to `message:new` event on notifications channel 
+socket
+    .subscribe('notifications')
+    .on('message:new', function(data) {
         console.log('New message:', data.text);
-    }
-
-});
+    });
 ```
 
 ## Cable API Reference
@@ -225,18 +222,7 @@ $cable->to('broadcasts.all')->emit('announcement', [
 
 ### Subscribing to Events
 
-Your frontend client can subscribe to emitted events:
-
-```javascript
-socket.subscribe('my-channel', {
-    // Single event handler
-    'event-name': function(data) {
-        console.log('Event received:', data);
-    }
-});
-```
-
-Or add handlers later:
+Your frontend client can subscribe to emitted events without requiring to manually poll for new messages:
 
 ```javascript
 const subscription = socket.subscribe('another-channel');
@@ -248,6 +234,19 @@ subscription.on('event-one', function(data) {
 subscription.on('event-two', function(data) {
     console.log('Event two:', data);
 });
+```
+
+### Custom Configurations
+
+You can customize following option when initializing a **cable** connection.
+
+```javascript
+const socket = cable.connect(
+    endpoint: '/cable/poll',
+    pollInterval: 3000,
+    reconnectInterval: 5000,
+    maxReconnectAttempts: 5
+)
 ```
 
 ## DOM Updates
@@ -478,9 +477,12 @@ cable.connect().subscribe('chat:42', {
 });
 
 // Advanced: filter events
-cable.subscribe('metrics').filter(payload => payload.cpu > 80).on('metric:update', payload => {
-    alert('High CPU!');
-});
+socket
+    .subscribe('metrics')
+    .filter(payload => payload.cpu > 80)
+    .on('metric:update', payload => {
+        alert('High CPU!');
+    });
 ```
 
 ### DOM Updates

@@ -198,7 +198,9 @@ $cable->cleanup(3600);
 
 ## Channel-Based Communication
 
-Channels allow you to organize your real-time communication:
+Channels allow you to organize your real-time communication. Your application emits events on a channel, whereas your frontend client subscribes to events on a channel.
+
+### Emitting Events
 
 ```php
 // Send to a specific user
@@ -221,7 +223,7 @@ $cable->to('broadcasts.all')->emit('announcement', [
 ]);
 ```
 
-## Subscribing to Events
+### Subscribing to Events
 
 Your frontend client can subscribe to emitted events:
 
@@ -248,7 +250,6 @@ subscription.on('event-two', function(data) {
 });
 ```
 
-
 ## DOM Updates
 
 Cable can directly update DOM elements without writing custom JavaScript:
@@ -273,31 +274,87 @@ $cable->to('dashboard')->update(
 
 ## Presence Channels
 
-Presence lets you track which users are online in a channel.
+Presence channels allow you to track which users are online in real-time.
 
-### Using Presence
+**Initialize the channel presence**
 
-```php
-// User joins a channel
-$presence->join($userId, 'room1');
+```javascript
+// Define channel name
+const channel = 'presence-room';
 
-// User leaves
-$presence->leave($userId, 'room1');
+// Initialize Cable
+const socket = cable.connect();
 
-// Heartbeat to check if online
-$presence->heartbeat($userId, 'room1');
-
-// Get users present in a channel
-$users = $presence->getUsers('room1');
-
-// Get all channels a user is present in
-$channels = $presence->getChannels($userId);
-
-// Clean up stale presence records
-$presence->cleanup();
+// Initialize presence channel
+const presence = socket.presence(channel, userId);
 ```
 
----
+Now you can utilize the presence channel capabilities as documented below:
+
+### Join the presence channel
+
+```javascript
+presence.join()
+    .then(() => {
+        console.log('Joined presence channel');
+        
+        // Start heartbeat to maintain presence
+        presence.startHeartbeat();
+    });
+```
+
+### Leave presence channel
+
+```javascript
+presence.stopHeartbeat();
+presence.leave()
+    .then(() => {
+        console.log('Left presence channel');
+    });
+```
+
+### Get all users in channel
+
+```javascript
+presence.getUsers()
+    .then(data => {
+        console.log('Users in channel:', data.users);
+    });
+```
+
+### Subscribe to presence channel events
+
+```javascript
+socket.subscribe(channel)
+
+    // Handle presence updates
+    .on('presence:update', function(data) {
+        console.log('Presence update:', data);
+        // updateOnlineUsers(data.users);
+    })
+
+    // Handle join events
+    .on('presence:join', function(data) {
+        console.log('Users joined:', data.users);
+        data.users.forEach(id => {
+            // addNotification(`User ${id} joined the chat`);
+        });
+    })
+
+    // Handle leave events
+    .on('presence:leave', function(data) {
+        console.log('Users left:', data.users);
+        data.users.forEach(id => {
+            // addNotification(`User ${id} left the chat`);
+        });
+    })
+
+    // Handle message events
+    .on('message', function(data) {
+        console.log('Received message event with data:', data);
+        // addMessage(data.userId, data.text);
+    });
+```
 
 ## Client-Side Integration: cable.js
 

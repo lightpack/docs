@@ -356,6 +356,87 @@ socket.subscribe(channel)
     });
 ```
 
+## Message Batching
+
+You can batch multiple messages together to promote better performance:
+
+1. Fewer database writes
+2. Better transaction handling
+3. Reduced server load
+4. More efficient client updates
+
+### Server-Side Batching
+
+**Without Batching (BAD)**
+
+```php
+public function notifyUsers(Cable $cable)
+{
+    // Sending 100 notifications = 100 database writes
+    foreach($users as $user) {
+
+        $cable->to('notifications')->emit('message:new', [
+            'user' => $user->id,
+            'message' => 'Hello'
+        ]);
+
+    }
+}
+```
+
+**With Batching (GOOD)**
+
+```php
+public function notifyUsers(MessageBatcher $batcher)
+{
+    $batcher->channel('notifications')->batchSize(100);
+
+    // Sending 100 notifications = 1 database writes
+    foreach($users as $user) {
+
+        $batcher->add('message:new', [
+            'user' => $user->id,
+            'message' => 'Hello'
+        ]);
+
+    }
+}
+```
+
+> The default batch size is 100 which you can override. You never need to manually flush the batch of messages. it is automatically done by the **MessageBatcher** instance.
+
+### Client-Side Batching
+
+```javascript
+const socket = cable.connect();
+const channel = 'user-tracking';
+
+// Configure client-side batching
+socket.setBatchOptions({
+    batchSize: 5,           // Max events per batch
+    batchInterval: 2000,     // Flush interval in ms
+    batchEndpoint: '<?= url()->route('api.batch-events') ?>',
+    csrfToken: '<?= csrfToken() ?>',
+});
+
+// Track events (added to batch)
+socket.emitBatched(channel, 'event:button-clicked', { data: 'Subscribe Button' });
+socket.emitBatched(channel, 'event:mouse-moved', { data: 'FAQ Section' });
+socket.emitBatched(channel, 'event:button-hovered', { data: 'Buy Now Button' });
+...
+...
+...
+socket.emitBatched(channel, 'event:button-clicked', { data: 'Buy Now Button' });
+```
+
+> Once the batch size exceeds or batch interval passes, the batch endpoint is automatically called with all the even data.
+
+If required, you can manually flush the batch of events:
+
+```javascript
+socket.flushOutgoingBatch();
+```
+
 ## Client-Side Integration: cable.js
 
 Cable’s JavaScript client brings real-time to your browser with a Socket.io-like API, but uses efficient polling for broad compatibility and simplicity.
@@ -402,174 +483,3 @@ cable.playSound('/sounds/notify.mp3');
 ```
 
 ---
-
-## Case Study: Real-Time Chat Room with Presence
-
-Let’s build a complete, minimal real-time chat room with user presence, using Lightpack Cable. This shows all major concepts in action, from backend to frontend.
-
-### 1. Backend Setup
-
-#### a) Register Providers
-In your `App.php`, register the Cable provider (and Redis if using Redis drivers):
-```php
-protected function getFrameworkProviders(): array {
-    return [
-        // ...
-        \Lightpack\Framework\Providers\RedisProvider::class, // If using Redis
-        \Lightpack\Framework\Providers\CableProvider::class,
-        // ...
-    ];
-}
-```
-
-#### b) Run Migrations
-Create the required tables for messages and presence (if using the DB driver):
-```sql
-CREATE TABLE cable_messages (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    channel VARCHAR(255) NOT NULL,
-    event VARCHAR(255) NOT NULL,
-    payload TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE cable_presence (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    channel VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
-    last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX (channel),
-    INDEX (user_id),
-    UNIQUE KEY channel_user (channel, user_id)
-);
-```
-
-#### c) Configure Cable
-Choose and instantiate your driver in a service or controller:
-```php
-use Lightpack\Cable\Cable;
-use Lightpack\Cable\Drivers\DatabaseCableDriver;
-use Lightpack\Cable\Presence;
-use Lightpack\Cable\Drivers\DatabasePresenceDriver;
-
-$cable = new Cable(new DatabaseCableDriver($db));
-$presence = new Presence($cable, new DatabasePresenceDriver($db));
-```
-
-### 2. PHP: Emitting Chat Messages and Presence
-
-**a) Sending a Chat Message:**
-```php
-// Called when a user sends a message
-$cable->to('chat:main')->emit('message:new', [
-    'user' => $user['name'],
-    'text' => $input['text'],
-    'timestamp' => time(),
-]);
-```
-
-**b) Managing Presence:**
-```php
-// User joins the chat room
-$presence->join($user['id'], 'chat:main');
-
-// User leaves (e.g., on logout or disconnect)
-$presence->leave($user['id'], 'chat:main');
-
-// Heartbeat (call every minute to keep user online)
-$presence->heartbeat($user['id'], 'chat:main');
-```
-
-### 3. Polling Endpoint (Controller Example)
-
-Expose a polling endpoint for the JS client:
-```php
-// routes/web.php
-$router->post('/cable/poll', function() use ($cable) {
-    $channels = $_POST['channels'] ?? [];
-    $lastIds = $_POST['lastIds'] ?? [];
-    $result = [];
-    foreach ($channels as $channel) {
-        $result[$channel] = $cable->getMessages($channel, $lastIds[$channel] ?? null);
-    }
-    echo json_encode($result);
-});
-```
-
-### 4. Frontend: HTML + Cable.js
-
-**a) Include Cable.js**
-```html
-<script src="/assets/cable.js"></script>
-```
-
-**b) HTML Structure**
-```html
-<div id="chat">
-    <div id="messages"></div>
-    <input id="chat-input" type="text" placeholder="Type a message...">
-    <button id="send-btn">Send</button>
-    <div id="presence"></div>
-</div>
-```
-
-**c) JavaScript: Subscribing and Handling Events**
-```js
-const username = prompt('Enter your name:');
-const userId = Math.floor(Math.random() * 100000); // Example user ID
-
-// Join presence (AJAX call to backend on page load)
-fetch('/join', {
-    method: 'POST',
-    body: JSON.stringify({ userId, channel: 'chat:main' }),
-    headers: { 'Content-Type': 'application/json' }
-});
-
-// Cable client
-cable.connect().subscribe('chat:main', {
-    'message:new': (payload) => {
-        const msg = document.createElement('div');
-        msg.textContent = `${payload.user}: ${payload.text}`;
-        document.getElementById('messages').appendChild(msg);
-    },
-    'presence:update': (payload) => {
-        document.getElementById('presence').textContent =
-            `Online: ${payload.count} users`;
-    }
-});
-
-document.getElementById('send-btn').onclick = function() {
-    const text = document.getElementById('chat-input').value;
-    // Send message to backend (AJAX call that emits via Cable)
-    fetch('/send', {
-        method: 'POST',
-        body: JSON.stringify({ userId, user: username, text }),
-        headers: { 'Content-Type': 'application/json' }
-    });
-    document.getElementById('chat-input').value = '';
-};
-```
-
-### 5. Presence and DOM Updates
-
-Whenever presence changes (user joins/leaves/heartbeat), the backend emits a `presence:update` event:
-```php
-// In Presence class (already built-in)
-$cable->to('chat:main')->emit('presence:update', [
-    'users' => $users, // List of user IDs or names
-    'count' => count($users),
-    'timestamp' => time(),
-]);
-```
-The frontend updates the online user count automatically.
-
-### 6. Cleanup & Best Practices
-- Call `$cable->cleanup()` and `$presence->cleanup()` periodically (e.g., via cron) to remove old messages and stale presence.
-- Use secure, non-guessable channel names for private rooms.
-- Add authentication and authorization as needed for your app.
-
----
-
-**Lightpack Cable is your foundation for building real-time, collaborative, and interactive PHP applications—without the complexity.**
-
-> "Real-time isn’t magic. With Lightpack Cable, it’s just another tool in your kit—simple, explicit, and yours to command."

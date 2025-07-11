@@ -37,9 +37,19 @@ Unlike WebSockets, Cable works with any hosting environment and doesn't require 
 
 ## Quick Start
 
-### 1. Run Migration
+Lightpack already ships with few route definitions for making it easy to work with message polling or presence channels. You can look for `routes/cable.php` file for more details. Following sections gives you a quick overview to get started with realtime features.
 
-Run the following migration command:
+### 1. Configure Cable
+
+You can view available configurations in `config/cable.php` file.
+
+**Choose a driver:**
+   - Database (default, simple, persistent storage)
+   - Redis (high-performance, temporary storage)
+
+### 2. Run Migration
+
+Run the following migration command if using MySQL as realtime backend:
 
 ```cli
 php console create:migration create_table_cable_system
@@ -82,14 +92,6 @@ public function down(): void
     $this->drop('cable_presence');
 }
 ```
-
-### 2. Configure Cable
-
-You can view available configurations in `config/cable.php` file.
-
-**Choose a driver:**
-   - Database (default, simple, persistent storage)
-   - Redis (high-performance, temporary storage)
 
 ### 3. Define Route
 
@@ -273,7 +275,13 @@ $cable->to('dashboard')->update(
 
 ## Presence Channels
 
-Presence channels allow you to track which users are online in real-time.
+Presence channels allow you to easily track which users are online in real-time.
+
+**Note**: You must define the following meta tag inside <head> tag. This is automatically used by the `cable.js` to pass CSRF token in request header for presence endpoints.
+
+```html
+<meta name="csrf-token" content="<?= csrf_token() ?>">
+```
 
 **Initialize the channel presence**
 

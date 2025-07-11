@@ -46,54 +46,113 @@ It support `MySQL` and `Redis` based backends for enabling realtime support and 
 
 ## Quick Start
 
-### 1. Server-Side Setup
+### 1. Run Migration
+
+Run the following migration command:
+
+```cli
+php console create:migration create_table_cable_system
+```
+
+Update following in your `up()/down()` migration methods:
+
+```php
+public function up(): void
+{
+    // table: cable_messages
+    $this->create('cable_messages', function(Table $table) {
+        $table->id();
+        $table->varchar('channel', 255);
+        $table->varchar('event', 255);
+        $table->column('payload')->type('json')->nullable();
+        $table->datetime('created_at')->nullable();
+        
+        $table->index('channel');
+    }); 
+
+    // table: cable_presence
+    $this->create('cable_presence', function(Table $table) {
+        $table->id();
+        $table->varchar('channel', 255);
+        $table->column('user_id')->type('bigint')->attribute('unsigned');
+        $table->datetime('last_seen');
+
+        $table->foreignKey('user_id')->references('id')->on('users')->cascadeOnDelete()->cascadeOnUpdate();
+        
+        $table->unique(['channel', 'user_id']);
+        $table->index('channel');
+        $table->index('last_seen');
+    });
+}
+
+public function down(): void
+{
+    $this->drop('cable_messages');
+    $this->drop('cable_presence');
+}
+```
+
+### 2. Server-Side Setup
 
 **Choose a driver:**
-   - Database (default, simple, persistent)
-   - Redis (high-performance, temporary)
+   - Database (default, simple, persistent storage)
+   - Redis (high-performance, temporary storage)
     
 You can view available configurations in `config/cable.php` file.
 
-### 2. Emitting Events
-
-In your controller's method:
+### 3. Define Route
 
 ```php
-// Send a message to the 'chat:42' channel
-$cable->to('chat:42')->emit('message:new', [
-    'user' => 'alice',
-    'text' => 'Hello, world!'
-]);
+route()->post('/realtime/send-message', RealtimeController::class, 'triggerMessage');
 ```
 
-### 3. Receiving Events in the Browser
+This route will forward the `POST /realtime/send-message` request to **RealtimeController**'s triggerMessage() method.
 
-Include the client:
+### 4. Emitting Events
+
+In your controller's method, emit an event `message:new` to the `hello` channel with required payload:
+
+```php
+class RealtimeController
+{
+    public function triggerMessage(Cable $cable)
+    {
+        $cable->to('hello')->emit('message:new', [
+            'message' => request()->input('message'),
+        ]);
+    
+        return response()->json(['success' => true]);
+    }
+}
+```
+
+### 5. Receive Events
+
+In your frontend, include the `cable.js` script file:
 
 ```html
 <?= asset()->load('js/cable.js') ?>
 ```
 
-Subscribe and handle events:
+Initialize `cable` client and subscribe to `hello` channel events:
 
 ```js
-cable.connect().subscribe('chat:42', {
-    'message:new': (payload) => {
-        console.log(payload.user + ': ' + payload.text);
-    },
-    'dom-update': (payload) => {
-        document.querySelector(payload.selector).innerHTML = payload.html;
-    }
+document.addEventListener('DOMContentLoaded', function() {
+
+    cable.connect().subscribe('hello', {
+        'message:new': payload => {
+            console.log(payload.message);
+        },
+    });
+
 });
 ```
-
----
 
 ## Cable API Reference
 
 ### Cable Class & Methods
 
-#### 1. `to(string $channel): self`
+#### `to(string $channel): self`
 Targets a specific channel for subsequent events.
 
 ```php
@@ -101,7 +160,7 @@ Targets a specific channel for subsequent events.
 $chat = $cable->to('chat:42');
 ```
 
-#### 2. `emit(string $event, array $payload = [])`
+#### `emit(string $event, array $payload = [])`
 Sends an event (with payload) to the current channel.
 
 ```php
@@ -112,7 +171,8 @@ $cable->to('chat:42')->emit('message:new', [
 ]);
 ```
 
-#### 3. `update(string $selector, string $html)`
+#### `update(string $selector, string $html)`
+
 Emits a `dom-update` event, allowing you to update parts of the UI in real time.
 
 ```php
@@ -120,7 +180,7 @@ Emits a `dom-update` event, allowing you to update parts of the UI in real time.
 $cable->to('dashboard')->update('#status', '<span>Online</span>');
 ```
 
-#### 4. `getMessages(?string $channel = null, ?int $lastId = null): array`
+#### `getMessages(?string $channel = null, ?int $lastId = null): array`
 Retrieves new messages for a channel since a given message ID. Used by polling clients (normally not called directly).
 
 ```php
@@ -131,7 +191,7 @@ foreach ($messages as $msg) {
 }
 ```
 
-#### 5. `cleanup(int $olderThanSeconds = 86400)`
+#### `cleanup(int $olderThanSeconds = 86400)`
 Deletes old messages from the backend (maintenance/housekeeping).
 
 ```php
@@ -139,118 +199,25 @@ Deletes old messages from the backend (maintenance/housekeeping).
 $cable->cleanup(3600);
 ```
 
-#### 6. `getDriver(): CableDriverInterface`
-Returns the current driver instance (for advanced usage).
-
-```php
-$driver = $cable->getDriver();
-```
-
----
-
-### MessageBatcher
-Efficiently emits many events as a single batch (reduces DB/Redis writes):
-
-```php
-use Lightpack\Cable\MessageBatcher;
-
-// Create a batcher for the 'metrics' channel, batching up to 100 events
-$batcher = new MessageBatcher($cable, 'metrics', 100);
-
-// Add events to the batch
-$batcher->add('metric:update', ['cpu' => 42]);
-$batcher->add('metric:update', ['cpu' => 43]);
-
-// Manually flush the batch (or let it auto-flush on shutdown)
-$batcher->flush();
-```
-
----
-
-## Drivers Explained
-
-### CableDriverInterface
-Any driver must implement:
-- `emit($channel, $event, $payload)`
-- `getMessages($channel, $lastId)`
-- `cleanup($olderThanSeconds)`
-
-### Database Driver
-- Stores messages in a table (default: `cable_messages`).
-- Good for small/medium scale, persistent history, easy setup.
-- Example schema:
-  ```sql
-  CREATE TABLE cable_messages (
-      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-      channel VARCHAR(255) NOT NULL,
-      event VARCHAR(255) NOT NULL,
-      payload TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
-  ```
-- Cleanup old messages regularly.
-
-### Redis Driver
-- Stores messages in Redis sorted sets (keyed by channel).
-- Ultra-fast, ephemeral (auto-expires), scales for high-traffic.
-- Use for chat, dashboards, presence at scale.
-- Set up Redis and register the driver:
-  ```php
-  use Lightpack\Cable\Drivers\RedisCableDriver;
-  $driver = new RedisCableDriver($redis);
-  $cable = new Cable($driver);
-  ```
-- Automatic expiry and cleanup.
-
-### Custom Drivers
-Implement `CableDriverInterface` for any backend (e.g., Kafka, SQS, WebSockets).
-
----
+> You can run a schedule to routinely cleanup old messages.
 
 ## Presence Channels
 
-Presence lets you track which users are online in a channel—essential for collaborative apps, group chat, and live dashboards.
+Presence lets you track which users are online in a channel.
 
 ### Using Presence
-```php
-use Lightpack\Cable\Presence;
-use Lightpack\Cable\Drivers\DatabasePresenceDriver;
-$presenceDriver = new DatabasePresenceDriver($db);
-$presence = new Presence($cable, $presenceDriver);
 
+```php
 // User joins a channel
 $presence->join($userId, 'room1');
 
 // User leaves
 $presence->leave($userId, 'room1');
 
-// Heartbeat to stay online
+// Heartbeat to check if online
 $presence->heartbeat($userId, 'room1');
 
-// Get users present
-$users = $presence->getUsers('room1');
-```
-
-### PresenceDriverInterface
-Implements presence tracking for users in channels. Example usage:
-
-```php
-use Lightpack\Cable\Presence;
-use Lightpack\Cable\Drivers\DatabasePresenceDriver;
-
-$presenceDriver = new DatabasePresenceDriver($db);
-$presence = new Presence($cable, $presenceDriver);
-
-// User joins a channel
-$presence->join($userId, 'room1');
-
-// User leaves
-$presence->leave($userId, 'room1');
-
-// Heartbeat to keep user present
-$presence->heartbeat($userId, 'room1');
-
-// Get users currently present
+// Get users present in a channel
 $users = $presence->getUsers('room1');
 
 // Get all channels a user is present in
@@ -259,25 +226,6 @@ $channels = $presence->getChannels($userId);
 // Clean up stale presence records
 $presence->cleanup();
 ```
-
-#### DatabasePresenceDriver
-- Tracks users in a table (default: `cable_presence`).
-- Uses upsert for join/heartbeat.
-- Cleans up stale sessions.
-
-#### RedisPresenceDriver
-- Tracks users in Redis sets (per channel/user).
-- Ultra-fast, auto-expires.
-
----
-
-## Batching Events
-
-Batching reduces backend writes and network load by grouping many events into one message.
-
-- Use `MessageBatcher` when emitting many events rapidly (e.g., analytics, metrics).
-- Auto-flushes on shutdown, or call `flush()` manually.
-- Client receives a `batch` event with all grouped events.
 
 ---
 
@@ -325,67 +273,6 @@ Cable.js can play sounds for events:
 ```js
 cable.playSound('/sounds/notify.mp3');
 ```
-
----
-
-## Best Practices & Advanced Usage
-
-- **Security:** Use unique, non-guessable channel names for private data. Implement authentication/authorization in your app logic.
-- **Cleanup:** Regularly call `cleanup()` on your driver to remove old messages/presence records.
-- **Scaling:** For high-traffic, prefer Redis drivers, tune batch sizes, shard channels if needed.
-- **Testing:** All Cable components are fully testable—use mocks for drivers, test event emission and presence logic.
-- **Custom Drivers:** Implement the relevant interface for any backend; see source/tests for examples.
-- **Client Polling:** Tune polling intervals for your use case (default: 3s).
-
----
-
-## Troubleshooting & FAQ
-
-- **Events not received?** Check channel names, driver config, and polling intervals.
-- **High DB/Redis load?** Use batching, increase cleanup frequency, consider sharding.
-- **Presence not updating?** Ensure heartbeats are sent regularly, check timeout settings.
-- **Need push (WebSockets) support?** Implement a custom driver and JS client if needed—Cable is designed for extensibility.
-
----
-
-## Extending Cable
-
-- **Write your own driver:** Implement `CableDriverInterface` or `PresenceDriverInterface`.
-- **Integrate with frameworks:** Cable is framework-agnostic—use in any PHP app, or integrate with React/Vue/Angular on the front-end.
-- **Real-world Example:**
-    - Collaborative whiteboard: use presence to track users, emit drawing events to a channel, update canvases in real time.
-    - Live dashboard: batch metric updates, push to all dashboards instantly.
-
----
-
-## Appendix
-
-### Database Schema: cable_messages
-```sql
-CREATE TABLE cable_messages (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    channel VARCHAR(255) NOT NULL,
-    event VARCHAR(255) NOT NULL,
-    payload TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### Database Schema: cable_presence
-```sql
-CREATE TABLE cable_presence (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    channel VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
-    last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX (channel),
-    INDEX (user_id),
-    UNIQUE KEY channel_user (channel, user_id)
-);
-```
-
-### Test Coverage
-Cable and all drivers are comprehensively tested—see `tests/Cable/` for examples covering every method, edge case, and integration scenario.
 
 ---
 

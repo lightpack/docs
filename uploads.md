@@ -168,14 +168,16 @@ With the image based uploads, you can define image transformations when attachin
 $user->attach('avatar', [
     'collection' => 'profile',
     'transformations' => [
-        'thumbnail' => [
-            'resize' => [200, 200],
-        ],
-        'medium' => [
-            'resize' => [400, 400],
-        ],
+        'thumbnail_small' => ['resize', 200, 200],
+        'thumbnail_medium' => ['resize', 400, 400],
     ],
 ]);
+```
+
+The value of the transformation key is the image transformation related methods and required arguments:
+
+```
+[resize, 200, 200]
 ```
 
 Then access the transformed versions:
@@ -210,11 +212,10 @@ You can specify different dimensions for each variant:
 
 ```php
 'transformations' => [
-    'thumbnail' => [
-        'resize' => [200, 200],
-    ],
-    'banner' => [
-        'resize' => [1200, 300],
+    'transformations' => [
+        'thumbnail_small' => ['resize', 200, 200],
+        'thumbnail_medium' => ['resize', 400, 400],
+        'banner' => ['resize', 1200, 300],
     ],
 ]
 ```

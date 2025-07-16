@@ -94,3 +94,4 @@
   * [Uploads](uploads.md)
   * [Social Auth](social-auth.md)
   * [SMS](sms.md)
+  * [MFA](mfa.md)

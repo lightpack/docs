@@ -68,7 +68,7 @@
 * Advanced
 
   * [Mails](mails.md)
-  * [Jobs](jobs.md)
+  * [Queue](queue.md)
   * [Schedule](schedule.md)
   * [Filters](filters.md)
   * [Events](events.md)

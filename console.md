@@ -1,236 +1,285 @@
-# Console: Lucy CLI
+# Console: Lightpack CLI Assistant
 
-**Lightpack** comes with a console CLI assistant named **`Lucy CLI`**. It is purposefully kept simple and is dead easy to start building CLI features for your application.
+Lightpack ships with developer-focused command-line assistant named **console**. It’s simple, powerful, and built for rapid PHP application development, automation, and extension.
 
-Suppose you want to build a CLI command that generates fresh new **controller** class
-code file for you. For that you may fire following command from your terminal inside
-your project root folder.
+---
+
+## Quick Example
+
+To generate a new controller class:
 
 ```terminal
-php lucy create:controller Product
+php console create:controller Product
 ```
 
-Now that you have got an overview of what **`Lucy CLI`** is, read the docs below
-for detailed guidelines.
+---
 
 ## Available Commands
 
-Lightpack ships with a couple of console commands for code file generation to assist in 
-rapid application development.
+console CLI provides a comprehensive set of commands for code generation, database management, job processing, application utilities, and more. Each command is described below with usage examples and options.
+
+### Code Generators
+
+#### create:env
+Create a new `.env` file in your project root by copying from the example template.
 
 ```terminal
-create:env
-create:event
-create:model
-create:filter
-create:command
-create:provider
-create:controller
-link:storage
-unlink:storage
-process:jobs
+php console create:env
 ```
 
-### create:env
-
-This command creates an environment file named `env.php` by copying the contents of `env.example.php` in project root directory.
+#### create:event
+Generate a new event class in `app/Events`.
 
 ```terminal
-php lucy create:env
+php console create:event UserRegistered
 ```
 
-### create:event
-
-This command creates an event class in `app/Events` folder. Simply pass it the name
-of the event class.
+#### create:model
+Generate a new model class in `app/Models`.
 
 ```terminal
-php lucy create:event SubscribeEvent
+php console create:model Product
 ```
+- `--table=products` : Set the table name.
+- `--key=product_id` : Set the primary key name.
 
-### create:model
-
-This command creates a model class in `app/Models` folder. Simply pass it the name
-of the model class. 
+#### create:filter
+Generate a new filter class in `app/Filters`.
 
 ```terminal
-php lucy create:model Product
+php console create:filter InputFilter
 ```
 
-Optionally pass the `--table` flag to set the **table** name. 
+#### create:command
+Generate a new command class in `app/Commands`.
 
 ```terminal
-php lucy create:model Product --table=products 
+php console create:command HelloCommand
 ```
 
-Optionally pass the `--key` flag to set the **primary** key name. 
+#### create:provider
+Generate a new provider class in `app/Providers`.
 
 ```terminal
-php lucy create:model Product --key=product_id
+php console create:provider MailProvider
 ```
+- `--instance` : Create a provider that calls the container's factory method.
 
-### create:filter
-
-This command creates a filter class in `app/Filters` folder. Simply pass it the name
-of the filter class.
+#### create:controller
+Generate a new controller class in `app/Controllers`.
 
 ```terminal
-php lucy create:filter InputFilter
+php console create:controller ProductController
 ```
 
-### create:command
-
-This command creates a command class in `app/Commands` folder. Simply pass it the name
-of the command class.
+#### create:migration
+Generate a new migration file in `database/migrations`.
 
 ```terminal
-php lucy create:command HelloCommand
+php console create:migration create_table_users
 ```
 
-### create:provider
-
-This command creates a provider class in `app/Providers` folder. Simply pass it the name
-of the provider class.
+#### create:job
+Generate a new job class in `app/Jobs`.
 
 ```terminal
-php lucy create:provider MailServiceProvider
+php console create:job SendEmailJob
 ```
 
-You can optionally pass `--instance`` flag to create a provider that calls **factory()** method of the [container](/containers).
+#### create:mail
+Generate a new mail class in `app/Mails`.
 
 ```terminal
-php lucy create:provider MailServiceProvider --instance
+php console create:mail WelcomeMail
 ```
 
-### create:controller
-
-This command creates a controller class in `app/Controllers` folder. Simply pass it the name of the controller class.
+#### create:seeder
+Generate a new seeder class in `database/seeders`.
 
 ```terminal
-php lucy create:controller ProductController
+php console create:seeder UserSeeder
 ```
 
-You can also create a namespaced controller as shown:
-
-```terminal 
-php lucy create:controller 'Product\IndexController'
-```
-
-### link:storage
-
-This command creates a symbolic link from **public/uploads** to **storage/uploads/public**. 
+#### create:transformer
+Generate a new transformer class in `app/Transformers`.
 
 ```terminal
-php lucy link:storage
+php console create:transformer UserTransformer
 ```
 
-Use this command to make files in **storage/uploads/public** publicly accessible.
-
-### unlink:storage
-
-This command removes the symbolic link from **public/uploads** to **storage/uploads/public**. 
+#### create:request
+Generate a new request class in `app/Requests`.
 
 ```terminal
-php lucy unlink:storage
+php console create:request RegisterRequest
 ```
 
-### process:jobs
+---
 
-To process background jobs created in `Lightpack`, fire this command:
+### File Storage
+
+#### link:storage
+Create a symbolic link from `public/uploads` to `storage/uploads/public`.
 
 ```terminal
-php lucy process:jobs
+php console link:storage
 ```
 
-The background job worker sleeps for `5 seconds` by default in case it finds no jobs to process and polls again. You can change this by passing the `--sleep` flag.
-
-For example, here we are specifying the job worker to poll for jobs every `30 seconds`:
+#### unlink:storage
+Remove the symbolic link created by `link:storage`.
 
 ```terminal
-php lucy process:jobs --sleep=30
+php console unlink:storage
 ```
 
-## Build Your Own Command
+---
 
-You can easily build your own custom command classes and register them to run from **PHP CLI** environment. Follow these steps as documented below.
+### Database & Migrations
 
-### Create Command Handler
-
-As a first step, you should create a command class inside 'app/Commands' folder. You can easliy do so with the help of Lightpack's `lucy` console assistant.
-
-Inside the terminal from your project root, run following command to **auto-generate**
-the command class.
+#### migrate:up
+Run all pending database migrations (MySQL/MariaDB only).
 
 ```terminal
-php lucy create:command TestCommand
+php console migrate:up
+```
+- Prompts for confirmation in production.
+
+#### migrate:down
+Rollback database migrations.
+
+```terminal
+php console migrate:down --all
+php console migrate:down --steps=2
+```
+- `--all` : Rollback all migrations.
+- `--steps=N` : Rollback N batches.
+
+#### db:seed
+Run the `DatabaseSeeder` to seed your database.
+
+```terminal
+php console db:seed
+```
+- Prompts for confirmation before running.
+
+---
+
+### Jobs & Scheduling
+
+#### process:jobs
+Run the background job worker to process queued jobs.
+
+```terminal
+php console process:jobs
+```
+- `--sleep=N` : Polling interval in seconds (default: 5).
+- `--queue=emails,notifications` : Comma-separated list of queues (default: `default`).
+- `--cooldown=N` : Exit after this many seconds of inactivity (default: run forever).
+
+#### schedule:events
+Run all scheduled tasks (for cron integration).
+
+```terminal
+php console schedule:events
 ```
 
-This command should have created the `TestCommand` class inside `app/Commands` folder. Now the next step is to register a **console command** for this class.
+---
 
-### Register New Command
+### Application Utilities
 
-To register a new command, open `config/commands.php` file. There in the array,
-put your **command name** as key and **command handler** as a new key-value pair.
+#### app:key
+Generate and set a new `APP_KEY` in your `.env` file.
 
-For example:
+```terminal
+php console app:key
+```
+
+#### app:serve
+Start the PHP built-in server using `APP_URL` from `.env` as the host.
+
+```terminal
+php console app:serve
+```
+
+---
+
+### Hot Reload & Watch
+
+#### watch
+Watch files or directories for changes and run a shell command (hot reload for development).
+
+```terminal
+php console watch --path=app,config --ext=php,json --run="vendor/bin/phpunit"
+```
+- `--path=app,config` : Comma-separated list of directories/files to watch (required).
+- `--ext=php,json` : Comma-separated file extensions to filter (optional).
+- `--run=command` : Shell command to execute on change (optional).
+- `--help` : Show detailed usage.
+
+---
+
+## Interactive Prompts & Output
+
+Lightpack console CLI provides a rich set of APIs for interactive command-line UX:
+
+### Output Formatting
+
+Use the `Lightpack\Console\Output()` class for styled output:
 
 ```php
-<?php
+$output = new Output();
 
-return [
-    'test:command' => App\Console\TestCommand::class,
-];
+$output->info('Information');
+$output->success('Success!');
+$output->error('An error occurred');
+$output->warning('This is a warning');
+$output->line('Plain text');
+$output->pad('Left', 'Right', 30, '.'); // Left................. Right
+$output->infoLabel('INFO'); // Colored label
 ```
 
-Now you are ready to run your `test:command` from **PHP CLI** itself.
+### Interactive Prompts
 
-### Test Run Command
-
-Open your terminal and navigate to your projects root folder. There you can fire
-following command to test it.
-
-```terminal
-php lucy test:command
-```
-
-You should see an output same as below:
-
-```terminal
-Built my first test command
-```
-
-### Passing Command Arguments
-
-You can pass any number of argument/options to the command you tested.
-
-```terminal
-php lucy test:command arg1 arg2 -n=23 --flag='hello world'
-```
-
-Now in the **`run()`** method of your TestCommand class, you can access all the
-arguments passed in the **`$arguments`** array.
+Use the `Lightpack\Console\Prompt` class for user input:
 
 ```php
-<?php
-...
-class TestCommand
-{
-    public function run(array $arguments = [])
-    {
-        print_r($arguments);
-    }
-}
-...
+$prompt = new Prompt();
+
+$name = $prompt->ask('What is your name?');
+$password = $prompt->secret('Enter password:');
+$agree = $prompt->confirm('Do you agree?', true); // [Y/n]
+$email = $prompt->askWithValidation('Email:', fn($v) => filter_var($v, FILTER_VALIDATE_EMAIL));
+$choice = $prompt->choice('Pick one:', ['a' => 'Apple', 'b' => 'Banana']);
 ```
 
-You should see an ouput as shown below:
+---
 
-```terminal
-Array
-(
-    [0] => arg1
-    [1] => arg2
-    [2] => -n=23
-    [3] => --flag=hello world
-)
-```
+## Custom Commands & Registration
+
+### Creating a Command
+
+1. Generate a new command class:
+
+   ```terminal
+   php console create:command MyCommand
+   ```
+
+2. Implement the `run(array $arguments = [])` method in your class.
+
+3. Register your command in `config/commands.php`:
+
+   ```php
+   return [
+       'my:command' => App\Commands\MyCommand::class,
+   ];
+   ```
+
+4. Run your command:
+
+   ```terminal
+   php console my:command arg1 --flag=value
+   ```
+
+**Note:** All arguments are passed as an array to `run()`.
+
+---

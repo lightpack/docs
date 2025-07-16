@@ -1,49 +1,94 @@
-# Background Jobs
+# Lightpack Background Jobs: Complete Guide
 
 Ideally, a time consuming job should be performed behind the scenes out of the main HTTP request context. For example, sending email to a user blocks the application untill the processing finishes and this may provide a bad experience to your application users. 
 
 What if you could perform time consuming tasks, such as sending emails, in the background without blocking the actual request? 
 
-*Welcome to background job processing.*
+**Welcome to background job processing.**
 
 While there are highly capable solutions available like **RabbitMQ**, **ZeroMQ**, **ActiveMQ**, **RocketMQ**, and many others, `Lightpack` provides background jobs processing capabilities that is super easy to use and understand. 
 
 Although `Lightpack` will solve background jobs processing needs for most of the applications, it never aims to be a **full-fledged** message queue broker like those mentioned above.
 
-<p class="tip">Lightpack provides a <b>MySQL/MariaDB/Redis</b> powered background job processor.</p>
+> **Lightpack Jobs** provides robust, extensible, and developer-friendly background job processing for PHP apps. Supports MySQL/MariaDB, Redis, synchronous, and null engines out of the box.
 
-## Jobs Table
+## Supported Engines
+- **Database:** MySQL/MariaDB-backed persistent queue
+- **Redis:** High-performance, production-grade queue (sorted sets, atomic ops, delayed jobs)
+- **Sync:** Executes jobs immediately (for synchronous execution)
+- **Null:** Discards jobs (for tests/dev)
 
-Currently, jobs processing is powered by `MySQL/MariaDB` database. So you will need to migrate a `jobs` table in your app database. So please create this table in your database:
+View `config/jobs.php` for desired job queue related configurations.
 
-```sql
-CREATE TABLE jobs (
-    id int NOT NULL AUTO_INCREMENT,
-    handler varchar(255) NOT NULL,
-    queue varchar(55) NOT NULL,
-    payload text NOT NULL,
-    status varchar(55) NOT NULL,
-    attempts int NOT NULL,
-    exception longtext NULL,
-    created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    scheduled_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    failed_at datetime NULL,
-    PRIMARY KEY (id),
-    index status (status),
-    index scheduled_at (scheduled_at),
-    index queue (queue)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+## Jobs Table Migration (Database Engine)
+
+If using the **database** engine, you need a `jobs` table. 
+
+**Create the migration:**
+
+```cli
+php console create_table_jobs
 ```
+
+**Update the migration logic:**
+
+```php
+return new class extends Migration
+{
+    public function up(): void
+    {
+        $this->create('jobs', function (Table $table) {
+            $table->id();
+            $table->varchar('handler', 255);
+            $table->varchar('queue', 55)->index();
+            $table->text('payload');
+            $table->varchar('status', 55)->index();
+            $table->column('attempts')->type('int');
+            $table->column('exception')->type('longtext')->nullable();
+            $table->createdAt();
+            $table->datetime('scheduled_at')->default('CURRENT_TIMESTAMP')->index();
+            $table->datetime('failed_at')->nullable();
+        });
+    }
+
+    public function down(): void
+    {
+        $this->drop('jobs');
+    }
+};
+```
+
+**Run the migration:**
+
+```cli
+php console migrate:up
+```
+
+---
 
 ## Creating Jobs
 
-Jobs are simply classes that implement `execute()` method. To create a new job class, fire this command in your terminal from project root:
+Jobs are PHP classes extending `Lightpack\Jobs\Job` and implementing a `run()` method. 
+
+To create a new job class, fire this command in your terminal from project root:
 
 ```terminal
 php lucy create:job SendMail
 ```
 
 This should have created a `SendMail.php` class file in `app/Jobs` folder. You can implement your job logic in the `run()` method.
+
+
+
+```php
+use Lightpack\Jobs\Job;
+
+class SendMail extends Job {
+    public function run() {
+        // Your job logic, e.g. send email using $this->payload
+    }
+}
+```
 
 ## Dispatching Jobs
 
@@ -64,7 +109,65 @@ $payload = [
 (new SendMail)->dispatch($payload);
 ```
 
-This will push the job into the database for processing in background and will not block the request.
+## Advanced Job Features
+- **Queue:** Set `$queue` property (default: 'default')
+- **Delay:** Set `$delay` property (strtotime string, e.g. '+30 seconds')
+- **Attempts:** Set `$attempts` property (default: 1)
+- **Retry After:** Set `$retryAfter` property (strtotime string, e.g. '+1 minute')
+
+Example:
+```php
+class SendMail extends Job {
+    protected $queue = 'emails';
+    protected $delay = '+1 minute';
+    protected $attempts = 3;
+    protected $retryAfter = '+10 seconds';
+}
+```
+
+### Queue
+
+You can specify a queue for a job by setting the `$queue` property:
+
+```php
+class SendMail
+{
+    protected $queue = 'emails';
+}
+```
+
+### Delay
+
+You can delay job processing by a specified amount of time by setting the `$delay` property:
+
+```php
+class SendMail
+{
+    protected $delay = '+30 seconds';
+}
+```
+
+### Attempts
+
+You can specify the number of attempts a job should be retried by setting the `$attempts` property:
+
+```php
+class SendMail
+{
+    protected $attempts = 3;
+}
+```
+
+### Retry After
+
+You can specify the time after which a failed job should be retried by setting the `$retryAfter` property:
+
+```php
+class SendMail
+{
+    protected $retryAfter = '+1 minute';
+}
+```
 
 ## Processing Jobs
 
@@ -74,38 +177,46 @@ Once you have dispatched your job its time to run them. Fire this command from t
 php lucy process:jobs
 ```
 
-This will hang your terminal prompt and will wait for any jobs to process. If a job is processed successfully, you should see a terminal message something like this for example:
+This will hang your terminal prompt and will wait for any jobs to process. If a job is processed successfully or faile, you should see a terminal message accordingly.
 
-```terminal
-✔ Job processed successfully: 123
+### Worker Options
+- `--sleep=N` (default 5): Seconds to sleep between polling
+- `--queues=emails,default`: Comma-separated queue names
+- `--cooldown=N`: Max seconds to run before exiting
+
+Example:
+```cli
+php lucy process:jobs --sleep=2 --queues=emails,default --cooldown=600
 ```
 
-If the job throws an exception that can be caught and fails, you should see a terminal message something like this for example:
+### Signal Handling
+The worker supports UNIX signals for graceful shutdown and reload.
 
-```terminal
-✖ Error dispatching job: 123 - Recipient email address is missing
-```
+## Custom Hooks
 
-**NOTE:** All jobs that failed processing will have status `failed` in the `jobs` table.
-
-## Delaying Jobs
-
-By default, a job is processed as soon as it is available for processing. However, you can delay job processing by a specified amount of time. For that, set the `$delay` property with any `strtotime` compatible string value. 
-
-For example, following job will be processed after a delay of `30 seconds`. 
+To run custom logic after a job succeeds or fails (after all retries are exhausted), implement `onSuccess()` and/or `onFailure()` in your job class:
 
 ```php
-class SendMail
-{
-    protected $delay = '+30 seconds';
+class SendMail extends Job {
+    public function run() {
+        // ... job logic ...
+    }
+
+    public function onSuccess() {
+        // Called after successful processing
+    }
+
+    public function onFailure() {
+        // Called after all attempts fail
+    }
 }
 ```
 
-## Supervising Jobs
+The framework will call these methods automatically if they exist.
 
-When testing your jobs locally, it fine to inspect them in terminal but in production, the processing of jobs should be **deamonized**. What this means is that the job **worker** should keep running in the background as a system process and in case it stops, it should start automatically.
+## Production
 
-There are various process monitoring solutions available like **upstart**, **systemd**, **supervisor**. Here is a solution using `supervisor` as job process monitor.
+In  **production** environment, you should run and monitor job processing by using a process monitoring solution like **supervisor**.
 
 First, you will have to install `supervisor`:
 
@@ -137,3 +248,5 @@ sudo supervisorctl reread
 sudo supervisorctl update
 sudo supervisorctl start lightshop-worker:*
 ```
+
+---

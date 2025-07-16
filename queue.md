@@ -10,9 +10,7 @@ While there are highly capable solutions available like **RabbitMQ**, **ZeroMQ**
 
 Although `Lightpack` will solve background jobs processing needs for most of the applications, it never aims to be a **full-fledged** message queue broker like those mentioned above.
 
-<p class="tip">Lightpack provides a <b>MySQL/MariaDB</b> powered background job processor. Although, some of you might be concerned with its performance, in my experience it has worked fine and scales really well for most of the application needs out there.</p>
-
-<p class="tip">Meanwhile, a <b>beanstalkd</b> powered job processor is in progress which will be integrated in the core framework once done.</p>
+<p class="tip">Lightpack provides a <b>MySQL/MariaDB/Redis</b> powered background job processor.</p>
 
 ## Jobs Table
 

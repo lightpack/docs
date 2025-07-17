@@ -112,6 +112,8 @@ $file->extension('path/to/file');
 
 The get the size of a file in bytes, call `size()` method.
 
+- **Returns `null` if the file does not exist.**
+
 ```php
 $file->size('/path/to/file'); // 1024
 ```
@@ -147,6 +149,8 @@ $file->modified('/path/to/file', true, 'd-M, Y'); // 7-Feb, 2020
 ## info()
 
 Calling `info()` method returns an instance of `SplFileInfo` class from PHP SPL library. This class provides an object-oriented access to the properties of a file or directory.
+
+- **Returns `null` if the file does not exist.**
 
 It is worth your time to have a look at this class details.
 
@@ -188,14 +192,15 @@ $file->makeDir('/path/to/file', 0775);
 
 To copy the contents of a source folder into another folder, call `copyDir()` method. It will recursively copy all the files and sub-folders from the source to the destination folder.
 
+- **The third argument (`delete`) deletes the source folder after copy (useful for moves).**
+
 This returns `true` on success otherwise `false`. 
 
 ```php
 $file->copyDir('/path/to/source', '/path/to/destination');
 ```
 
-If you want to delete the surce folder after copy operation, pass
-`true` as third argument.
+If you want to delete the source folder after copy operation, pass `true` as third argument.
 
 ```php
 $file->copyDir('/path/to/source', '/path/to/destination', true);
@@ -217,6 +222,8 @@ $file->emptyDir('/path/to/file');
 
 To delete a folder and all its content, call `removeDir()` method.
 
+- **The second argument (`delete`) controls whether the directory itself is deleted (default: `true`).**
+
 It returns `true` on success otherwise `false`.
 
 ```php
@@ -226,6 +233,8 @@ $file->removeDir('/path/to/file');
 ## recent()
 
 To get the most recently modified file in a folder, call `recent()` method. 
+
+- **Returns `null` if there are no files in the directory.**
 
 This method returns an instance of [`SplFileInfo`](https://www.php.net/manual/en/class.splfileinfo.php) class which provides a number of methods to get the information about a file.
 
@@ -240,6 +249,8 @@ $recent->getFilename();
 
 To list all the files and folders in a given directory, call `traverse()` method. 
 
+- **Returns `null` if the path is not a directory.**
+
 This method will return an array of the contents of a folder with filepath as `key` and an instance of `SplFileInfo` as value.
 
 ```php
@@ -248,4 +259,56 @@ $files = $file->traverse('path/to/file');
 foreach($files as $file) {
     echo $file->getFilename();
 }
+```
+
+---
+
+## moveDir()
+
+Move a directory and all its contents to a new location. This is a wrapper around `copyDir()` that deletes the source after copy.
+
+```php
+$file->moveDir('/path/to/source', '/path/to/destination');
+```
+
+---
+
+## hash()
+
+Get a cryptographic hash (checksum) of a file’s contents. Useful for verifying file integrity, cache-busting, or detecting changes. Supports any hash algorithm supported by PHP (`sha256`, `md5`, etc).
+
+```php
+$file->hash('/path/to/file'); // default: sha256
+$file->hash('/path/to/file', 'md5');
+```
+
+---
+
+## atomic()
+
+Write contents to a file atomically. This prevents partial/corrupted writes by writing to a temp file and then renaming. Especially useful for config, cache, or data files that must never be corrupted.
+
+```php
+$file->atomic('/path/to/file', $contents);
+```
+
+---
+
+## Directory Iterators
+
+For advanced directory traversal, you can get iterators:
+
+```php
+$iterator = $file->getIterator('/path/to/dir'); // FilesystemIterator, non-recursive
+$iterator = $file->getRecursiveIterator('/path/to/dir'); // RecursiveIteratorIterator, recursive
+```
+
+---
+
+## Path Sanitization
+
+For security, you can sanitize file paths:
+
+```php
+$safe = $file->sanitizePath($userInputPath);
 ```

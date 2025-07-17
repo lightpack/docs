@@ -1,163 +1,388 @@
 # Response
 
-The <code>Lightpack\Http\Response</code> class provides few utility methods to help with
-generating appropriate response to output.
+The `Lightpack\Http\Response` class provides a comprehensive, fluent API for generating HTTP responses in your application. It supports status codes, headers, content types, file downloads, streaming, security, caching, advanced output, and more.
 
-An instance of this class has already been configured in service container. So you can access
-it anywhere using <code>response()</code> function.
+An instance is automatically available via the `response()` helper.
 
-## Code
+---
 
-To set the response status code, use <code>setStatus()</code> method.
+## Status, Type, Message, and Body
 
-```php
-response()->setStatus(404);
-```
+- **Set Status Code:**
+  ```php
+  response()->setStatus(404);
+  ```
+  - Sets both the code and the standard status message, unless overridden.
+  - Default: `200` (OK)
 
-To get the set response code, use <code>getCode()</code> method.
+- **Get Status Code:**
+  ```php
+  $code = response()->getStatus();
+  ```
 
-```php
-response()->getStatus();
-```
+- **Set/Override Status Message:**
+  ```php
+  response()->setMessage('Not Found');
+  ```
+  - Default: Standard HTTP message for the code (e.g., `OK` for 200).
 
-<p class="tip">By default, the response code is set to <code>200</code>.</p>
+- **Get Status Message:**
+  ```php
+  $msg = response()->getMessage();
+  ```
 
-## Type
+- **Set Content Type:**
+  ```php
+  response()->setType('application/json');
+  ```
+  - Default: `text/html`
+  - Charset is always set to UTF-8.
 
-To set the resonse content type, use <code>setType()</code> method.
+- **Get Content Type:**
+  ```php
+  $type = response()->getType();
+  ```
 
-```php
-response()->setType('application/json');
-```
+- **Set Response Body:**
+  ```php
+  response()->setBody('Hello World');
+  ```
 
-To get the set reponse content type, use <code>getType()</code> method.
+- **Get Response Body:**
+  ```php
+  $body = response()->getBody();
+  ```
 
-```php
-response()->getType();
-```
+---
 
-<p class="tip">By default, the response content type is set to <code>text/html</code></p>
+## Header Management
 
-## Message
+- **Set a Header:**
+  ```php
+  response()->setHeader('X-Frame-Options', 'SAMEORIGIN');
+  ```
 
-To set the reponse status message, use <code>setMessage()</code> method.
+- **Set Multiple Headers:**
+  ```php
+  response()->setHeaders([
+      'Server' => 'Apache',
+      'X-Frame-Options' => 'SAMEORIGIN',
+  ]);
+  ```
 
-```php
-response()->setMessage('Not Found');
-```
+- **Get All Headers:**
+  ```php
+  $headers = response()->getHeaders();
+  ```
 
-To get the set response status message, use <code>geMessage()</code> method.
+- **Get a Header by Name:**
+  ```php
+  $value = response()->getHeader('X-Frame-Options');
+  ```
 
-```php
-response()->getMessage();
-```
+- **Check if Header Exists:**
+  ```php
+  if (response()->hasHeader('Content-Type')) { ... }
+  ```
 
-<p class="tip">By default, the response status message is set to <code>OK</code></p>
+---
 
-## Headers
+## Sending the Response
 
-To set a response header, use <code>setHeader()</code> method.
+- **Send the response to the client:**
+  ```php
+  response()->send();
+  ```
+---
 
-```php
-response()->setHeader('Server', 'Apache/2.4.1 (Unix)');
-response()->setHeader('X-Frame-Options', 'SAMEORIGIN');
-```
 
-To set multiple response headers at once, use <code>setHeaders</code> method.
+## Method Chaining
 
-```php
-response()->setHeaders([
-    'Server' => 'Apache/2.4.1 (Unix)',
-    'X-Frame-Options' => 'SAMEORIGIN'
-]);
-```
-
-To get all the set response headers, use <code>getHeaders()</code> method.
-
-```php
-response()->getHeaders();
-```
-
-## Body
-
-To set the response content body, use <code>setBody()</code> method.
-
-```php
-response()->setBody('Hello World');
-```            
-
-To get the set response body, use <code>getBody()</code> method.
-
-```php
-response()->getBody();
-```        
-
-## Send
-
-After you have configured the appropriate response, you would want to send the output to
-the client. For that, simply call <code>send()</code> method. It takes care of properly
-formatting the response output for you without you having to worry about preparing the
-output.
-
-```php
-response()->send();
-```
-
-## JSON
-
-To send a <code>JSON</code> response, use the <code>json() method.</code> Pass it an array of data
-to be sent as JSON response body. It takes care of setting content-type header to <code>application/json</code>.
-
-```php
-response()->json(['name' => 'Bob']);
-```
-
-## XML
-
-To send an <code>XML</code> response, use the <code>xml()</code> method. Pass it an
-XML formatted string to send as response. It takes care of setting content-type header to <code>text/xml</code>.
-
-```php
-response()->xml('xml-string');
-```
-
-## Chaining
-
-Method chaining is supported to assist you in preparing the appropriate response.
+All setters return `$this` for fluent chaining:
 
 ```php
 response()
-    ->setStatus(200)
-    ->setMessage('OK')
-    ->setType('text/html')
-    ->setBody('Hello World')
+    ->setStatus(201)
+    ->setType('application/json')
+    ->setHeader('X-Resource', 'created')
+    ->json(['id' => 5])
     ->send();
 ```
 
-## Download
+---
 
-To download the file in the user's browser as response:
+## JSON, XML, and Plain Text Responses
 
+- **JSON Response:**
+  ```php
+  response()->json(['success' => true]);
+  ```
+  - Sets Content-Type to `application/json` and encodes the data.
+  - Throws exception if encoding fails.
+
+- **XML Response:**
+  ```php
+  response()->xml('<root><name>Bob</name></root>');
+  ```
+  - Sets Content-Type to `text/xml`.
+
+- **Plain Text Response:**
+  ```php
+  response()->text('Hello World');
+  ```
+  - Sets Content-Type to `text/plain`.
+
+---
+
+## File Downloads and Streaming
+
+- **Download a locally stored file:**
+  ```php
+  response()->download('/path/to/file.pdf');
+  response()->download('/path/to/file.pdf', 'custom.pdf');
+  response()->download('/path/to/file.pdf', null, ['X-Header' => 'Value']);
+  ```
+
+  - Sets appropriate headers for download.
+  - Automatically detects MIME type.
+  - Reads file into memory (not recommended for large files).
+
+- **Stream a File Download (Memory Efficient):**
+  ```php
+  response()->downloadStream('/path/to/large.zip');
+  
+  // Stream in 2MB chunks
+  response()->downloadStream('/path/to/large.zip', 'archive.zip', [], 2*1024*1024); 
+  ```
+
+  - Streams file in chunks to client.
+  - Use for large files to avoid memory issues.
+
+- **Display a File Inline in Browser:**
+  ```php
+  response()->file('/path/to/image.jpg');
+  ```
+
+  - Like `download()`, but sets `Content-Disposition: inline`.
+
+- **Stream a File Inline:**
+  ```php
+  response()->fileStream('/path/to/large-video.mp4');
+  ```
+  
+  - Streams large files for in-browser display.
+
+- **Best Practice:** Always use streaming methods for files larger than a few megabytes.
+
+---
+
+
+## Streaming Responses
+
+Lightpack’s `Response` class provides several ways to stream data to the client in a memory-efficient, real-time manner. This is essential for large files, live data, CSV exports, and server-sent events (SSE).
+
+### 1. Arbitrary Content Streaming (`stream()`)
+
+Use `stream()` to send custom output in real time, such as:
+- Large dynamically-generated content
+- Server-Sent Events (SSE)
+- Progress updates
+- Long-running reports
+
+**Example: Real-time progress output**
 ```php
-response()->download('path/to/my/file');
+response()->stream(function() {
+    for ($i = 1; $i <= 10; $i++) {
+        echo "Progress: $i/10\n";
+        flush(); // Push output to client immediately
+        sleep(1);
+    }
+});
 ```
 
-You can additionally pass a custom name for download file as second parameter:
-
+**Example: Server-Sent Events (SSE)**
 ```php
-response()->download('path/to/my/file', 'profile.png');
+response()
+    ->setHeader('Content-Type', 'text/event-stream')
+    ->stream(function() {
+        for ($i = 0; $i < 5; $i++) {
+            echo "data: Message $i\n\n";
+            ob_flush(); flush();
+            sleep(2);
+        }
+    });
 ```
 
-You can also pass additional headers as an array in the third argument:
+**Notes:**
+- Always call `flush()` or `ob_flush()` to ensure data is sent immediately.
+- Use `setHeader()` to set appropriate content types (e.g., `text/event-stream` for SSE).
+- The callback receives no arguments; use closures to capture needed variables.
+- Use `getStreamCallback()` to retrieve the callback if needed.
+- Streaming disables the normal response body (`setBody()` is ignored if a stream is set).
 
+### 2. File Streaming for Downloads (`downloadStream()`)
+
+Use `downloadStream()` for memory-efficient, chunked file downloads:
+
+**Example: Download a large file in 2MB chunks**
 ```php
-response()->download('path/to/my/file', 'profile.png', ['Content-type' => 'image/png']);
+response()->downloadStream('/path/to/huge.zip', 'backup.zip', [], 2 * 1024 * 1024);
 ```
+- Automatically sets headers for file download.
+- Reads and outputs the file in chunks (default 1MB, configurable).
+- Avoids loading the entire file into memory.
+- Throws an exception if the file does not exist.
 
-## File
+**Best Practice:** Use for files larger than a few megabytes.
 
-This method is same as `download()` method. The only difference is instead of downloading, `file()` method displays the file in the user's browser:
+### 3. File Streaming for Inline Display (`fileStream()`)
 
+Use `fileStream()` to stream large files for direct display in the browser (e.g., videos, PDFs):
+
+**Example: Stream a video inline**
 ```php
-response()->file('path/to/my/file');
+response()->fileStream('/media/bigvideo.mp4');
 ```
+- Sets `Content-Disposition: inline` so the browser displays the file.
+- Uses chunked output for memory efficiency.
+
+### 4. CSV Streaming (`streamCsv()`)
+
+Use `streamCsv()` to efficiently export large datasets as CSV downloads:
+
+**Example: Export users as CSV**
+```php
+response()->streamCsv(function() {
+    echo "id,name\n";
+    foreach (User::all() as $user) {
+        echo $user->id . ',' . $user->name . "\n";
+    }
+}, 'users.csv');
+```
+- Sets `Content-Type: text/csv` and download headers.
+- The callback writes CSV rows directly to output.
+- Ideal for exporting large or streaming datasets.
+
+### 5. Streaming Gotchas and Best Practices
+
+- **Headers:** All headers must be set before returning the response. Once output starts, headers cannot be changed.
+- **Buffering:** Use `flush()` or `ob_flush()` to push output.
+- **Connection Handling:** If the client disconnects, the stream callback should handle it (see `connection_status()` in PHP).
+- **Error Handling:** For file streams, exceptions are thrown if the file is missing. For custom streams, handle errors in your callback.
+- **Memory Usage:** Streaming is essential for large files or datasets—never read large files into memory with `setBody()` or `download()`.
+- **Chaining:** All streaming methods are chainable with other response configuration methods.
+
+---
+
+## Redirects
+
+- **Set a Redirect URL:**
+  ```php
+  response()->setRedirectUrl('/login');
+  ```
+  - This property is available for custom redirect handling (not automatic HTTP Location header).
+  - Use in advanced workflows or with custom middleware.
+
+- **Get Redirect URL:**
+  ```php
+  $url = response()->getRedirectUrl();
+  ```
+
+---
+
+## View Rendering
+
+- **Render a Template:**
+  ```php
+  response()->view('emails/welcome', ['name' => 'Alice']);
+  ```
+  - Renders an HTML template as the response body.
+  - The second parameter allows passing an array of data to be available to view templates.
+  - Each array data key becomes a variable available to the view file.
+
+---
+
+## Security Headers
+
+- **Apply Secure Defaults:**
+  ```php
+  response()->secure();
+  ```
+  - Adds recommended security headers:
+    - `X-Content-Type-Options: nosniff`
+    - `X-Frame-Options: SAMEORIGIN`
+    - `X-XSS-Protection: 1; mode=block`
+    - `Referrer-Policy: strict-origin-when-cross-origin`
+    - Adds HSTS if HTTPS is detected.
+  - You can also pass custom headers to override or add:
+    ```php
+    response()->secure(['X-Frame-Options' => 'DENY']);
+    ```
+
+---
+
+## Caching and Last-Modified
+
+- **Enable HTTP Caching:**
+  ```php
+  response()->cache(3600); // 1 hour
+  response()->cache(3600, ['public' => false, 'immutable' => true]);
+  ```
+  - Sets `Cache-Control`, `Expires`, and `Pragma` headers.
+  - `public` (default true): Allow shared caches; `private`: only for user.
+  - `immutable`: Content won’t change during cache lifetime.
+
+- **Disable Caching:**
+  ```php
+  response()->noCache();
+  ```
+  - Sets appropriate headers to prevent all caching.
+
+- **Set Last-Modified Header:**
+  ```php
+  response()->setLastModified(time());
+  response()->setLastModified('2024-07-17 12:00:00');
+  response()->setLastModified(new DateTime());
+  ```
+  - Accepts timestamp, date string, or DateTime object.
+
+---
+
+## Summary Table of Methods
+
+| Method                       | Purpose                                      |
+|------------------------------|----------------------------------------------|
+| setStatus(int)               | Set HTTP status code                         |
+| getStatus()                  | Get HTTP status code                         |
+| setMessage(string)           | Set HTTP status message                      |
+| getMessage()                 | Get HTTP status message                      |
+| setType(string)              | Set Content-Type                             |
+| getType()                    | Get Content-Type                             |
+| setHeader(name, value)       | Set a header                                 |
+| setHeaders(array)            | Set multiple headers                         |
+| getHeaders()                 | Get all headers                              |
+| getHeader(name)              | Get a header value                           |
+| hasHeader(name)              | Check if header is set                       |
+| setBody(string)              | Set response body                            |
+| getBody()                    | Get response body                            |
+| send()                       | Send headers and body                        |
+| setTestMode(bool)            | Prevent exit() (for tests)                   |
+| json(data)                   | Set JSON response                            |
+| xml(string)                  | Set XML response                             |
+| text(string)                 | Set plain text response                      |
+| download(path, ...)          | Download a file                              |
+| downloadStream(path, ...)    | Stream file download (large files)           |
+| file(path, ...)              | Display a file inline                        |
+| fileStream(path, ...)        | Stream file inline (large files)             |
+| stream(callable)             | Stream custom output                         |
+| getStreamCallback()          | Get stream callback                          |
+| view(file, data)             | Render and set a template                    |
+| streamCsv(callable, name)    | Stream CSV file for download                 |
+| secure([headers])            | Add security headers                         |
+| cache(maxAge, [options])     | Enable HTTP caching                          |
+| noCache()                    | Disable HTTP caching                         |
+| setLastModified(time)        | Set Last-Modified header                     |
+| setRedirectUrl(url)          | Set a logical redirect URL                   |
+| getRedirectUrl()             | Get the logical redirect URL                 |
+
+---

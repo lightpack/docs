@@ -1,9 +1,10 @@
 # Cookies
 
-<p class="tip">Lightpack provides <code>cookie()</code> function to work with cookies.</p>
+<p class="tip">Lightpack provides the <code>cookie()</code> function to work with cookies.</p>
 
-Note that all the cookies created by Lightpack is <code>encrypted</code> for better security. You can access
-following functions to deal with cookies:
+**Note:** All cookies created by Lightpack are <strong>signed</strong> using HMAC for tamper detection. The cookie value is visible to the client, but any modification will be detected and rejected.
+
+You can access the following functions:
 
 ```php
 cookie()->set()
@@ -15,48 +16,47 @@ cookie()->delete()
 
 ## Set
 
-This sets a cookie that expires at the end of current session:
+Set a cookie (expires at the end of the session):
 
 ```php
 cookie()->set('key', 'value');
 ```
 
-You can pass the number of seconds as expiry time for the cookie:
+Set a cookie with custom expiry (in seconds):
 
 ```php
 cookie()->set('key', 'value', 5*60);
 ```
 
-You can pass an array as fourth parameter to provide cookie options <code>path</code>, <code>domain</code>, <code>secure</code>, <code>http_only</code>.
+Set a cookie with options (<code>path</code>, <code>domain</code>, <code>secure</code>, <code>http_only</code>, <code>same_site</code>):
 
 ```php
-cookie()->set('key', 'value', 5*60, ['path' => $path, 'domain' => $domain]);
+cookie()->set('key', 'value', 5*60, [
+    'path' => $path,
+    'domain' => $domain,
+    'secure' => true,
+    'http_only' => true,
+    'same_site' => 'lax', // or 'strict', 'none'
+]);
 ```
 
 ## Get
 
-To access all the set cookies together, simply call <code>get()</code> method.
+Get all cookies:
 
 ```php
 cookie()->get();
 ```
 
-To access a specific cookie, call it's <code>get()</code> method passing it name 
-of the cookie. It returns <code>null</code> if cookie not found.
+Get a specific cookie (returns <code>null</code> if not found or tampered):
 
 ```php
 cookie()->get('key');
 ```
 
-You can specify a default value for a specific cookie if not found.
-
-```php
-cookie()->get('key', 'default');
-```            
-
 ## Has
 
-To check if a cookie is set, call it's <code>has()</code> method. It returns a boolean TRUE or FALSE.
+Check if a cookie is set:
 
 ```php
 cookie()->has('key');
@@ -64,25 +64,29 @@ cookie()->has('key');
 
 ## Forever
 
-Sometimes you may require to set a non-expiring cookie. One example is while implementing "Remember Me"
-functionality when user logins. For that simply call <code>forever()</code> method. This automatically 
-sets an expiry time long enough to set a non-expiring cookie. 
-
+Set a cookie that lasts for years (useful for “Remember Me”):
 
 ```php
 cookie()->forever('key', 'value');
 ```
 
-You can also pass an array as third parameter to pass other cookie options.
+You can also pass options as the third parameter:
 
 ```php
-cookie()->set('key', 'value', ['path' => $path, 'domain' => $domain]);
+cookie()->forever('key', 'value', ['path' => $path, 'same_site' => 'strict']);
 ```
 
 ## Delete
 
-To delete a specific cookie, call <code>delete()</code> method.
+Delete a specific cookie:
 
 ```php
-cookie()->delete();
+cookie()->delete('key');
 ```
+
+---
+
+<strong>Security Note:</strong>  
+If a cookie is modified by the client, Lightpack will detect the tampering and return <code>null</code> for that cookie.
+
+---

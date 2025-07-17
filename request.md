@@ -1,216 +1,439 @@
 # Request
 
-The <code>Lightpack\Http\Request</code> class provides utility methods to deal with
-incoming HTTP request. 
+The `Lightpack\Http\Request` class provides a comprehensive API for accessing and interacting with incoming HTTP requests.
 
-Lightpack already configures an instance of <code>Request</code> in IoC container.
-So you can simply access it anywhere in your project using helper function <code>request()</code>.
+Lightpack automatically configures an instance of `Request` in the IoC container. You can access it anywhere in your project using the `request()` helper.
 
-## URL
+---
 
-Assuming your application is installed in <code>app</code> folder within web root, if 
-the request URL is <code>http://localhost/app/users/editors?status=active</code>, following
-request methods might be of help for you.
+## URL and Path Methods
+
+Assuming your application is installed in the `app` folder within the web root, and the request URL is `http://localhost/app/users/editors?status=active`, the following methods are available:
 
 ```php
-// Gives: /app/users/editors
+// Returns: /app/users/editors?status=active
 request()->uri();
 
-// Gives: /users/editors
+// Returns: /app/users/editors
+request()->fullpath();
+
+// Returns: /users/editors
 request()->path();
 
-// Gives: /app
+// Returns: /app
 request()->basepath();
 
-// Gives: status=active
-request()->query();
+// Returns: http://localhost/app/users/editors
+request()->url();
 
-// Gives: /app/users/editors?status=active
-request()->fullUri();
+// Returns: http://localhost/app/users/editors?status=active
+request()->fullUrl();
 ```
 
-## Verbs
-
-Following methods are available to access common HTTP verbs:
+### Path Segments
 
 ```php
+// Returns: ['users', 'editors']
+request()->segments();
 
-// Return true if HTTP method is GET
-request()->isGet(); 
+// Returns: 'users'
+request()->segments(0);
 
-// Return true if HTTP method is POST
+// Returns: 'editors'
+request()->segments(1);
+```
+
+---
+
+## HTTP Methods and Verbs
+
+```php
+// Returns the HTTP method as a string (e.g., 'GET', 'POST', etc.)
+request()->method();
+
+// Returns true if HTTP method is GET
+request()->isGet();
+
+// Returns true if HTTP method is POST
 request()->isPost();
 
-// Return true if HTTP method is PUT
+// Returns true if HTTP method is PUT
 request()->isPut();
 
-// Return true if HTTP method is PATCH
+// Returns true if HTTP method is PATCH
 request()->isPatch();
 
-// Return true if HTTP method is DELETE
+// Returns true if HTTP method is DELETE
 request()->isDelete();
+
+// Returns true if the HTTP method was spoofed via _method
+request()->isSpoofed();
+
+// Returns an array of all supported HTTP verbs
+request()->verbs();
 ```
 
-## Input
+> **Note:** Method spoofing allows you to use PUT, PATCH, or DELETE via a POST request with a hidden `_method` field.
 
-To access incoming request input data, use <code>request()->input()</code> method.
+---
+
+## Input and Query Data
+
+### Merged Input
+
+The `input()` method intelligently merges input from query string, POST data, JSON body, or parsed body depending on the HTTP method and content type.
 
 ```php
+// Get a specific input value
 request()->input('key');
-```
 
-Provide second parameter for default input value:
-
-```php
+// Get a specific input value with a default
 request()->input('key', 'default');
-```
 
-Passing no key will return all the input data as an array:
-
-```php
+// Get all input data as an array
 request()->input();
 ```
 
-To access query string data, use <code>request()->query()</code> method. For example, if the request URL is <code>/users/editors?status=active</code>, following code will return the value of <code>status</code> query string parameter:
+### Query String
 
 ```php
+// Get a specific query parameter
 request()->query('status');
+
+// Get all query parameters as an array
+request()->query();
 ```
 
-## AJAX
-
-To check if the incoming request is an AJAX request:
+### Raw and Parsed Body
 
 ```php
+// Get the raw request body as a string
+request()->getRawBody();
+
+// Get the parsed body (for PUT/PATCH/DELETE with form data)
+request()->getParsedBody();
+
+// Get a specific parsed body value with a default
+request()->getParsedBody('key', 'default');
+```
+
+---
+
+## JSON Requests
+
+```php
+// Returns true if the request Content-Type is application/json
+request()->isJson();
+
+// Returns true if the client expects a JSON response (Accept: application/json)
+request()->expectsJson();
+```
+
+> **Deprecated:** `json()` is an alias for `input()` and is deprecated. Use `input()` instead.
+
+---
+
+## AJAX Requests
+
+```php
+// Returns true if the request was made via AJAX (X-Requested-With: XMLHttpRequest)
 request()->isAjax();
 ```
 
-> Note: This method relies on <code>X-Requested-With</code> header.
+---
 
-## JSON
-
-To check if the incoming request has asked for JSON data:
+## Security and Protocol
 
 ```php
-request()->isJson();
-```
-
-## Secure
-
-To check if the incoming request is secure i.e. <code>https</code>:
-
-```php
+// Returns true if the request is over HTTPS
 request()->isSecure();
+
+// Returns the scheme (http or https)
+request()->scheme();
+
+// Returns the HTTP protocol version (e.g., 'HTTP/1.1')
+request()->protocol();
+
+// Returns the Content-Type of the request
+request()->format();
 ```
 
-## Uploads
+---
 
-Consider this file upload form:
-
-```html
-<form method="post" enctype="multipart/form-data">
-    <input name="photo" type="file" />
-    <button>Upload</button>
-</form>
-```
-
-### Retrieve uploaded file
-
-To retrieve the uploaded file details:
+## Host and Port
 
 ```php
+// Returns the host name (without port)
+request()->host();
+
+// Returns the port number (if available)
+request()->port();
+
+// Returns the host with port (e.g., 'localhost:8080')
+request()->hostWithPort();
+```
+
+---
+
+## Headers
+
+```php
+// Get a specific header value
+request()->header('User-Agent');
+
+// Get all headers as an associative array
+request()->headers();
+
+// Check if a header exists
+request()->hasHeader('Authorization');
+
+// Get the User-Agent string
+request()->userAgent();
+
+// Get the Bearer token from the Authorization header
+request()->bearerToken();
+```
+
+---
+
+## CSRF Token
+
+```php
+// Get the CSRF token from header or input
+request()->csrfToken();
+```
+
+---
+
+## Referer
+
+```php
+// Get the referer URL, if present
+request()->referer();
+```
+
+---
+
+## Route Information
+
+```php
+// Get the matched route instance (if available)
+request()->route();
+
+// Get all route parameters as an array
+request()->params(null);
+
+// Get a specific route parameter (with optional default)
+request()->params('userId', 0);
+```
+
+---
+
+## URL Signature Validation
+
+```php
+// Throws an exception if the URL signature is invalid
+request()->validateUrlSignature();
+
+// Returns true if the URL signature is valid
+request()->hasValidSignature();
+
+// Returns true if the URL signature is invalid
+request()->hasInValidSignature();
+```
+
+## Client IP Address
+
+```php
+// Get the client's IP address
+request()->ip();
+```
+
+## File Uploads
+
+Lightpack provides a robust API for handling file uploads via the `request()->file()` and `request()->hasFile()` methods. 
+
+Uploaded file are represented by the `UploadedFile` class.
+
+### Single File
+
+```html
+<input name="photo">
+```
+
+```php
+// Retrieve the uploaded file by key
 $file = request()->file('photo');
+
+// Check if a file was uploaded for the given key
+request()->hasFile('photo');
 ```
-
-### Save uploaded file
-
-To **save/move** the uploaded file locally:
 
 ```php
-$file->move(DIR_STORAGE . '/uploads');
-```
+$file = request()->file('avatar');
 
-You can also pass the filename as second argument:
-
-```php
-$file->move(DIR_STORAGE . '/uploads', 'filename.jpg');
-```
-
-### Uploaded file name
-
-To get the uploaded filename:
-
-```php
-$file->getName();
-```
-
-### Uploaded file size
-
-To get the uploaded filesize in bytes:
-
-```php
-$file->getSize();
-```
-
-### Uploaded file type
-
-To get the uploaded file type:
-
-```php
-$file->getType();
-```
-
-### Uploaded file extension
-
-To get the uploaded file extension:
-
-```php
-$file->getExtension();
-```
-
-### Uploaded file temporary path
-
-To get the temporary path of uploaded file:
-
-```php
-$file->getTmpName();
-```
-
-### Uploaded file error
-
-To check if there was an error while uploading file:
-
-```php
-$file->hasError(); // true|false
-```
-
-To get the file upload error:
-
-```php
-$file->getError();
-```
-
-### Multiple File Uploads
-
-Consider this multiple file upload form:
-
-```html
-<form method="post" enctype="multipart/form-data">
-    <input name="photos[]" type="file" multiple/>
-    <button>Upload</button>
-</form>
-```
-
-To retrieve all the uploaded photos:
-
-```php
-$photos = request()->file('photos');
-```
-
-Now all of the above mentioned file methods can be applied individually on each uploaded file. For example, here we loop each uploaded photo and store them:
-
-```php
-foreach($photos as $photo) {
-    $photo->move(DIR_STORAGE . '/uploads');
+// Check if file upload failed
+if ($file->hasError()) {
+    //
 }
 ```
+
+### Multiple Files
+
+```html
+<input name="photos[]" type="file" multiple>
+```
+
+```php
+$photos = request()->file('photos'); 
+
+foreach ($photos as $photo) {
+    if (!$photo->hasError()) {
+        // Handle each uploaded file
+    }
+}
+```
+
+### UploadedFile Methods
+
+Each `UploadedFile` instance provides:
+
+- `getName()`: Original filename
+- `getSize()`: File size in bytes
+- `getType()`: MIME type (e.g., `image/jpeg`)
+- `getExtension()`: File extension (e.g., `jpg`)
+- `getTmpName()`: Temporary path on disk
+- `hasError()`: Returns `true` if there was an upload error
+- `getError()`: Returns the error code (see PHP file upload errors)
+- `isEmpty()`: Returns `true` if file is empty
+- `isImage()`: Returns `true` if file is an image
+- `getDimensions()`: Returns `['width' => ..., 'height' => ...]` for images
+- `getWidth()`, `getHeight()`: Image dimensions (0 if not an image)
+
+### Storing Uploaded Files
+
+Lightpack abstracts the storage of uploaded files to utilize the configured [Storage](storage.md) service.
+
+#### Store in Arbitrary Location
+
+```php
+$path = $file->store('some/directory');
+```
+
+#### Store in Public Uploads
+
+```php
+$path = $file->storePublic('avatars');
+```
+- Stores in `uploads/public/avatars/` (web-accessible).
+
+#### Store in Private Uploads
+
+```php
+$path = $file->storePrivate('documents');
+```
+- Stores in `uploads/private/documents/` (not web-accessible by default).
+
+#### Storage Options
+
+You can customize storage via the `$options` array:
+
+- `'name'`: Custom filename (string or callable)
+- `'unique'`: Generate a unique filename (bool)
+- `'preserve_name'`: Keep original name as prefix when unique (bool)
+
+Example:
+
+```php
+$path = $file->storePublic('avatars', [
+    'unique' => true,
+    'preserve_name' => true,
+]);
+```
+
+### Troubleshooting
+
+- `request()->file('key')` returns `null` if no file was uploaded.
+- For multiple files, always check `is_array()` before looping.
+- Always check `hasError()` to avoid processing failed uploads.
+- Use `storePublic` for files that should be accessible via URL, and `storePrivate` for protected files.
+
+---
+
+## HTTP Headers
+
+Lightpack provides a clean API for accessing request headers through the `request()` helper.
+
+### Retrieving a Single Header
+
+```php
+// Get a specific header value (case-insensitive)
+$userAgent = request()->header('User-Agent');
+$auth = request()->header('Authorization');
+$custom = request()->header('X-Custom-Header', 'default-value');
+```
+
+- Header names are case-insensitive and normalized internally.
+- If the header is not present, the default value is returned (or `null` if not specified).
+
+### Checking for a Header
+
+```php
+if (request()->hasHeader('X-Requested-With')) {
+    // Handle AJAX request
+}
+```
+
+### Retrieving All Headers
+
+```php
+$headers = request()->headers(); // Returns an associative array of all headers
+foreach ($headers as $name => $value) {
+    // Process each header
+}
+```
+
+### Common Header Patterns
+
+#### Authorization / Bearer Token
+
+```php
+$token = request()->bearerToken();
+if ($token) {
+    // Use the Bearer token for authentication
+}
+```
+
+#### CSRF Token
+
+```php
+$csrf = request()->csrfToken();
+```
+
+#### User-Agent
+
+```php
+$ua = request()->userAgent();
+```
+
+#### Forwarded Headers
+
+Lightpack automatically parses common proxy headers:
+
+- `X-Forwarded-For` (client IP)
+- `X-Forwarded-Proto` (scheme)
+- `X-Forwarded-Host` (host)
+- `X-Forwarded-Port` (port)
+
+These are used internally by `request()->ip()`, `request()->scheme()`, etc., but you can also access them directly:
+
+```php
+$proto = request()->header('X-Forwarded-Proto');
+```
+
+### Notes
+
+- All header methods are case-insensitive.
+- For custom headers, always use the normalized name (e.g., `X-Custom-Header`).
+
+---

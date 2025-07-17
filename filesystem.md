@@ -10,7 +10,7 @@ To get started, simply create an instance of `Lightpack\File\File` class.
 $file = new Lightpack\File\File();
 ```
 
-Now you can access following listed methods to work with files in your local system.
+Now you can access following listed methods as documented.
 
 ```php
 $file->exists();

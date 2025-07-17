@@ -213,11 +213,26 @@ response()
     });
 ```
 
+**getStreamCallback():**
+- Use `getStreamCallback()` to retrieve the currently set stream callback function.
+- This is useful for testing, introspection, or advanced middleware that needs to inspect or manipulate the streaming logic before sending the response.
+
+**Example: Inspecting the stream callback**
+```php
+$response = response()->stream(function() {
+    echo 'Streaming...';
+});
+
+$callback = $response->getStreamCallback();
+if (is_callable($callback)) {
+    // You can inspect, wrap, or call the callback as needed
+}
+```
+
 **Notes:**
 - Always call `flush()` or `ob_flush()` to ensure data is sent immediately.
 - Use `setHeader()` to set appropriate content types (e.g., `text/event-stream` for SSE).
 - The callback receives no arguments; use closures to capture needed variables.
-- Use `getStreamCallback()` to retrieve the callback if needed.
 - Streaming disables the normal response body (`setBody()` is ignored if a stream is set).
 
 ### 2. File Streaming for Downloads (`downloadStream()`)
@@ -274,19 +289,104 @@ response()->streamCsv(function() {
 
 ---
 
-## Redirects
+## Working with Redirects
 
-- **Set a Redirect URL:**
-  ```php
-  response()->setRedirectUrl('/login');
-  ```
-  - This property is available for custom redirect handling (not automatic HTTP Location header).
-  - Use in advanced workflows or with custom middleware.
+### What is an HTTP Redirect?
+An HTTP redirect tells the browser to immediately load a different URL. This is done by sending a special status code (usually 302) and a `Location` header in the response. Redirects are commonly used after form submissions, login/logout, or when a resource has moved.
 
-- **Get Redirect URL:**
+In Lightpack, redirects are handled by the `Redirect` class, accessible via the `redirect()` helper. This provides a clear, expressive, and testable API for all common redirect scenarios.
+
+---
+
+### Common Redirect Methods
+
+#### **redirect()->to($url)**
+Redirect to any absolute or relative URL.
+
+**Example: After login, send user to dashboard**
+```php
+public function login()
+{
+    // ... authentication logic ...
+    return redirect()->to('/dashboard');
+}
+```
+- Sets status code 302 and `Location: /dashboard` header.
+- Works with both absolute and relative URLs.
+
+#### **redirect()->route($name, ...$params)**
+Redirect to a named route, passing route parameters as needed.
+
+**Example: After profile update, redirect to profile page**
+```php
+public function update($userId)
+{
+    // ... update logic ...
+    return redirect()->route('profile', $userId);
+}
+```
+- Resolves the route name and parameters to a URL.
+- Ensures your redirects stay in sync with route changes.
+
+#### **redirect()->back()**
+Redirect back to the previous page (using URL stored in session, or `/` if unavailable).
+
+**Example: After failed form validation, return user to previous page**
+```php
+public function save()
+{
+    if (! $this->validate()) {
+        // ... maybe set flash message ...
+        return redirect()->back();
+    }
+    // ...
+}
+```
+- Uses session to remember the last visited URL.
+- Essential for post/redirect/get patterns.
+
+#### **redirect()->intended()**
+Redirect to the “intended” URL stored in session (commonly used after login), or `/` if not set.
+
+**Example: After login, send user to originally requested page**
+```php
+public function login()
+{
+    // ... authentication logic ...
+    return redirect()->intended();
+}
+```
+- Stores the intended URL before redirecting unauthenticated users.
+- After login, users are returned to where they originally wanted to go.
+
+#### **redirect()->refresh()**
+Redirect to the current URL (refresh the page).
+
+**Example: After a POST, refresh the page to show updated data**
+```php
+public function post()
+{
+    // ... save logic ...
+    return redirect()->refresh();
+}
+```
+- Useful for preventing duplicate form submissions.
+
+---
+
+### Common Patterns and Pitfalls
+- **Always return the redirect from your controller:**
   ```php
-  $url = response()->getRedirectUrl();
+  return redirect()->to('/login');
   ```
+- **Chain additional headers or configuration:**
+  ```php
+  return redirect()->to('/login')->setHeader('X-Reason', 'auth-required');
+  ```
+- **Flash messages:** Set flash data before redirecting to show messages after redirect.
+- **Session integration:** `back()` and `intended()` rely on session data—ensure sessions are enabled.
+- **Prefer `redirect()` over manual Location headers:** It’s safer, more expressive, and integrates with Lightpack’s routing/session system.
+- **Advanced:** For custom needs, use `setRedirectUrl()` and `getRedirectUrl()` on any response, but the `Redirect` class covers all standard use cases.
 
 ---
 

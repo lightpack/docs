@@ -67,7 +67,7 @@ class PageController
 {
     public function index()
     {
-        return response()->render('page', [
+        return response()->view('page', [
             'title' => 'Lightpack PHP',
         ]);
     }

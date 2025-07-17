@@ -71,7 +71,7 @@ return [
 
 ## Built-in Filters
 
-Below are the built-in filters provided by Lightpack, their aliases, and what they do:
+Lightpack provides many pre-defined filters that you can declare on your route definitions. Below are the built-in filters provided by Lightpack, their aliases, and what they do:
 
 ### 1. `auth`
 **Purpose:** Restricts access to authenticated users (web or API).

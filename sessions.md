@@ -1,129 +1,194 @@
 # Sessions
 
-<p class="tip">Lightpack provides <code>session()</code> function to work with sessions.</p>
+<p class="tip">Lightpack provides the <code>session()</code> function to work with sessions in a consistent, secure, and flexible way. The session system supports multiple storage drivers, dot notation for nested data, CSRF and agent validation, and more.</p>
 
-You can access following functions to deal with sessions:
+## Quick Start
+
+To use sessions, just call the global <code>session()</code> helper:
+
+```php
+session()->set('user_id', 42);
+$userId = session()->get('user_id');
+```
+
+## Supported Methods
 
 ```php
 session()->set()
 session()->get()
 session()->has()
 session()->delete()
-session()->regenerate()
 session()->flash()
+session()->regenerate()
+session()->destroy()
 session()->token()
 session()->hasInvalidToken()
 session()->hasInvalidAgent()
-session()->destroy()
+session()->verifyAgent()
+session()->setUserAgent()
 ```
 
-## Set
+---
 
-To set a data in session, use <code>set()</code> method.
+## Features & Usage
+
+### Setting Session Data
+
+Set a value (including arrays/objects) for a key:
 
 ```php
 session()->set('key', $value);
 ```
 
-## Get
+Supports <strong>dot notation</strong> for nested data:
 
-To get a data in session, use <code>get()</code> method.
+```php
+session()->set('user.profile.name', 'Alice');
+```
+
+### Getting Session Data
+
+Get a value by key:
 
 ```php
 session()->get('key');
 ```
 
-You can provide a default data to be returned if session key not found.
+Get a nested value:
 
 ```php
-session()->get('key', $default);
+session()->get('user.profile.name');
 ```
 
-To get all session data, simply call <code>get()</code> method without specifying any key.
+Provide a default if the key isn’t found:
+
+```php
+session()->get('key', 'default');
+```
+
+Get all session data:
 
 ```php
 session()->get();
 ```
 
-## Has
+### Checking Existence
 
-To check if a session key exists, use <code>has()</code> method. It returns a boolean TRUE or FALSE.
+Check if a key (or nested key) exists:
 
 ```php
 session()->has('key');
+session()->has('user.profile.name');
 ```
 
-## Delete
+### Deleting Session Data
 
-To delete a session data, call <code>delete()</code> method by passing it the key value.
+Delete a key (or nested key):
 
 ```php
 session()->delete('key');
+session()->delete('user.profile.name');
 ```
 
-## Flash
+### Flash Data
 
-To set a session data which should be available only till the next request, use <code>flash()</code>
-method.
+Flash data persists only for the next request (great for messages):
 
 ```php
-session()->flash('key', $value);
+session()->flash('notice', 'Profile updated!'); // Set flash data
+$notice = session()->flash('notice'); // Get and remove flash data
 ```
 
-To access the set flash data, simply call the same <code>flash()</code> method by passing it the key.
+### Regenerating Session ID
 
-```php
-session()->flash('key');
-```
-
-## CSRF Token
-
-CSRF tokens are one of the security measures to verify session validity. To get 
-a CSRF token, call <code>token()</code> method. This will generate a CSRF token
-and set it in the session data by key <code>csrf-token</code>.
-
-```php
-<form method="post">
-    <input 
-        type="hidden" 
-        name="csrf-token" 
-        value="<?= session()->token() ?>"
-    >
-</form>
-```
-
-Now when the form is submitted, you can check the validity of CSRF token using <code>hasInvalidToken()</code>
-method. This returns boolean TRUE if the token has been tampered otherwise false.
-
-```php
-if(session()->hasInvalidToken()) {
-    // May be block the request, right?
-}
-```
-
-## Verify Agent
-
-Verifying session agent is also one of the security measures to verify session validity. To check
-if the current session user agent is valid, use <code>hasInvalidAgent</code> method.
-
-```php
-if(session()->hasInvalidAgent()) {
-    // May be block the request, right?
-}
-```
-
-## Regenerate
-
-To regenerate the current session ID, call <code>regenerate()</code> method.
+Regenerate the session ID (for security after login, etc):
 
 ```php
 session()->regenerate();
 ```
+- <strong>Note:</strong> Also deletes the CSRF token.
 
-## Destroy
+### Destroying the Session
 
-To completely destroy current session, call <code>destroy()</code> method.
+Completely destroy the session and all its data:
 
 ```php
 session()->destroy();
 ```
+
+---
+
+## Security Features
+
+### CSRF Token
+
+Generate or retrieve a CSRF token:
+
+```php
+$token = session()->token();
+```
+
+Check if the CSRF token is invalid (e.g., after form submission):
+
+```php
+if(session()->hasInvalidToken()) {
+    // Block the request!
+}
+```
+
+### User Agent Validation
+
+Store and verify the user agent string to help prevent session hijacking:
+
+```php
+// Manually set agent
+session()->setUserAgent('AppleWebKit/KHTML'); 
+
+if(session()->hasInvalidAgent()) {
+    // Block the request!
+}
+```
+
+## Advanced Features
+
+### Dot Notation for Nested Data
+
+You can set, get, check, or delete deeply nested session data using dot notation:
+
+```php
+session()->set('cart.items.0.product_id', 123);
+$productId = session()->get('cart.items.0.product_id');
+session()->delete('cart.items.0.product_id');
+session()->has('cart.items.0.product_id');
+```
+
+### Driver System
+
+Lightpack sessions support multiple drivers, each with different storage backends:
+
+- <strong>DefaultDriver:</strong> Uses PHP’s native <code>$_SESSION</code> (file-based).
+- <strong>ArrayDriver:</strong> Stores data in-memory (great for tests).
+- <strong>CacheDriver:</strong> Stores session in a cache backend.
+- <strong>RedisDriver:</strong> Uses Redis for scalable, distributed sessions.
+- <strong>EncryptedDriver:</strong> Encrypts session values at rest.
+
+You can configure the driver in your app’s config.
+
+## Edge Cases & Notes
+
+- <strong>Session keys can be any string.</strong> Use dot notation for nested arrays.
+- <strong>Flash data</strong> is removed after it is read.
+- <strong>Regenerating</strong> deletes the CSRF token for safety.
+- <strong>If you use a custom driver</strong>, it must implement the <code>DriverInterface</code>.
+- <strong>Session ID and cookie settings</strong> (name, lifetime, security flags) are configurable.
+- <strong>EncryptedDriver</strong> requires a <code>Crypto</code> instance and will serialize/deserialize values automatically.
+- <strong>ArrayDriver</strong> is not persistent and should only be used for testing.
+- <strong>CacheDriver</strong> and <strong>RedisDriver</strong> handle session IDs and cookies internally, and support TTL (expiry).
+
+---
+
+## Configuration
+
+Session settings (driver, name, lifetime, security, etc.) are controlled in your app’s config file, typically <code>config/session.php</code>.
+
+---

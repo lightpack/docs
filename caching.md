@@ -1,19 +1,14 @@
 # Caching
 
-A cache is a store where you put some data to enhance application performance by reducing frequent data computation. 
+A cache is a store where you put data to enhance application performance by reducing frequent computations or database queries.
 
-For example, suppose an online shopping store website displays all its categories with products count. Querying the database
-to aggregate categories with products count
-everytime the store's pages are displayed can become a huge performance bottleneck. So rather than querying that data on every page
-request, you should store the query data in a cache to access it later on every page request. 
+For example, if your store displays product categories with counts, querying the database every time is slow. Instead, cache the result and reuse it for future requests.
 
-While caching in itself can introduce its own challenges, `Lightpack` provides you a cache library that can take some pain away when working with cache data.
+Lightpack provides a simple, flexible cache library with multiple drivers and a clean API.
 
-## Quick start
+## Quick Start
 
-`Lightpack` comes pre-configured with a default **file** based cache service which you can start using without much changes required. 
-
-Following is the list of cache methods available:
+Lightpack comes pre-configured with a default **file-based** cache service. Just use:
 
 ```php
 cache()->set();
@@ -22,42 +17,43 @@ cache()->has();
 cache()->delete();
 cache()->flush();
 cache()->forever();
+cache()->remember();
+cache()->rememberForever();
 ```
 
-<p class="tip">NOTE: You will have to set appropriate write permissions on <code>storage</code> directory in order to work with file cache.</p>
+<p class="tip">NOTE: Set appropriate write permissions on the <code>storage</code> directory for file cache.</p>
+
+---
 
 ### set()
 
-To store an item in the cache, call `set()` method. It takes item `key`, item
-`value` and item expiry time in `minutes`.
-
-This example stores in cache an item with key `name` and value `Bob` for `5 minutes`.
+Store an item in the cache.  
+**Parameters:** `key`, `value`, `seconds` (expiry in seconds, not minutes).
 
 ```php
-cache()->set('name', 'Bob', 5 * 60);
+cache()->set('name', 'Bob', 300); // 5 minutes
 ```
+- Pass `0` as seconds for a “forever” cache (5 years).
 
 ### get()
 
-To get an item from cache, call `get()` method passing it the item key. It returns
-`null` if the item does not exist in the cache.
+Retrieve an item from cache by key. Returns `null` if not found or expired.
 
 ```php
-cache()->get('name'); // Bob
+$name = cache()->get('name'); // Bob or null
 ```
 
 ### has()
 
-To check if an item is in the cache, use `has()` method. This method returns a `boolean` true or false. Pass it the item key to check for the item existence.
+Check if a key exists in the cache.
 
 ```php
-cache()->has('name');
+if (cache()->has('name')) { ... }
 ```
 
 ### delete()
 
-To delete an item from the cache, call `delete()` method passing it the
-the item key.
+Remove an item from the cache.
 
 ```php
 cache()->delete('name');
@@ -65,7 +61,7 @@ cache()->delete('name');
 
 ### flush()
 
-To delete all the items from the cache store, call `flush` method.
+Clear all items from the cache store.
 
 ```php
 cache()->flush();
@@ -73,29 +69,41 @@ cache()->flush();
 
 ### forever()
 
-To store an item in the cache that doesn't expire soon, call `forever()` method.
-It takes the item `key` and item `value` as its parameters. 
-
-**NOTE:** This method sets the cache item expiry to 5 years. In case you want to expire the cached item, call `delete()` method manually to do so.
-
-The following example caches forever the item with key `site_theme` and value `Marble`.
+Store an item “forever” (actually 5 years).
 
 ```php
 cache()->forever('site_theme', 'Marble');
 ```
 
-## Manual Configuration
+### remember()
 
-As you already know by now that `Lightpack` provides **file** based caching by default. However, you can manually configure cache provider yourself.
-
-To manually create a cache service provider, first create an instance of the
-cache driver and then pass it to the contructor of `Cache` class as shown below.
+Retrieve an item if present, otherwise compute, store, and return it.
 
 ```php
-<?php
+$value = cache()->remember('expensive', 300, function() {
+    return computeExpensiveThing();
+});
+```
 
+### rememberForever()
+
+Like `remember()`, but stores the value “forever”.
+
+```php
+$value = cache()->rememberForever('expensive', function() {
+    return computeExpensiveThing();
+});
+```
+
+---
+
+## Manual Configuration
+
+You can manually configure the cache provider:
+
+```php
 use Lightpack\Cache\Cache;
-use Lightpack\Cache\Drivers\File;
+use Lightpack\Cache\Drivers\FileDriver;
 
 $driver = new File(DIR_STORAGE . '/cache');
 $cache = new Cache($driver);
@@ -110,7 +118,44 @@ $cache->get('name'); // Bob
 
 ## Available Drivers
 
-`Lightpack` provides a **file** based cache driver for now.  Adding new drivers
-is in the way. However, if you can, create a pull request with your own driver implementation to expand available cache drivers.
+Lightpack provides several cache drivers:
 
-**NOTE:** All the drivers must implement `Lightpack\Cache\DriverInterface`.
+- **FileDriver**: Stores cache in files (default).
+- **ArrayDriver**: Stores cache in memory (non-persistent, useful for testing).
+- **NullDriver**: Disables cache (all operations are no-ops).
+- **DatabaseDriver**: Stores cache in a database table (requires schema).
+- **RedisDriver**: Stores cache in Redis (supports key prefixing).
+
+You can view `config/cache.php` file for cache related configurations.
+
+### Database Migration
+
+If using database as cache driver, you need to migrate a new table for storing cache entries.
+
+```php
+php console create:migration create_table_cache
+```
+
+Update and run the migration code:
+
+```php
+return new class extends Migration
+{
+    public function up(): void
+    {
+        $this->create('cache', function (Table $table) {
+            $table->varchar('key', 255)->primary();
+            $table->column('value')->type('longtext');
+            $table->column('expires_at')->type('int')->attribute('UNSIGNED');
+            $table->index('expires_at', 'idx_cache_expiry');
+        });
+    }
+
+    public function down(): void
+    {
+        $this->drop('cache');
+    }
+};
+```
+
+---

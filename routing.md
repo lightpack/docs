@@ -1,151 +1,164 @@
 # Routing
 
-Routing is the process of mapping requested URLs with appropriate
-request handlers called **controllers**. You can define your routes using `route()` function which returns 
-an instance of route object provided by **Lightpack**.
+Lightpack’s routing system lets you map incoming HTTP request URLs to appropriate controllers and actions with clarity and flexibility. This guide covers **all routing features** available to app developers—so you can build delightful, robust APIs and web apps.
+
+---
+
+## Quick Start
 
 ```php
-route()->get('/products', ProductController::class);
-```
+// Basic GET route
+route()->get('/products', ProductController::class); // maps to index()
 
-This will map the URL `/products` to the `ProductController` class and the `index` method by default. To map a different method, pass the method name as the last parameter.
-
-```php
+// Specify action
 route()->get('/products', ProductController::class, 'list');
+
+// Route with parameter
+route()->get('/products/:id', ProductController::class, 'show');
 ```
+
+---
 
 ## Route Files
 
-All the routes definitions goes into `routes` folder. There you will find two routes files already defined.
+Define routes in the `routes` folder:
 
-```text
-routes
-  ├── web.php
-  ├── api.php
+```
+routes/
+  ├── web.php   // for web routes
+  └── api.php   // for API routes
 ```
 
-If you are defining routes for your APIs, you should define them in `routes/api.php` file.
+---
 
 ## Route Methods
 
-Lightpack supports following routing methods for your convinience:
-* <code>route()->get()</code>
-* <code>route()->post()</code>
-* <code>route()->put()</code>
-* <code>route()->patch()</code>
-* <code>route()->delete()</code>
-* <code>route()->options()</code>
-* <code>route()->any()</code>
-* <code>route()->map()</code>
-* <code>route()->group()</code>
+Lightpack supports all HTTP verbs and flexible grouping:
+- `route()->get()`
+- `route()->post()`
+- `route()->put()`
+- `route()->patch()`
+- `route()->delete()`
+- `route()->options()`
+- `route()->any()` (registers for all verbs)
+- `route()->map()` (registers for multiple verbs)
+- `route()->group()` (for prefix/filter/host grouping)
+
+**Examples:**
+```php
+route()->post('/products', ProductController::class, 'store');
+route()->map(['GET', 'POST'], '/contact', ContactController::class, 'handle');
+route()->any('/ping', HealthController::class);
+```
+
+---
 
 ## Route Parameters
 
-You can define dynamic parameters in your routes. For example, if you want to define a route for a product with id 1, you can define it as follows:
-
+Define dynamic segments with `:param` syntax:
 ```php
-route()->get('/products/:id', ProductController::class);
+route()->get('/users/:id', UserController::class, 'show');
 ```
+- Parameters are passed as arguments to your controller action.
 
-## Route Regex
-
-Lightpack supports regex based route paths definition. It comes with a bunch of
-regex patterns out of the box to assist you for common cases.
-
-* <code>:any</code>
-* <code>:num</code>
-* <code>:seg</code>
-* <code>:slug</code>
-* <code>:alpha</code>
-* <code>:alnum</code>
-
+**Optional parameters:**
 ```php
-// Example: /users/23
-route()->get('/users/:user', UserController::class)->pattern(['user' => ':num'])
+route()->get('/users/:id/photos/:photo?', UserController::class, 'photo');
 ```
+- `?` makes the last parameter optional (will be `null` if not present).
 
-Below is an explanation for pre-defined regex route placeholders.
+---
 
-<table>
-    <tbody>
-        <tr>
-            <td><code>:any</code></td>
-            <td>Match any and all the characters in the URI. Equivalent regex pattern <code>(.*)</code></td>
-        </tr>
-        <tr>
-            <td><code>:num</code></td>
-            <td>Match a numeric segment in the URI. Equivalent regex pattern <code>([0-9]+)</code></td>
-        </tr>
-        <tr>
-            <td><code>:seg</code></td>
-            <td>Match a segment in the URI. Equivalent regex pattern <code>([^/]+)</code></td>
-        </tr>
-        <tr>
-            <td><code>:slug</code></td>
-            <td>Match a slug based segment in the URI. Equivalent regex pattern <code>([a-zA-Z0-9-]+)</code></td>
-        </tr>
-        <tr>
-            <td><code>:alpha</code></td>
-            <td>Match a segment of alphabet characters in the URI. Equivalent regex pattern <code>([a-zA-Z]+)</code></td>
-        </tr>
-        <tr>
-            <td><code>:alnum</code></td>
-            <td>Match an alphanumeric segment in the URI. Equivalent regex pattern <code>([a-zA-Z0-9]+)</code></td>
-        </tr>
-    </tbody>
-</table>
+## Custom Regex & Placeholders
 
-You can provide your own custom regular expression to match the path.
+Use built-in placeholders or custom regex for flexible matching:
+- `:any` → `.*`
+- `:num` → `[0-9]+`
+- `:seg` → `[^/]+`
+- `:slug` → `[a-zA-Z0-9-]+`
+- `:alpha` → `[a-zA-Z]+`
+- `:alnum` → `[a-zA-Z0-9]+`
 
+**Example:**
+```php
+route()->get('/posts/:slug', PostController::class)->pattern(['slug' => ':slug']);
+```
+**Custom regex:**
 ```php
 route()->get('/users/:id', UserController::class)->pattern(['id' => '([0-9]{4})']);
-```   
+```
 
-## Route Names
+---
 
-You can define a name for your route. This is useful when you want to generate a URL for a route.
+## Route Naming & URL Generation
 
+Name routes for easy URL generation:
 ```php
 route()->get('/products/:id', ProductController::class)->name('product.show');
 ```
-
-You can generate a URL for a route by passing the route name and parameters using the `url()` helper function. For example, if you want to generate a URL for the above route, you can do it as follows:
-
+Generate URLs using the `url()` helper:
 ```php
-url()->route('product.show', 23]);
+url()->route('product.show', 42); // /products/42
 ```
+
+---
 
 ## Route Filters
 
-You can apply filters on a route by passing a `string` or an `array` of filters aliases as last argument.
-
+Attach filters (middleware) to routes or groups:
 ```php
-route()->get('/users', UserController::class)->filter('auth');
+route()->get('/admin', AdminController::class)->filter('auth');
 route()->post('/users', UserController::class)->filter(['auth', 'csrf']);
 ```
+- Filters can be strings or arrays; they accumulate and are unique per route.
+- See [filters docs](filters.md) for details.
 
-See more about filters [here](https://lightpack.github.io/docs/#/filters)
+---
 
 ## Route Groups
 
-If you have a bunch of routes that start with common path prefix, or apply common filters,
-you can group them using <code>route()->group()</code> method.
-
-This method takes an array as first argument and a callback function.
-
-For example, the following route group definition will match
-request paths that start with <code>/api/v1</code>.
-
+Group routes by prefix, filters, or host:
 ```php
+// Prefix group
 route()->group(['prefix' => '/api/v1'], function() {
     route()->get('/users', UserController::class);
 });
-```
 
-Similarly, you can also group filters.
+// Filter group
+route()->group(['filter' => ['auth']], function() {
+    route()->post('/posts', PostController::class);
+});
 
-```php
-route()->group(['filter' => ['cors', 'trim']], function() {
-    route()->get('/users', UserController::class);
+// Host-based group
+route()->group(['host' => 'admin.example.com'], function() {
+    route()->get('/dashboard', AdminController::class);
 });
 ```
+- Groups can be nested; options are merged (prefixes/filters/hosts accumulate).
+
+---
+
+## Multi-Verb Routes
+
+Register a route for multiple HTTP verbs with `map()` or all verbs with `any()`:
+```php
+// GET and POST
+route()->map(['GET', 'POST'], '/feedback', FeedbackController::class, 'submit');
+
+// All verbs
+route()->any('/status', StatusController::class);
+```
+
+---
+
+## Best Practices & Gotchas
+
+- **Order matters:** Register more specific routes before generic ones.
+- **Unique route names:** Avoid duplicate names for reliable URL generation.
+- **Filter accumulation:** Filters from groups and routes are merged and deduplicated.
+- **Group nesting:** Prefixes and filters accumulate in nested groups.
+- **Optional params:** Use `:param?` for optional last segment; missing param are `null`.
+- **Host-based routes:** Use `host` option for subdomain or domain-specific routes.
+- **404s:** If no route matches, Lightpack throws a `RouteNotFoundException`.
+
+---

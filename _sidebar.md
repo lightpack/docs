@@ -8,6 +8,7 @@
 
   * [Routing](routing.md)
   * [Controllers](controllers.md)
+  * [Views](views.md)
   * [Request](request.md)
   * [Response](response.md)
   * [Sessions](sessions.md)

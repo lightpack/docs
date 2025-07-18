@@ -1,8 +1,6 @@
 # Logging
 
-**Lightpack** ships with a PSR-3 compatible logger that is already configured as a service for you.
-
-You can access the logger instance as service using `logger()` which gives an instance of `Lightpack\Logger\Logger`. 
+**Lightpack** ships with a PSR-3 compatible logger that is already configured as a service for you. You can access the logger instance as service using `logger()` which gives an instance of `Lightpack\Logger\Logger`. 
 
 This class exposes following logging methods:
 
@@ -19,30 +17,14 @@ logger()->emergency();
 
 ## Log Driver
 
-**Lightpack** uses `file` as default log driver and logs the messages in the filename configured in `config/default.php` file.
-
-```php
-// ...
-    'logger' => [
-        'filename' => DIR_STORAGE . '/logs.txt',
-    ],
-// ...
-```
+**Lightpack** ships with `null` and `file` log drivers. The default is the `file` log driver and logs the messages in the filename configured in `config/storage.php` file.
 
 ### Disable Logging
 
-It may be the case where you might want to disable logging messages. This specially is true in **shared hosting** where you would want to disable logging because of `disk space` restrictions.
+To **disable** logging messages, you can set the log driver to null in `.env` file.
 
-To **disable** logging messages, you can set the log driver to null in `env.php` file.
-
-```php
-// ...
-    /**
-     * Log driver: file, null.
-     */
-
-    'LOG_DRIVER' => 'null',
-// ...
+```env
+LOG_DRIVER=null
 ```
 
 ## Available Methods

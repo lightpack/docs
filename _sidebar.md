@@ -18,7 +18,7 @@
   * [Configuration](configuration.md)
   * [Environments](environments.md)
   * [Date & Time](moment.md)
-  * [Utilities](utilities.md)
+  * [Utility Functions](utility-functions.md)
 
 * Databases
 
@@ -97,4 +97,3 @@
   * [SMS](sms.md)
   * [MFA](mfa.md)
   * [Storage](storage.md)
-  * [Form Request](form-request.md)

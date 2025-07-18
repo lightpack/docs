@@ -31,6 +31,222 @@ if ($validator->fails()) {
 
 ---
 
+## Sticky Forms and Errors
+
+If the form validation fails for the current request, you would want to:
+- Repopulate fields with the user's previous input ("sticky" forms)
+- Show validation error messages next to each field
+
+When you call `validateRequest()` method on the **validator** instance, Lightpack automatically sets the current request input data and validation error messages in the active session.
+
+Lightpack provides two helpers:
+- `old('field')` — Returns the previous value for a field
+- `error('field')` — Returns the validation error message for a field
+
+
+### old()
+
+`old(string $key, $default = '', bool $escape = true)`
+
+**What it does:**
+Returns the previously submitted value for a form field, or a default if not present.
+
+**When to use:**
+- To repopulate form fields after a validation error, so users don’t lose their input.
+- Especially useful in large forms or when validation fails.
+
+**Example:**
+```php
+<input name="email" value="<?= old('email') ?>">
+```
+If the user submitted the form and it failed validation, their email input will be preserved.
+
+### error()
+
+`error(string $key)`
+
+**What it does:**
+Returns the validation error message for a specific field, if any.
+
+**When to use:**
+- To show users what went wrong with their input after a failed form submission.
+- Place near each form field for clear feedback.
+
+**Example:**
+```php
+<input name="email" value="<?= old('email') ?>">
+<span class="error"><?= error('email') ?></span>
+```
+If validation fails for `email`, the error message appears next to the field.
+
+### Example
+
+Below is an example showing usage of above two helper functions.
+
+**Controller**
+
+```php
+public function register(Request $request)
+{
+    $validator = validator()
+        ->field('username')->required()->min(3)
+        ->field('email')->required()->email()
+        ->field('password')->required()->min(8);
+
+    $validator->validateRequest();
+
+    if ($validator->fails()) {
+        return redirect()->back();
+    }
+    
+    // ... proceed with registration
+}
+```
+
+**View**
+
+```php
+<form method="POST">
+    <?= csrf_input() ?>
+
+    <label>Username</label>
+    <input name="username" value="<?= old('username') ?>">
+    <span class="error"><?= error('username') ?></span>
+
+    <label>Email</label>
+    <input name="email" value="<?= old('email') ?>">
+    <span class="error"><?= error('email') ?></span>
+
+    <label>Password</label>
+    <input name="password" type="password">
+    <span class="error"><?= error('password') ?></span>
+
+    <button type="submit">Register</button>
+</form>
+```
+
+---
+
+## Form Requests
+
+The `FormRequest` class in Lightpack provides a powerful, expressive, and reusable way to handle HTTP request validation and authorization in your applications. It encapsulates validation logic, error handling, and request data preparation, making your controllers clean and focused.
+
+---
+
+### Key Features
+
+- **Thin Controllers:** Move all validation logic to FormRequest classes.
+- **Reusable Rules:** Centralize and reuse request validation across controllers.
+- **Automatic Validation:** Requests are validated before reaching your controller logic.
+- **AJAX & JSON Support:** Automatically returns JSON error responses for AJAX/JSON requests.
+- **Custom Hooks:** Easily customize data preparation and error handling with overridable methods.
+- **Seamless Integration:** Works with Lightpack’s DI container, session, and redirect systems.
+- **Session Flash**: Validation errors and current request input are automatically flashed to the session for easy display in views.
+- Use **old()** and **error()** methods to work with sticky forms and displaying error messages.
+
+---
+
+### How It Works
+
+1. **Extend FormRequest:** Create your own request classes by extending `Lightpack\Http\FormRequest`.
+2. **Define Rules:** Implement the `rules()` method to return your validation rules.
+   - **Rule Resolution:** Your `rules()` method is called via the container.
+   - You can typehint dependencies you would like to get injected by the framework.
+3. **Automatic Bootstrapping:** Lightpack boots your FormRequest, runs validation, and handles errors or passes control to your controller.
+4. On successful validation, controller method executes further.
+5. **On Failure:**
+  - **AJAX/JSON:** Responds with HTTP 422 and a JSON error structure.
+  - **Standard Request:** Redirects back with errors in the session.
+  - Custom hooks (`beforeSend`, `beforeRedirect`) are available for advanced control.
+
+### Example Usage
+
+#### 1. Create a FormRequest
+
+```php
+php console create:request RegisterUserRequest
+```
+
+Then implement the `rules()` method. For example:
+
+```php
+namespace App\Requests;
+
+use Lightpack\Http\FormRequest;
+
+class RegisterUserRequest extends FormRequest
+{
+    protected function rules()
+    {
+         $this->validator
+            ->field('name')
+            ->required()
+            ->max(255);
+
+         $this->validator
+            ->field('email')
+            ->required()
+            ->email()
+            ->custom(new UniqueEmailRule, UniqueEmailRule::MESSAGE);
+
+         $this->validator
+            ->field('password')
+            ->required()
+            ->min(6)
+            ->max(25);
+
+         $this->validator
+            ->field('confirm_password')
+            ->required()
+            ->same('password');
+    }
+}
+```
+
+#### 2. Use in Controller
+
+Typehint the request class as dependency in your controller's method:
+
+```php
+public function register(RegisterUserRequest $request)
+{
+   // If validation passes, you reach here!
+
+    $data = $request->all();
+
+   // Proceed with user registration...
+}
+```
+
+### Overridable Hooks
+
+You can customize the request lifecycle by overriding these methods:
+
+- `protected function data()`: Prepare or mutate request data before validation.
+- `protected function beforeSend()`: Run logic before sending a JSON error response.
+- `protected function beforeRedirect()`: Run logic before redirecting on validation failure.
+
+Override any of the following in your FormRequest:
+
+```php
+protected function data()
+{
+   // Manipulate request input data before validation
+}
+
+protected function beforeSend()
+{
+   // Add custom headers or logging before JSON error response
+}
+
+protected function beforeRedirect()
+{
+   // Custom logic before redirecting on failure
+}
+```
+
+---
+
 ## Available Rules
 
 ### String Rules

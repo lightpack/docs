@@ -2,33 +2,14 @@
 
 **Lightpack** facilitates sending emails using any SMTP service provider in a very friendly manner. You can easily send emails in plain `Text` or rich `HTML` format.
 
-The first step is to **configure** your SMTP service provider. 
-
-## Configuring SMTP
-
-Open your [env.php](/environments) file and adjust the SMTP credentials:
-
-```php
-/**
- * Mail settings.
- */
-
-'MAIL_DRIVER' => 'smtp',
-'MAIL_HOST' => 'smtp.mailtrap.io',
-'MAIL_PORT' => 587,
-'MAIL_ENCRYPTION' => 'tls',
-'MAIL_USERNAME' => null,
-'MAIL_PASSWORD' => null,
-'MAIL_FROM_ADDRESS' => 'lightpack@example.com',
-'MAIL_FROM_NAME' => 'Lightpack',
-```
+The first step is to **configure** your SMTP service provider in the `.env` file and adjust the SMTP credentials.
 
 ## Creating Mail Class
 
 Once you have setup your `SMTP` credentials, you should now create a mail class. To create a new mail class, fire this command in your terminal from project root:
 
 ```terminal
-php lucy create:mail TestMail
+php console create:mail TestMail
 ```
 
 This should have created a `TestMail.php` file in **app/Mails** folder. You can write your mail logic in `dispatch()` method. Here is a minimal example of sending an email:
@@ -46,7 +27,7 @@ public function dispatch(array $payload = [])
 
 ## Sending Mail
 
-To send the mail, simply instantiate the mail class and call its `execute()` method:
+To send the mail, simply instantiate the mail class and call its `dispatch()` method:
 
 ```php
 (new TestMail)->dispatch();
@@ -307,3 +288,5 @@ $this->send();
 ## Final Note
 
 Lightpack depends on the awesome [PHPMailer](https://github.com/PHPMailer/PHPMailer) library for mail sending facility and all the mail classes extend this library. So you can utilize all the possible methods in your mail class as documented by **PHPMailer** project.</p>
+
+---

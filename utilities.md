@@ -53,57 +53,6 @@ Outputs a hidden input to spoof HTTP methods (like PUT, PATCH, DELETE) in HTML f
 </form>
 ```
 
-## old()
-
-`old(string $key, $default = '', bool $escape = true)`
-
-**What it does:**
-Returns the previously submitted value for a form field, or a default if not present.
-
-**When to use:**
-- To repopulate form fields after a validation error, so users don’t lose their input.
-- Especially useful in large forms or when validation fails.
-
-**Example:**
-```php
-<input name="email" value="<?= old('email') ?>">
-```
-If the user submitted the form and it failed validation, their email input will be preserved.
-
-## error()
-
-`error(string $key)`
-
-**What it does:**
-Returns the validation error message for a specific field, if any.
-
-**When to use:**
-- To show users what went wrong with their input after a failed form submission.
-- Place near each form field for clear feedback.
-
-**Example:**
-```php
-<input name="email" value="<?= old('email') ?>">
-<span class="error"><?= error('email') ?></span>
-```
-If validation fails for `email`, the error message appears next to the field.
-
-## _e()
-
-`_e(string $str)`
-
-**What it does:**
-Escapes HTML special characters to prevent XSS attacks.
-
-**When to use:**
-- Always escape any user-generated or dynamic content before outputting it in HTML.
-- Use for comments, user names, or any data you don’t fully control.
-
-**Example:**
-```php
-<p><?= _e($comment->body) ?></p>
-```
-
 ## dd()
 
 `dd(...$args)`

@@ -288,3 +288,5 @@ $this->send();
 ## Final Note
 
 Lightpack depends on the awesome [PHPMailer](https://github.com/PHPMailer/PHPMailer) library for mail sending facility and all the mail classes extend this library. So you can utilize all the possible methods in your mail class as documented by **PHPMailer** project.</p>
+
+---

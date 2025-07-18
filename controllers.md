@@ -80,12 +80,7 @@ Now you can access the view data array by key names as variables within your vie
 Title: <?= $title ?>
 ```
 
-You can also organize your view templates in folder within <code>app/views</code> folder. For
-example, to render the template <code>app/views/page/home.php</code>,
-
-```php
-response()->view('page/home');
-```
+Read more about [view templating](views.md) support in Lightpack.
 
 ## JSON Response
 

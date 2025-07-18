@@ -16,14 +16,14 @@ Or you can call the utility function `url()` which returns an instance or **Url*
 
 ```php
 // Generate basic URL
-$url->to('users'); // Returns: /users
+url()->to('users'); // Returns: /users
 
 // URL with multiple segments
-$url->to('blog', 'posts', '123'); // Returns: /blog/posts/123
+url()->to('blog', 'posts', '123'); // Returns: /blog/posts/123
 
 // URL with query parameters
 // Returns: /users?sort=asc&status=active
-$url->to('users', ['sort' => 'asc', 'status' => 'active']); 
+url()->to('users', ['sort' => 'asc', 'status' => 'active']); 
 ```
 
 If you set the environment variable `APP_URL`, then it returns fully qualified URL:
@@ -31,7 +31,7 @@ If you set the environment variable `APP_URL`, then it returns fully qualified U
 ```php
 // If APP_URL=https://example.com
 // Returns: https://example.com/api/v1
-$url->to('api', 'v1'); 
+url()->to('api', 'v1'); 
 ```
 
 ## Asset URLs
@@ -40,7 +40,7 @@ Generate URLs for static assets in the public directory:
 
 ```php
 // Basic asset URL
-$url->asset('css/styles.css'); // Returns: /css/styles.css
+url()->asset('css/styles.css'); // Returns: /css/styles.css
 ```
 
 With `ASSET_URL` environment variable:
@@ -48,7 +48,7 @@ With `ASSET_URL` environment variable:
 ```php
 // If ASSET_URL=https://cdn.example.com
 // Returns: https://cdn.example.com/js/app.js
-$url->asset('js/app.js'); 
+url()->asset('js/app.js'); 
 ```
 
 Fallback to `APP_URL` if `ASSET_URL` not set:
@@ -56,7 +56,7 @@ Fallback to `APP_URL` if `ASSET_URL` not set:
 ```php
 // If APP_URL=https://example.com
 // Returns: https://example.com/images/logo.png
-$url->asset('images/logo.png'); 
+url()->asset('images/logo.png'); 
 ```
 
 ## Route URLs
@@ -69,13 +69,13 @@ Basic route URL
 
 ```php
 // Returns: /users/123/profile
-$url->route('user.profile', ['id' => 123]); 
+url()->route('user.profile', ['id' => 123]); 
 ```
 Route with optional parameters
 
 ```php
 // Returns: /blog/tech/php-tips
-$url->route('blog.post', [
+url()->route('blog.post', [
     'category' => 'tech',
     'slug' => 'php-tips'
 ]); 
@@ -85,7 +85,7 @@ Route with query parameters:
 
 ```php
 // Returns: /search?q=php&page=1
-$url->route('search', [
+url()->route('search', [
     'q' => 'php',
     'page' => 1
 ]); 
@@ -99,14 +99,14 @@ Add/update query parameters:
 
 ```php
 // Returns: https://example.com/search?q=php
-$url->withQuery('https://example.com/search', ['q' => 'php']);
+url()->withQuery('https://example.com/search', ['q' => 'php']);
 ```
 
 Array parameters:
 
 ```php
 // Returns: https://example.com/posts?tags[0]=php&tags[1]=mysql
-$url->withQuery('https://example.com/posts', [
+url()->withQuery('https://example.com/posts', [
     'tags' => ['php', 'mysql']
 ]);
 ```
@@ -115,21 +115,21 @@ Remove query parameters:
 
 ```php
 // Returns: example.com?page=1
-$url->withoutQuery('example.com?page=1&sort=desc', 'sort');
+url()->withoutQuery('example.com?page=1&sort=desc', 'sort');
 ```
 
 Remove multiple parameters:
 
 ```php
 // Returns: example.com?page=1
-$url->withoutQuery('example.com?utm_source=fb&page=1', ['utm_source', 'utm_medium']);
+url()->withoutQuery('example.com?utm_source=fb&page=1', ['utm_source', 'utm_medium']);
 ```
 
 Remove all query parameters:
 
 ```php
 // Returns: example.com
-$url->withoutQuery('example.com?page=1&sort=desc');
+url()->withoutQuery('example.com?page=1&sort=desc');
 ```
 
 ### URL Fragments
@@ -138,21 +138,21 @@ Add/update fragment:
 
 ```php
 // Returns: example.com#section1
-$url->withFragment('example.com', 'section1');
+url()->withFragment('example.com', 'section1');
 ```
 
 Update existing fragment:
 
 ```php
 // Returns: example.com#new
-$url->withFragment('example.com#old', 'new');
+url()->withFragment('example.com#old', 'new');
 ```
 
 Remove fragment:
 
 ```php
 // Returns: example.com
-$url->withoutFragment('example.com#section');
+url()->withoutFragment('example.com#section');
 ```
 
 ### URL Normalization
@@ -161,14 +161,14 @@ Clean up URLs:
 
 ```php
 // Returns: https://example.com/api/users
-$url->normalize('https://example.com//blog/../api/./users//');
+url()->normalize('https://example.com//blog/../api/./users//');
 ```
 
 Join URL segments:
 
 ```php
 // Returns: https://api.com/v1/users?sort=desc
-$url->join('https://api.com', 'v1/', '/users', '?sort=desc');
+url()->join('https://api.com', 'v1/', '/users', '?sort=desc');
 ```
 
 ## URL Signing
@@ -177,16 +177,16 @@ Generate a signed URL for a given route for secure access:
 
 ```php
 // Generate signed URL (expires in 1 hour default)
-$signedUrl = $url->sign('download.file', ['id' => 123]);
+$signedUrl = url()->sign('download.file', ['id' => 123]);
 
 // Generate signed URL with custom expiration
-$signedUrl = $url->sign('download.file', ['id' => 123], 7200); // 2 hours
+$signedUrl = url()->sign('download.file', ['id' => 123], 7200); // 2 hours
 ```
 
 Verify signed URL:
 
 ```php
-if ($url->verify($signedUrl)) {
+if (url()->verify($signedUrl)) {
     // URL is valid and not expired
 }
 ```
@@ -194,7 +194,7 @@ if ($url->verify($signedUrl)) {
 Verify with ignored parameters:
 
 ```php
-$url->verify($signedUrl, ['utm_source', 'utm_medium']);
+url()->verify($signedUrl, ['utm_source', 'utm_medium']);
 ```
 
 ## Comprehensive Example Scenarios

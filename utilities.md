@@ -1,122 +1,141 @@
-# Utilities
+# Lightpack Utilities
 
-`Lightpack` provides few handy utility functions.
-
-## url()
-
-This function exposes methods to generate URLs for your application.
-
-To generate a URL, use `to()` method. It takes any number of string texts as arguments and concats them to generate relative URL to application basepath. 
-
-```php
-url()->to('products', 'edit', 23); // /products/edit/23
-```
-
-To generates relative URL with support for query parameters, pass an array as the last argument.
-
-```php
-url()->to('products', 'list', ['sort' => 'asc', 'status' => 'active']);
-```
-
-That will produce `/products/list?sort=asc&status=active`
-
-To generate relative path URL for your application assets residing in `/public/assets` folder:
-
-```php
-url()->asset('css/styles.css'); // /assets/css/styles.css
-url()->asset('img/favicon.png'); // /assets/img/favicon.png
-url()->asset('js/scripts.js'); // /assets/js/scripts.js
-```
-
-## redirect()
-
-Use this function for HTTP redirect relative to your applications domain. You can optionally pass HTTP redirect status code as second argument which defaults to `302`.
-
-For example, to redirect to `/products/list`:
-
-```php
-redirect()->to('products/list');
-```
+Lightpack provides few handy utility functions to simplify common usage scenarios in your application.
 
 ## csrf_input()
 
-Returns an HTML input element for CSRF token. Especially helpful when working with forms.
+**What it does:**
+Outputs a hidden HTML input containing the current CSRF token (named `_token`).
 
+**When to use:**
+- Always include this in every `<form>` that performs a POST, PUT, PATCH, or DELETE request.
+- Protects your application from Cross-Site Request Forgery attacks.
+
+**Example:**
 ```php
-<?php echo csrf_input(); ?>
+<form method="POST">
+  <?= csrf_input() ?>
+  <!-- other fields -->
+</form>
 ```
 
-This will generate an hidden input element with name `csrf_token` and a random CSRF token as value. For example:
+## csrf_token()
 
+**What it does:**
+Returns the current CSRF token as a string.
+
+**When to use:**
+- When you need to access the token value directly (e.g., for AJAX requests or custom headers).
+
+**Example:**
 ```php
-<input type="hidden" name="csrf_token" value="642c75336eece81c">
+$token = csrf_token();
+// Use $token in an AJAX request header
 ```
 
-## str()
+## spoof_input()
 
-This function exposes methods to manipulate strings.
+`spoof_input(string $method)`
 
+**What it does:**
+Outputs a hidden input to spoof HTTP methods (like PUT, PATCH, DELETE) in HTML forms.
 
-Use method `slugify()` to convert an ASCII text to URL friendly slug. It will replace any non-word character, non-digit character, or a non-dash '-' character with empty. Also it will replace any number of space character with a single dash '-'.
+**When to use:**
+- When you want to send a method other than GET or POST in a form submission.
+- HTML forms only support GET and POST natively; this lets you use RESTful verbs.
 
+**Example:**
 ```php
-str()->slugify('Hello World'); // hello-world
+<form method="POST" action="/resource/123">
+  <?= csrf_input() ?>
+  <?= spoof_input('DELETE') ?>
+  <button type="submit">Delete</button>
+</form>
 ```
 
-Use method `humanize()` This function converts a slug text to friendly human readable text. It replaces dashes and underscores with whitespace character. Then capitalizes the first character.
+## old()
 
+`old(string $key, $default = '', bool $escape = true)`
+
+**What it does:**
+Returns the previously submitted value for a form field, or a default if not present.
+
+**When to use:**
+- To repopulate form fields after a validation error, so users don’t lose their input.
+- Especially useful in large forms or when validation fails.
+
+**Example:**
 ```php
-str()->humanize('hello-world'); // Hello World
+<input name="email" value="<?= old('email') ?>">
 ```
+If the user submitted the form and it failed validation, their email input will be preserved.
 
-## get_env()
+## error()
 
-This function return an environment variable set in one of `$_ENV` or `$_SERVER` variable. 
+`error(string $key)`
 
-It returns `null` in case he environment variable is not found.
+**What it does:**
+Returns the validation error message for a specific field, if any.
 
+**When to use:**
+- To show users what went wrong with their input after a failed form submission.
+- Place near each form field for clear feedback.
+
+**Example:**
 ```php
-get_env('DB_HOST');
+<input name="email" value="<?= old('email') ?>">
+<span class="error"><?= error('email') ?></span>
 ```
-
-You can pass a default value as second argument to return.
-
-```php
-get_env('DB_HOST', 'localhost');
-```
-
-## set_env()
-
-This function sets an environment variable.
-
-```php
-set_env('APP_VERSION', 'v1.0');
-```
+If validation fails for `email`, the error message appears next to the field.
 
 ## _e()
 
-This function is an HTML characters to entities converter.Use this function to escape HTML output to protect against XSS attacks.
+`_e(string $str)`
 
+**What it does:**
+Escapes HTML special characters to prevent XSS attacks.
+
+**When to use:**
+- Always escape any user-generated or dynamic content before outputting it in HTML.
+- Use for comments, user names, or any data you don’t fully control.
+
+**Example:**
 ```php
-_e('<script>alert("dangerous")</script>');
+<p><?= _e($comment->body) ?></p>
 ```
 
 ## dd()
 
-Use this function as a quick alternate to `var_dump()`. It will pretty dump the variables and then exit the PHP execution.
+`dd(...$args)`
 
-You can pass any number of variables to this function.
+**What it does:**
+“Dump and Die”—outputs the contents of variables (like `var_dump`) and stops the script.
 
+**When to use:**
+- For debugging: inspect variables, arrays, or objects at any point in your code.
+- Use in development only; never leave in production code.
+
+**Example:**
 ```php
-var_dump($var1, $var2, ..., $varN);
+dd($user, $posts);
 ```
 
 ## pp()
 
-Use this function as a quick alternate to `print_r()`. It will pretty print the variables and then exit the PHP execution.
+`pp(...$args)`
 
-You can pass any number of variables to this function.
+**What it does:**
+“Pretty Print”—outputs variables using `print_r` and stops the script. This function is useful for debugging purposes, especially when working with arrays and objects.
+
+**When to use:**
+- For debugging: best for arrays and objects where structure matters. This provides a clear and readable representation of the data.
+- Use in development only.
+
+**Example:**
+```php
+pp($myArray);
+```
 
 ```php
-print_r($var1, $var2, ..., $varN);
+pp($var1, $var2, $var3)
 ```

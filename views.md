@@ -1,6 +1,4 @@
-# Lightpack View Template System: Deep Dive
-
-## Overview
+# Lightpack View Template System
 
 The `Lightpack\View\Template` class is the core of Lightpack’s view rendering system. It provides a minimal, robust, and flexible API for rendering PHP templates, including support for data injection, template composition, conditional inclusion, and error handling. This documentation provides an exhaustive breakdown of its design, usage, and internals.
 
@@ -15,7 +13,7 @@ Use the helper function `template()` to utilize the view templating capabilities
 - **Purpose:** Render a template file with provided data.
 - **Usage:**
   ```php
-  <?=> template()->render('profile', ['user' => $user]) ?>
+  <?= template()->render('profile', ['user' => $user]) ?>
   ```
 
 ### include()
@@ -164,7 +162,7 @@ public function dashboard()
         'title'   => 'Dashboard',
         'stats'    => ['sales' => 23, 'leads' => 100],
         'copyright' => '@Lightpack',
-        'template' => 'dashboard,
+        'template' => 'dashboard',
     ];
 
     return response()->view('layout', $data);
@@ -219,5 +217,48 @@ Total Leads: <?= $stats['leads'] ?>
 **Observe that we include the `app/view/dashboard.php` template using:**
 
 `<?= template()->include($template) ?>`
+
+---
+
+## Escaping Output
+
+Lightpack provides a convenient global function, `_e()`, to help you safely output dynamic data in your templates:
+
+- It converts special characters to their HTML entity equivalents.
+- Prevents Cross-Site Scripting (XSS) by ensuring user-supplied or dynamic data cannot break out of HTML context.
+- Use it whenever you output any data that may contain special HTML characters or come from user input.
+
+```php
+<?php foreach($comments as $comment): ?>
+    <?= _e($comment) ?>
+<?php endforeach  ?>
+```
+
+## Few Suggestions
+
+Using PHP as a template engine doesn’t mean you have to write messy or “spaghetti” code. Follow these principles for clean, maintainable views:
+
+**Keep business logic out of templates.**
+- All data preparation, decisions, and calculations should happen in your controllers or services.
+- Templates should focus only on presentation: displaying variables, looping over data, and calling includes/components.
+- This is the single biggest reason why templates become messy.
+
+**Use Partials and Components**
+- Break up large templates into smaller, reusable pieces (headers, footers, navbars, widgets).
+- Use `template()->include()` and `template()->component()` to compose your UI from simple building blocks.
+
+**Leverage Layouts**
+- Define a base layout for your site and inject page content into it.
+- This keeps your structure consistent and your page templates focused.
+
+**Minimize Inline PHP**
+- Use short echo tags (`<?= ... ?>`) for output.
+- Avoid complex `if`/`else` or function calls in templates—prepare everything in advance.
+
+**Name Variables Clearly**
+- Use descriptive variable names so your templates are self-explanatory.
+
+**Escape Output Where Needed**
+- Always escape user-provided data with `_e()`, unless you are certain it’s safe.
 
 ---

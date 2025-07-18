@@ -4,6 +4,8 @@ The `Lightpack\View\Template` class is the core of Lightpack’s view rendering 
 
 Use the helper function `template()` to utilize the view templating capabilities.
 
+<p class="tip">Lightpack expects all your view templates to be located in the <b>app/views/</b> directory of your project. You can organize your layouts, partials, and page templates here, using subdirectories as needed.</p>
+
 ## Available Methods
 
 ### render()
@@ -154,24 +156,50 @@ This will look for the `app/views/profile.php` template file and render it with 
 
 Layouts enable you to define a common structure for your pages (such as headers, footers, navigation, and meta tags) while allowing individual templates to inject their own content.
 
+There is a special method for rendering embedded child content inside a layout:
+
+```php
+template()->embed()
+```
+
 ### 1. Controller
+
+Specify the `__embed` key in view data with the name of the template you are expect to be embedded in **layout.php** view.
+
 ```php
 public function dashboard()
 {
-    $data = [
+    return response()->view('layout', [
+        '__embed' => 'dashboard', // dashboard template
         'title'   => 'Dashboard',
-        'stats'    => ['sales' => 23, 'leads' => 100],
         'copyright' => '@Lightpack',
-        'template' => 'dashboard',
-    ];
-
-    return response()->view('layout', $data);
+        'stats'    => ['sales' => 23, 'leads' => 100],
+    ]);
 }
 ```
 
+> All the data is automatically passed to **layout.php** except `__embed` which is unset by the framework when rendering the view template.
+
 ### 2. Define Templates
 
-`app/views/header.php`
+An example directory structure for defining view templates might look like:
+
+```
+app/
+└── views/
+    ├── layout.php           # Main layout template
+    ├── dashboard.php        # Dashboard content template
+    └── partials/
+        └── header.php
+        └── footer.php
+        └── header.php
+```
+
+- **layout.php**: Your main layout file (includes header, footer, and an embed slot for child content).
+- **header.php, footer.php**: Common partials included in layouts or other templates.
+- **dashboard.php**: referenced as embedded content inside layout.
+
+`app/views/partials/header.php`
 
 ```php
 <header>
@@ -179,7 +207,7 @@ public function dashboard()
 </header>
 ```
 
-`app/views/footer.php`
+`app/views/partials/footer.php`
 
 ```php
 <footer>
@@ -204,8 +232,8 @@ Total Leads: <?= $stats['leads'] ?>
         <?= template()->include('header') ?>
 
         <main>
-            <!-- include template to render -->
-            <?= template()->include($template) ?>
+            <!-- embed child content -->
+            <?= template()->embed() ?>
         </main>
 
         <!-- include footer template -->
@@ -214,9 +242,9 @@ Total Leads: <?= $stats['leads'] ?>
 </html>
 ```
 
-**Observe that we include the `app/view/dashboard.php` template using:**
+**Observe that we've embed the `app/view/dashboard.php` template using:**
 
-`<?= template()->include($template) ?>`
+`<?= template()->embed() ?>`
 
 ---
 

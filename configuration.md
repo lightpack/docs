@@ -23,19 +23,7 @@ config('key');
 To view configurations for your application browse `config` folder. It
 lists some pre-defined configurations as an `array` of key-value pairs.
 
-For example, open `config/db.php` configuration file:
-
-```php
-// ...
-'db.mysql.host' => get_env('DB_HOST'),
-'db.mysql.port' => get_env('DB_PORT'),
-'db.mysql.username' => get_env('DB_USER'),
-'db.mysql.password' => get_env('DB_PSWD'),
-'db.mysql.database' => get_env('DB_NAME'),
-// ...
-```
-
-To access a config item, simply specify it as a key.
+For example, you c an access `config/db.php` configuration file keys like:
 
 ```php
 config('db.mysql.host');
@@ -53,13 +41,15 @@ as an **array** as show below.
 <?php
 
 return [
-    'redis.host' => '127.0.0.1',
-    'redis.port' => '6666',
-    'redis.password' => '1234',
+    'redis' => [
+        'host' => '127.0.0.1',
+        'port' => '6666',
+        'password' => '1234',
+    ],
 ];
 ```
 
-**That's it**. Now you can easily access the config values as shown:
+Now you can easily access the config values as shown:
 
 ```php
 config('redis.host'); // 127.0.0.1
@@ -72,5 +62,7 @@ You can dynamically add new configuration values at runtime by simply
 setting the config item key as show below.
 
 ```php
-app('config')->set('key', 'value');
+config()->set('key', 'value');
 ```
+
+---

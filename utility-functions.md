@@ -1,4 +1,4 @@
-# Lightpack Utilities
+# Lightpack Utility Functions
 
 Lightpack provides few handy utility functions to simplify common usage scenarios in your application.
 

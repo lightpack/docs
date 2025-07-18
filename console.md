@@ -201,6 +201,12 @@ Start the PHP built-in server using `APP_URL` from `.env` as the host.
 php console app:serve
 ```
 
+**You can specify the port to run:**
+
+```terminal
+php console app:serve 8001
+```
+
 ---
 
 ### Hot Reload & Watch

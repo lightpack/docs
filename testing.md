@@ -97,12 +97,69 @@ $this->assertResponseJsonHasKey();
 $this->assertResponseJsonKeyValue();
 ```
 
+- **assertResponseHasValidJson()**
+  
+  Asserts that the response body is valid JSON. Use this to ensure your endpoint returns a properly formatted JSON response.
+
+  ```php
+  $this->request('GET', '/api/products');
+  $this->assertResponseHasValidJson();
+  ```
+
+- **assertResponseJson()**
+  
+  Asserts that the response JSON matches the given array exactly. Use this to check for a full match with the expected JSON structure and values.
+
+  ```php
+  $this->request('GET', '/api/products/1');
+  $this->assertResponseJson(['id' => 1, 'name' => 'Lightpack']);
+  ```
+
+- **assertResponseJsonHasKey()**
+  
+  Asserts that a specific key exists in the response JSON. Supports dot notation for nested keys.
+
+  ```php
+  $this->request('GET', '/api/user');
+  $this->assertResponseJsonHasKey('profile.email');
+  ```
+
+- **assertResponseJsonKeyValue()**
+  
+  Asserts that a specific key in the JSON response has the expected value. Supports dot notation for nested keys.
+
+  ```php
+  $this->request('GET', '/api/user');
+  $this->assertResponseJsonKeyValue('profile.email', 'john@example.com');
+  ```
+
 ## Asserting Redirect Responses
 
 ```php
 $this->assertRedirectUrl();
 $this->assertResponseIsRedirect();
 ```
+
+- **assertRedirectUrl()**
+  
+  Asserts that the response is a redirect to the specified URL. Use this to confirm the correct redirect location after an action.
+
+  ```php
+  $this->request('POST', '/login', [
+      'email' => 'foo@bar.com',
+      'password' => 'secret'
+  ]);
+  $this->assertRedirectUrl('/dashboard');
+  ```
+
+- **assertResponseIsRedirect()**
+  
+  Asserts that the response is a redirect (any 3xx status code). Use this to check if the action results in a redirect, regardless of destination.
+
+  ```php
+  $this->request('POST', '/logout');
+  $this->assertResponseIsRedirect();
+  ```
 
 ## Asserting Sessions
 
@@ -113,6 +170,51 @@ $this->assertSessionHasErrors();
 $this->assertSessionHasOldInput();
 ```
 
+- **withSession()**
+  
+  Sets session data before making a request. Use this to simulate a session state, such as a logged-in user or pre-filled data.
+
+  ```php
+  $this->withSession(['user_id' => 1]);
+  $this->request('GET', '/dashboard');
+  ```
+
+- **assertSessionHas()**
+  
+  Asserts that the session contains the given key (and optionally, the expected value). Use this to check if session data is set after a request.
+
+  ```php
+  $this->request('POST', '/login', [
+      'email' => 'foo@bar.com',
+      'password' => 'secret'
+  ]);
+  $this->assertSessionHas('user_id');
+  ```
+
+- **assertSessionHasErrors()**
+  
+  Asserts that the session contains validation errors for the given fields. Use this to verify validation error handling.
+
+  ```php
+  $this->request('POST', '/register', [
+      'email' => '',
+      'password' => ''
+  ]);
+  $this->assertSessionHasErrors(['email', 'password']);
+  ```
+
+- **assertSessionHasOldInput()**
+  
+  Asserts that the session contains old input data for the specified fields. Useful for checking form repopulation after validation errors.
+
+  ```php
+  $this->request('POST', '/register', [
+      'email' => 'foo@bar.com',
+      'password' => ''
+  ]);
+  $this->assertSessionHasOldInput(['email']);
+  ```
+
 ## Asserting Headers
 
 ```php
@@ -121,29 +223,123 @@ $this->assertResponseHasHeader();
 $this->assertResponseHeaderEquals();
 ```
 
+- **withHeaders()**
+  
+  Sets custom HTTP headers for the next request. Use this to simulate requests with specific headers (e.g., authentication, content type).
+
+  ```php
+  $this->withHeaders([
+      'Authorization' => 'Bearer token',
+      'Accept' => 'application/json'
+  ]);
+  $this->request('GET', '/api/data');
+  ```
+
+- **assertResponseHasHeader()**
+  
+  Asserts that the response contains the specified header. Use this to check if a header is present in the response.
+
+  ```php
+  $this->request('GET', '/api/data');
+  $this->assertResponseHasHeader('Content-Type');
+  ```
+
+- **assertResponseHeaderEquals()**
+  
+  Asserts that a response header matches the expected value. Use this to verify the exact value of a header in the response.
+
+  ```php
+  $this->request('GET', '/api/data');
+  $this->assertResponseHeaderEquals('Content-Type', 'application/json');
+  ```
+
 
 ## Asserting Cookies
 
 ```php
 $this->withCookies();
+$this->assertCookieHas();
+$this->assertCookieEquals();
+$this->assertCookieMissing();
 ```
 
-```php
-public function testItSetsCookies()
-{
-    $this->withCookies(['test' => 'test']);
-    $this->requestJson('get', '/api/test');
+- **withCookies()**
+  
+  Sets cookies for the next request. Use this to simulate requests with specific cookie values (e.g., authentication, preferences).
 
-    $this->assertTrue(cookie()->has('test'));
-    $this->assertEquals('test', cookie()->get('test'));
-}
-```                    
+  ```php
+  $this->withCookies(['theme' => 'dark', 'token' => 'abc123']);
+  $this->request('GET', '/profile');
+  ```
+
+- **assertCookieHas()**
+  
+  Asserts that a cookie exists in the response.
+
+  ```php
+  $this->request('GET', '/set-cookie');
+  $this->assertCookieHas('theme');
+  ```
+
+- **assertCookieEquals()**
+  
+  Asserts that a cookie exists and has the expected value.
+
+  ```php
+  $this->request('GET', '/set-cookie');
+  $this->assertCookieEquals('theme', 'dark');
+  ```
+
+- **assertCookieMissing()**
+  
+  Asserts that a cookie does not exist in the response.
+
+  ```php
+  $this->request('GET', '/set-cookie');
+  $this->assertCookieMissing('old_token');
+  ```
 
 ## Asserting File Uploads
 
 ```php
 $this->withFiles();
 ```
+
+- **withFiles()**
+  
+  Sets files for the next request. Use this to simulate file uploads in your tests.
+
+  ```php
+  $file = [
+      'name' => 'avatar.png',
+      'type' => 'image/png',
+      'tmp_name' => __DIR__ . '/fixtures/avatar.png',
+      'error' => UPLOAD_ERR_OK,
+      'size' => filesize(__DIR__ . '/fixtures/avatar.png'),
+  ];
+  $this->withFiles(['avatar' => $file]);
+  $this->request('POST', '/upload');
+  ```
+
+## Asserting File Uploads
+
+- **assertResponseStatus()** (after upload)
+  
+  Asserts that the upload response status is as expected.
+
+  ```php
+  $this->request('POST', '/upload', [], ['avatar' => $file]);
+  $this->assertResponseStatus(200);
+  ```
+
+- **assertTrue() / assertEquals()** (for uploaded file checks)
+  
+  Use these to check if the file exists in storage or matches expected properties after upload.
+
+  ```php
+  $this->request('POST', '/upload', [], ['avatar' => $file]);
+  $this->assertTrue(file_exists(storage_path('uploads/avatar.png')));
+  ```
 
 ## Asserting Mails
 
@@ -167,6 +363,133 @@ $this->assertMailHasAttachments();
 $this->assertMailHasAttachment();
 $this->assertMailHasNoAttachments();
 ```
+
+
+- **assertMailSent()**
+  
+  Asserts that at least one email was sent during the test.
+  ```php
+  $this->assertMailSent();
+  ```
+
+- **assertMailNotSent()**
+  
+  Asserts that no emails were sent during the test.
+  ```php
+  $this->assertMailNotSent();
+  ```
+
+- **assertMailSubject()**
+  
+  Asserts that an email with the given subject was sent.
+  ```php
+  $this->assertMailSubject('Welcome to Lightpack');
+  ```
+
+- **assertMailContains()**
+  
+  Asserts that the email body contains the given text.
+  ```php
+  $this->assertMailContains('Your verification code is');
+  ```
+
+- **assertMailSentFrom()**
+  
+  Asserts that an email was sent from the given address.
+  ```php
+  $this->assertMailSentFrom('noreply@example.com');
+  ```
+
+- **assertMailCount()**
+  
+  Asserts that the number of emails sent matches the expected count.
+  ```php
+  $this->assertMailCount(2);
+  ```
+
+- **assertMailSentTo()**
+  
+  Asserts that an email was sent to the given recipient.
+  ```php
+  $this->assertMailSentTo('user@example.com');
+  ```
+
+- **assertNoMailSentTo()**
+  
+  Asserts that no email was sent to the given recipient.
+  ```php
+  $this->assertNoMailSentTo('banned@example.com');
+  ```
+
+- **assertMailSentToAll()**
+  
+  Asserts that emails were sent to all recipients in the given list.
+  ```php
+  $this->assertMailSentToAll(['a@example.com', 'b@example.com']);
+  ```
+
+- **assertMailCc()**
+  
+  Asserts that an email was CC'd to the given address.
+  ```php
+  $this->assertMailCc('manager@example.com');
+  ```
+
+- **assertMailBcc()**
+  
+  Asserts that an email was BCC'd to the given address.
+  ```php
+  $this->assertMailBcc('auditor@example.com');
+  ```
+
+- **assertMailCcAll()**
+  
+  Asserts that all given addresses were CC'd on the email.
+  ```php
+  $this->assertMailCcAll(['a@example.com', 'b@example.com']);
+  ```
+
+- **assertMailBccAll()**
+  
+  Asserts that all given addresses were BCC'd on the email.
+  ```php
+  $this->assertMailBccAll(['a@example.com', 'b@example.com']);
+  ```
+
+- **assertMailReplyTo()**
+  
+  Asserts that the email has the given reply-to address.
+  ```php
+  $this->assertMailReplyTo('support@example.com');
+  ```
+
+- **assertMailReplyToAll()**
+  
+  Asserts that all given reply-to addresses are set on the email.
+  ```php
+  $this->assertMailReplyToAll(['a@example.com', 'b@example.com']);
+  ```
+
+- **assertMailHasAttachments()**
+  
+  Asserts that the email has at least one attachment.
+  ```php
+  $this->assertMailHasAttachments();
+  ```
+
+- **assertMailHasAttachment()**
+  
+  Asserts that the email has the specified attachment.
+  ```php
+  $this->assertMailHasAttachment('invoice.pdf');
+  ```
+
+- **assertMailHasNoAttachments()**
+  
+  Asserts that the email has no attachments.
+  ```php
+  $this->assertMailHasNoAttachments();
+  ```
 
 ## Asserting Databases
 

@@ -1,9 +1,8 @@
 # Testing
 
-> **Lightpack** extends `PHPUnit` to support integration tests for your HTTP routes, responses, and API endpoints. 
+> **Lightpack** extends `PHPUnit` to support integration tests for your HTTP routes, responses, and API endpoints. To feature test a route and its response, create a test class in `tests/Http` folder in your project root. 
 
-To feature test a route and its response, create a test class in `tests` folder in your project root. You can see
-an example of a test class provided in `tests/Http` folder.
+You can see an example of a test class provided in `tests/Http` folder.
 
 ```php
 class HomeTest extends HttpTestCase
@@ -48,7 +47,7 @@ Use this method to make **JSON** requests. It accepts the same parameters that `
 $this->requestJson('POST', '/products', ['name' => 'Lightpack']);
 ```
 
-## Asserting Responses
+## Asserting HTML Responses
 
 Once you have made a request to a route, you can then assert returned response using following assertion methods:
 
@@ -56,203 +55,78 @@ Once you have made a request to a route, you can then assert returned response u
 $this->assertRouteNotFound();
 $this->assertResponseStatus();
 $this->assertResponseBody();
+```
+
+- **assertRouteNotFound()** 
+  
+Asserts that the last request resulted in a 404 Not Found response. Use this to verify that a route does not exist or is not accessible.
+
+```php
+$this->request('GET', '/invalid-route');
+$this->assertRouteNotFound();
+```
+
+- **assertResponseStatus()** 
+
+Asserts that the response status code matches the expected value. Pass the desired HTTP status code (e.g., 200 for OK, 302 for redirect, 404 for not found).
+
+```php
+$this->request('POST', '/login', [
+    'email' => 'foo@bar.com', 
+    'password' => 'secret'
+]);
+
+$this->assertResponseStatus(302);
+```
+
+- **assertResponseBody()**: 
+  
+Asserts that the response body matches the given string exactly. Use this to confirm the precise output returned by the route.
+
+```php
+$this->request('GET', '/hello');
+$this->assertResponseBody('Hello, World!');
+```
+
+## Asserting JSON Responses
+
+```php
 $this->assertResponseHasValidJson();
 $this->assertResponseJson();
 $this->assertResponseJsonHasKey();
 $this->assertResponseJsonKeyValue();
+```
+
+## Asserting Redirect Responses
+
+```php
+$this->assertRedirectUrl();
+$this->assertResponseIsRedirect();
+```
+
+## Asserting Sessions
+
+```php
+$this->withSession();
+$this->assertSessionHas();
+$this->assertSessionHasErrors();
+$this->assertSessionHasOldInput();
+```
+
+## Asserting Headers
+
+```php
+$this->withHeaders();
 $this->assertResponseHasHeader();
 $this->assertResponseHeaderEquals();
-$this->assertRedirectUrl();
 ```
 
-### assertRouteNotFound()
 
-Use this method to assert that request route does not exist.
+## Asserting Cookies
 
 ```php
-public function testPageNotFound()
-{
-    $this->request('GET', '/does-not-exist');
-
-    $this->assertRouteNotFound();
-}
+$this->withCookies();
 ```
-
-### assertResponseStatus()
-
-Use this method to assert the returned response status code. For example:
-
-```php
-public function testItRendersHomePage()
-{
-    $this->request('GET', '/');
-
-    $this->assertResponseStatus(200);
-}
-```
-
-### assertResponseBody()
-
-Use this method to assert the returned content in response body. For example:
-
-```php
-public function testItRendersHomePage()
-{
-    $this->request('GET', '/');
-
-    $this->assertResponseBody('<h1>Welcome</h1>');
-}
-```
-
-### assertResponseHasValidJson()
-
-Use this method to assert that returned **JSON** in response is valid. For example:
-
-```php
-public function testItFetchesProductsJson()
-{
-    $this->request('GET', '/products');
-
-    $this->assertResponseHasValidJson();
-}
-```
-
-### assertResponseJson()
-
-Use this method to assert that returned **JSON** in response exactly matches the array. For example:
-
-
-```php
-public function testItFetchesProductsJson()
-{
-    $this->request('GET', '/products/1');
-
-    $this->assertResponseJson(['name' => 'Lightpack']);
-}
-```
-
-### assertResponseJsonHasKey()
-
-Use this method to assert that returned **JSON** in response contains a given key. For example:
-
-```php
-public function testItFetchesProductsJson()
-{
-    $this->request('GET', '/products/1');
-
-    $this->assertResponseJsonHasKey('name');
-}
-```
-
-Note that you can also specify a key using `dot` notation. For example:
-
-
-```php
-public function testItFetchesProductsJson()
-{
-    $this->request('GET', '/products/1');
-
-    $this->assertResponseJsonHasKey('brand.name');
-}
-```
-
-### assertResponseJsonKeyValue()
-
-Use this method to assert that returned **JSON** in response has matching `key-value`. For example:
-
-```php
-public function testItFetchesProductsJson()
-{
-    $this->request('GET', '/products/1');
-
-    $this->assertResponseJsonHasKey('name', 'Lightpack');
-}
-```
-
-### assertResponseHasHeader()
-
-Use this method to assert that returned response has matching header key. For example:
-
-```php
-public function testItFetchesProductsJson()
-{
-    $this->request('GET', '/products/1');
-
-    $this->assertResponseHasHeader('cache-control');
-}
-```
-
-### assertResponseHeaderEquals()
-
-Use this method to assert that returned response has matching header `key-value`. For example:
-
-```php
-public function testItFetchesProductsJson()
-{
-    $this->request('GET', '/products/1');
-
-    $this->assertResponseHasHeader('cache-control', 'no-cache');
-}
-```
-
-### assertRedirectUrl()
-
-Use this method to assert that returned response has a redirect URL. For example:
-
-```php
-public function testItFetchesProductsJson()
-{
-    $this->request('GET', '/dashboard');
-
-    $this->assertResponseHasHeader('/login');
-}
-```
-
-## Testing Databases
-
-> Note: This section applies only in case of MariaDB, MySQl based relational databases.
-
-**Lightpack** ships with `phpunit.xml` file in the project's root directory. You can specify the database name you will use for testing:
-
-```xml
-<env name="DB_NAME" value="test_lightpack" />
-```
-
-### Migrations
-
-Before you start testing database applications, you should run all your migrations in the test database so that it contains the latest schema for testing:
-
-```cli
-php lucy migrate:up
-```
-
-### Seeding
-
-In case you want to seed some test data, execute all your seeder classes:
-
-```cli
-php lucy db:seed
-```
-
-### Transactions
-
-You should wrap your test methods in transactions so that once the method is tested, it should rollback any changes made in database. For that, simply wrap your statements within a transaction:
-
-```php
-public function testItStoresNewProduct()
-{
-    app('db')->begin();
-
-    $this->request('POST', '/products', ['name' => 'Lightpack']);
-    $this->assertResponseStatus(201);
-    
-    app('db')->rollback();
-}
-```
-
-## Test Cookies
-
-Use `withCookies()` method to pass custom cookies in request.
 
 ```php
 public function testItSetsCookies()
@@ -265,58 +139,77 @@ public function testItSetsCookies()
 }
 ```                    
 
-## Test Session
-
-Use `withSession()` method to set custom session data.
+## Asserting File Uploads
 
 ```php
-public function testItSetsSession()
-{
-    $this->withSession(['test' => 'test']);
-    $this->requestJson('get', '/api/test');
+$this->withFiles();
+```
 
-    $this->assertTrue(session()->has('test'));
-    $this->assertEquals('test', session()->get('test'));
+## Asserting Mails
+
+```php
+$this->assertMailSent();
+$this->assertMailNotSent();
+$this->assertMailSubject();
+$this->assertMailContains();
+$this->assertMailSentFrom();
+$this->assertMailCount();
+$this->assertMailSentTo();
+$this->assertNoMailSentTo();
+$this->assertMailSentToAll();
+$this->assertMailCc();
+$this->assertMailBcc();
+$this->assertMailCcAll();
+$this->assertMailBccAll();
+$this->assertMailReplyTo();
+$this->assertMailReplyToAll();
+$this->assertMailHasAttachments();
+$this->assertMailHasAttachment();
+$this->assertMailHasNoAttachments();
+```
+
+## Asserting Databases
+
+**Lightpack** ships with `phpunit.xml` file in the project's root directory. You can specify the database configurations you will use for testing.
+
+Once you have configured database settings, use the `Lightpack\Testing\DatabaseTrait` in your test classes that need to interect with database. 
+- This migrates all the required schema changes per test method before it runs and destroys them after every test method execution completion.
+- This also wraps the test method execution within a transaction ensuring a clean slate for each test method.
+
+```php
+class LoginTest extends TestCase
+{
+    use DatabaseTrait;
+
+    public function testUserCanLoginWithValidData()
+    {
+        $user = [
+            'email' => 'johndoe@example.com',
+            'password' => '!secret!';
+        ];
+
+        // Make the login post request
+        $this->request('POST', url()->route('login'), $user);
+
+        // Assert tge response status is 302
+        $this->assertResponseStatus(302);
+
+        // Assert response is a redirect
+        $this->assertInstanceOf(Redirect::class, $this->response);
+
+        // Assert redirect url is to dashboard route
+        $this->assertRedirectUrl(url()->route('dashboard'));
+
+        // Assert user login session is set
+        $this->assertTrue(auth()->isLoggedIn());
+    }
 }
 ```
 
-## Test Headers
+### Seeding
 
-Use `withHeaders()` method to pass custom request headers.
+In case you want to seed some test data, execute all your seeder classes:
 
-```php
-public function testItSetsRequestHeaders()
-{
-    $this->withHeaders([
-        'Accept' => 'application/json',
-        'X-Requested-With' => 'XMLHttpRequest',
-    ]);
-
-    $this->request('get', '/test');
-
-    $this->assertTrue(request()->hasHeader('Accept'));
-    $this->assertTrue(request()->hasHeader('X-Requested-With'));
-
-    $this->assertEquals('application/json', request()->header('Accept'));
-    $this->assertEquals('XMLHttpRequest', request()->header('X-Requested-With'));
-}
-```
-
-## Testing File Uploads
-
-Use `withFiles()` method to test file uploads. This method accepts an array of one or more files to test upload.
-
-```php
-public function testItUploadsFile() 
-{
-    $file = [
-        'name' => 'profile.png',
-        'type' => 'text/plain',
-        'tmp_name' => __DIR__ . '/../tmp/profile.png',
-        'error' => UPLOAD_ERR_OK,
-        'size' => filesize(__DIR__ . '/../tmp/profile.png'),
-    ];
-
-    $this->withFiles(['photo' => $file])->request('post', '/test/upload');
-}
+```cli
+php console db:seed
 ```

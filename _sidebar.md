@@ -46,6 +46,7 @@
   * Authentication
 
     * [Introduction](authentication.md)
+    * [API Access Tokens](api-access-tokens.md)
     * [Configuration](auth-configuration.md)
     * [Extending Auth](custom-auth.md)
     * [Route Filters](auth-filters.md)

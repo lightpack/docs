@@ -20,6 +20,9 @@ auth()->isGuest();
 // Attempt login and start session
 auth()->login();
 
+// Login as a specific user without credentials
+auth()->loginAs();
+
 // Attempt login once without starting session
 auth()->attempt();
 

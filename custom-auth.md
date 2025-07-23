@@ -50,11 +50,6 @@ class CustomIdentifier implements Identifier
         // custom logic to fetch user by id
     }
 
-    public function findByAuthToken(string $token): ?Identity
-    {
-        // fetch user with matching api_token
-    }
-
     public function findByRememberToken($id, string $token): ?Identity
     {
         // fetch user with matching remember_me token

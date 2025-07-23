@@ -48,8 +48,6 @@ auth()->redirectLogout();
 auth()->redirectLoginUrl();
 ```
 
-Also the configuration for authentication is present in `config/auth.php` file. In most cases, you can use these methods without any configurations needed.
-
 ## Logging In
 
 ### Web Based Login

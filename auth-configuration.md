@@ -25,16 +25,7 @@ Here is a brief explanation for those configurations:
 
 ## identifier
 
-This key is the class name that represents a user identifier. This class implements `Lightpack\Auth\Identifier` interface and contains following methods:
-
-```php
-public function findByAuthToken(string $token);
-public function findByRememberToken($id, string $token);
-public function findByCredentials(array $credentials);
-public function updateLogin($id, array $fields);
-```
-
-You can create your own custom user data service providers to implement your own authentication mechanism.
+This key is the class name that represents a user identifier. This class implements `Lightpack\Auth\Identifier` interfaceand acts as a user data service provider.  You can also [implement your own custom](custom-auth) auth identifers.
 
 ## login.url
 
@@ -71,3 +62,5 @@ This key is the name of the column in the users table that stores the remember-m
 ## flash_error
 
 This key contains the default error message for **failed** login attempts.
+
+---

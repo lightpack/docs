@@ -20,6 +20,9 @@ auth()->isGuest();
 // Attempt login and start session
 auth()->login();
 
+// Login as a specific user without credentials
+auth()->loginAs();
+
 // Attempt login once without starting session
 auth()->attempt();
 
@@ -44,29 +47,6 @@ auth()->redirectLogout();
 // Redirect to login URL
 auth()->redirectLoginUrl();
 ```
-
-Also the configuration for authentication is present in `config/auth.php` file. In most cases, you can use these methods without any configurations needed.
-
-## Migrations
-
-You will need to migrate **users** table to support authentication.
-
-```sql
-CREATE TABLE IF NOT EXISTS `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `remember_token` varchar(255) NULL,
-  `api_token` varchar(255) DEFAULT NULL,
-  `last_login_at` datetime DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-```
-
-Execute above SQL statement to create a **users** table with appropriate columns.
 
 ## Logging In
 
@@ -144,10 +124,12 @@ If the user checks the **remember** functionality while logging in, you can use 
 auth()->recall();
 ```
 
-Behind the scenes, this method will perform following actions.
+Behind the scenes, this method performs the following actions:
 
-* Check if **session** has logged in.
-* On **success**, redirect to **post-login** url.
-* On **failure**, check if `remember_me` cookie is set and valid.
-* If **cookie** is valid, redirect to **post-login** url.
-* Else, redirect to **login** page.
+* Checks if the user is already logged in via session.
+* If **yes**, redirects to the **post-login** URL.
+* If **no**, checks if a `remember_me` cookie is present and valid.
+* If the **cookie is valid**, the user is automatically logged in (a new session is started) and redirected to the **post-login** URL.
+* If the **cookie is missing or invalid**, the user is redirected to the **login** page.
+
+---

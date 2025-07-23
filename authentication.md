@@ -124,10 +124,12 @@ If the user checks the **remember** functionality while logging in, you can use 
 auth()->recall();
 ```
 
-Behind the scenes, this method will perform following actions.
+Behind the scenes, this method performs the following actions:
 
-* Check if **session** has logged in.
-* On **success**, redirect to **post-login** url.
-* On **failure**, check if `remember_me` cookie is set and valid.
-* If **cookie** is valid, redirect to **post-login** url.
-* Else, redirect to **login** page.
+* Checks if the user is already logged in via session.
+* If **yes**, redirects to the **post-login** URL.
+* If **no**, checks if a `remember_me` cookie is present and valid.
+* If the **cookie is valid**, the user is automatically logged in (a new session is started) and redirected to the **post-login** URL.
+* If the **cookie is missing or invalid**, the user is redirected to the **login** page.
+
+---

@@ -11,14 +11,7 @@ Authenticators are classes that extend `Lightpack\Auth\AbstractAuthenticator` cl
 These classes are responsible for authenticating a request. You can create your own authenticator by extending this class. For example:
 
 ```php
-<?php
-
-namespace App\Security;
-
-use Lightpack\Auth\Identity;
-use Lightpack\Auth\AbstractAuthenticator;
-
-class CustomAuthenticator extends AbstractAuthenticator
+class JwtAuthenticator extends AbstractAuthenticator
 {
     public function verify(): ?Identity
     {
@@ -27,22 +20,30 @@ class CustomAuthenticator extends AbstractAuthenticator
 }
 ```
 
-The `verify()` method should return an instantce of **\Lightpack\Auth\Identity**. 
+The `verify()` method should return an instance of **\Lightpack\Auth\Identity** (or `null` if authentication fails). 
+
+To use your custom authenticator, you should register it using the `extend()` method. For example, in your login controller:
+
+```php
+class LoginController
+{
+    public function authenticate()
+    {
+        // specify authenticator to use
+        auth()->extend('jwt', JwtAuthenticator::class);
+
+        return auth()->login();
+    }
+}
+```
 
 ## Identifiers
 
 Identifiers are classes that implement `Lightpack\Auth\Identifier` interface.
 
-These classes are responsible for **fetching** users and they act as user repository or user data service providers. You can created your own identifier by implementing this interface. For example:
+These classes are responsible for **fetching** users and they act as user repository or user data service providers. You can create your own identifier by implementing this interface. For example:
 
 ```php
-<?php
-
-namespace App\Security;
-
-use Lightpack\Auth\Identity;
-use Lightpack\Auth\Identifier;
-
 class CustomIdentifier implements Identifier
 {
     public function findById($id): ?Identity
@@ -67,10 +68,9 @@ class CustomIdentifier implements Identifier
 }
 ```
 
-## Configuration
+### Configuration
 
-Now the final step remains is to configure your custom authentication provider. Add a new key in `config/auth.php` file
-with a value that identifies your authentication privider.
+Now the final step is to configure your custom identifier. Add a new key in your `config/auth.php` file with a value that identifies your authentication provider:
 
 ```php
 <?php
@@ -87,10 +87,10 @@ return [
 ];
 ```
 
-Once configured, call the `extend()` method on `auth()` in your login controller or wherever you want to use this custom authentication. For example:
+To use your custom provider in a controller or any part of your app, simply call `auth('custom')` to switch to your provider for that call chain:
 
 ```php
-<?php 
+<?php
 
 namespace App\Controllers;
 
@@ -98,13 +98,17 @@ class LoginController
 {
     public function authenticate()
     {
-        // Use custom authentication
-        auth()->extend('custom');
-
-        // Try to validate login
-        auth()->login();
+        return auth('custom')->login();
     }
 }
 ```
+
+## Quick Summary Table
+
+| Task                    | How to do it                                           |
+|-------------------------|--------------------------------------------------------|
+| Register authenticator  | `auth()->extend('jwt', JwtAuthenticator::class);`      |
+| Use custom provider     | `auth('custom')->login();`                             |
+| Register identifier     | Add to `config/auth.php` under `'custom'`              |
 
 ---

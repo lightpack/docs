@@ -15,7 +15,6 @@ by the framework itself.
     'fields.id' => 'id',
     'fields.username' => 'email',
     'fields.password' => 'password',
-    'fields.api_token' => 'api_token',
     'fields.remember_token' => 'remember_token',
     'fields.last_login_at' => 'last_login_at',
     'flash_error' => 'Invalid account credentials.',
@@ -65,13 +64,9 @@ This key is the form-field name for **username** input which by default, it is s
 
 This key is the form-field name for **password** input.
 
-## fields.api_token
-
-This key is the name for **api_token** column in users table.
-
 ## fields.remember_token
 
-This key is the name for cookie **remember_token** column in users table.
+This key is the name of the column in the users table that stores the remember-me token.
 
 ## flash_error
 

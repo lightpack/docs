@@ -94,6 +94,12 @@ $user->deleteTokens($plainTextToken);
 
 // Delete current request access token 
 $user->deleteCurrentRequestToken();
+
+// Delete a token by ID
+$user->deleteTokensById(23);
+
+// Delete multiple tokens by ID
+$user->deleteTokensById([23, 24, 24]);
 ```
 
 - Deleting tokens immediately invalidates them for future authentication.

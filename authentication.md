@@ -50,27 +50,6 @@ auth()->redirectLoginUrl();
 
 Also the configuration for authentication is present in `config/auth.php` file. In most cases, you can use these methods without any configurations needed.
 
-## Migrations
-
-You will need to migrate **users** table to support authentication.
-
-```sql
-CREATE TABLE IF NOT EXISTS `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `remember_token` varchar(255) NULL,
-  `api_token` varchar(255) DEFAULT NULL,
-  `last_login_at` datetime DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-```
-
-Execute above SQL statement to create a **users** table with appropriate columns.
-
 ## Logging In
 
 ### Web Based Login

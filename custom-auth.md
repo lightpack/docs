@@ -1,8 +1,34 @@
 # Extending Authentication
 
-**Lightpack's** authentication system is made up of `Authenticators` and `Identifiers`. 
+**Lightpack's** authentication system is made up of two key building blocks: `Authenticators` and `Identifiers`.
 
-Understanding these two aspects will help you customize and implement your own authentication system as per your application needs. 
+Understanding how these work together will help you confidently customize authentication for your application.
+
+## Concepts
+
+**Authenticator**
+- Handles the mechanics of authentication (e.g., parsing a JWT, validating a password, checking a cookie)
+- Extracts identifying information (e.g., user ID) from the request
+
+**Identifier**
+- Responsible for fetching the user (Identity) from a data source, given some identifying info (like user ID, email, etc.)
+- Is agnostic to how the identifying info was obtained
+
+**How do they work together?**
+- Authenticator verifies the request and extracts the identifier (e.g., user ID from JWT)
+- Identifier loads the user from the database (or other source)
+- This separation allows you to mix and match authentication strategies and user sources
+
+**When do you need a custom Identifier?**
+- Only if your user-fetching logic is different from the default (e.g., you want to look up by email instead of ID, or fetch from an API)
+- Most of the time, the default identifier is sufficient—even for JWT authentication
+
+**Why this separation?**
+- Encourages single responsibility and testability
+- Makes it easy to add new authentication methods without rewriting user lookup logic
+- Enables advanced scenarios (multi-tenancy, external user stores, etc.)
+
+Below we document in detail how to define your own custom authenticators and identifiers as required.
 
 ## Authenticators
 

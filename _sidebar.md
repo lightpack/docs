@@ -1,8 +1,6 @@
 * Getting Started
 
-  <!-- * [Introduction](introduction.md) -->
   * [Quick Install](install.md)
-  * [Sample Tutorial](sample-tutorial.md)
 
 * Basics
 

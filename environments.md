@@ -14,7 +14,7 @@ you can define as many environment configurations as you wish.
 You can also generate the **.env** file from command line itself.
 
 ```terminal
-php lucy create:env
+php console create:env
 ```
 
 <p class="tip">You should not commit your environment specific config files to your version control system.</p>

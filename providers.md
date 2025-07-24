@@ -38,7 +38,7 @@ Although there are a couple of possible solutions to do that, `Lightpack` suppor
 From your terminal you can fire this command to create a `Mailerprovider`.
 
 ```terminal
-php lucy create:provider MailerProvider
+php console create:provider MailerProvider
 ```
 
 This should have generated `MailerProvider` class in `app/Providers` directory. 

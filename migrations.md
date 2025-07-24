@@ -9,7 +9,7 @@ Migrations provide version control for your database schema. Each migration is a
 To create a new migration file, fire this command from console:
 
 ```terminal
-php lucy create:migration create_table_products
+php console create:migration create_table_products
 ```
 
 This will create the migration file prefixed with current **datetime** in `database/migrations` folder. The migration class contains methods `up()` and `down()`.
@@ -28,7 +28,7 @@ The `up()` method contains definition for required schema changes. Any reverse o
 To run your migration files:
 
 ```terminal
-php lucy migrate:up
+php console migrate:up
 ```
 
 This command will run the `up()` method in all the migration scripts defined inside **database/migrations** folder. 
@@ -40,7 +40,7 @@ To track the files that have been migrated, it will also create a `migrations` t
 To rollback or undo all your migrations:
 
 ```terminal
-php lucy migrate:down
+php console migrate:down
 ```
 
 This will run the `down()` method in all the migration scripts inside **database/migrations** folder.
@@ -48,7 +48,7 @@ This will run the `down()` method in all the migration scripts inside **database
 To rollback a limited number of migrations, provide the `steps` flag:
 
 ```terminal
-php lucy migrate:down --steps=2
+php console migrate:down --steps=2
 ```
 
 This will rollback last two **batches** of migrations if present.

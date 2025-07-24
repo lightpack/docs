@@ -20,7 +20,7 @@ Suppose you have a products table with following columns:
 Fire this command from the root of your project:
 
 ```terminal
-php lucy create:seeder ProductsSeeder
+php console create:seeder ProductsSeeder
 ```
 
 This should have created a seeder class named `ProductsSeeder` in `database/seeders` directory. 
@@ -65,7 +65,7 @@ public function seed()
 As a final step, you need to execute all your seeders. For that, simply execute the following console command:
 
 ```terminal
-php lucy db:seed
+php console db:seed
 ```
 
 ## Model Factory

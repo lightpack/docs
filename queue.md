@@ -73,7 +73,7 @@ Jobs are PHP classes extending `Lightpack\Jobs\Job` and implementing a `run()` m
 To create a new job class, fire this command in your terminal from project root:
 
 ```terminal
-php lucy create:job SendMail
+php console create:job SendMail
 ```
 
 This should have created a `SendMail.php` class file in `app/Jobs` folder. You can implement your job logic in the `run()` method.
@@ -174,7 +174,7 @@ class SendMail
 Once you have dispatched your job its time to run them. Fire this command from the terminal in your project root:
 
 ```terminal
-php lucy process:jobs
+php console process:jobs
 ```
 
 This will hang your terminal prompt and will wait for any jobs to process. If a job is processed successfully or faile, you should see a terminal message accordingly.
@@ -186,7 +186,7 @@ This will hang your terminal prompt and will wait for any jobs to process. If a 
 
 Example:
 ```cli
-php lucy process:jobs --sleep=2 --queues=emails,default --cooldown=600
+php console process:jobs --sleep=2 --queues=emails,default --cooldown=600
 ```
 
 ### Signal Handling
@@ -231,7 +231,7 @@ Create a file named `lightpack-worker.conf` in `/etc/supervisor/conf.d` director
 ```text
 [program:lightshop-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/lightpack-app/lucy process:jobs
+command=php /var/www/lightpack-app/console process:jobs
 autostart=true
 autorestart=true
 stopasgroup=true

@@ -32,7 +32,7 @@ Then you should define a `Product` model in <code>app/Models</code> folder.
 Fire this command to generate a model from your terminal inside your project root.
 
 ```terminal
-php lucy create:model Product --table=products
+php console create:model Product --table=products
 ```
 
 This should have created `Product` model in `app/Models` folder.

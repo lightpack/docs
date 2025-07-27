@@ -19,7 +19,7 @@ The **rate limiter** uses Lightpack's Cache system, supporting multiple drivers:
 
 ## Usage
 
-You may create an instance of Lock class:
+You may create an instance of `Limiter` class:
 
 ```php
 $limiter = new Lightpack\Utils\Limiter;

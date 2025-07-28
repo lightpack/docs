@@ -9,5 +9,5 @@ you need to understand the mechanism of `Cross-Origin Resource Sharing` aka **CO
 `Lightpack` framework comes with a filter to support CORS requests made by browsers while
 accessing your APIs. 
 
-The class `App\Filters\CorsFilter` adds sufficient headers in the **before()**
+The class `Lightpack\Filters\CorsFilter` adds sufficient headers in the **before()**
 and **after()** methods to allow preflight requests made by browsers using `OPTIONS` request method.

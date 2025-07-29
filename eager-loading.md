@@ -351,7 +351,8 @@ $posts = $user->posts; // Triggers a query to fetch posts for this user
 - **N+1 Query Problem:** If you loop over a collection and access a relation on each item, you can easily trigger many queries:
   
   ```php
-  $users = User::all();
+  $users = User::query()->all();
+  
   foreach ($users as $user) {
         $user->profile; // Triggers 1 profile query per user
   }

@@ -269,7 +269,7 @@ Use `streamCsv()` to efficiently export large datasets as CSV downloads:
 ```php
 response()->streamCsv(function() {
     echo "id,name\n";
-    foreach (User::all() as $user) {
+    foreach ($users as $user) {
         echo $user->id . ',' . $user->name . "\n";
     }
 }, 'users.csv');

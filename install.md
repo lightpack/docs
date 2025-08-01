@@ -1,19 +1,17 @@
 # Installation
 
-Clone the <code>Lightpack</code> repository into your project web root directory.
-
-```bash
-git clone https://github.com/lightpack/lightpack.git
+```
+composer create-project lightpack/lightpack myapp --stability=dev
 ```
 
-Move into your repository folder.
+Move into your new project folder.
 
-```bash
-cd lightpack
+```
+cd myapp
 ```
 
-Now run the composer command.
+composer create-project lightpack/lightpack
 
-```bash
-composer install --no-dev -vvv
+```
+php console app:serve
 ```

@@ -2,6 +2,8 @@
 
 > **Prerequisites:** PHP 8.2+, Composer
 
+**Follow the steps to create a new Lightpack PHP project for development.**
+
 1. Create a new project in `myapp` folder:
 
 ```bash

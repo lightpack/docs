@@ -58,13 +58,13 @@ You should define all the schedules in `schedules/schedules.php` file.
 
 ```php
 // Schedule a job to run every day at midnight
-schedule()->job('SendDailyReport')->daily();
+schedule()->job(SendDailyReport::class)->daily();
 
 // Schedule a command to run every hour
-schedule()->command('CleanupCommand')->hourly();
+schedule()->command(CleanupCommand::class)->hourly();
 
 // Schedules a command with arguments
-schedule()->command('MyCommandClass', ['--force' => true]); 
+schedule()->command(MyCommandClass::class, ['--force' => true]); 
 ```
 
 ## Setting When Events Run
@@ -72,7 +72,7 @@ schedule()->command('MyCommandClass', ['--force' => true]);
 **Using Cron Expressions Directly**
 
 ```php
-schedule()->job('BackupJob')->cron('0 3 * * *'); // Every day at 3:00 AM
+schedule()->job(BackupJob::class)->cron('0 3 * * *'); // Every day at 3:00 AM
 ```
 
 **Using Fluent Helpers**
@@ -90,31 +90,31 @@ schedule()->job('BackupJob')->cron('0 3 * * *'); // Every day at 3:00 AM
 Every Friday at 5:00 PM
 
 ```php
-schedule()->job('SendNewsletter')->fridays()->at('17:00');
+schedule()->job(SendNewsletter::class)->fridays()->at('17:00');
 ```
 
 15th of each month at 9:00 AM
 
 ```php
-schedule()->job('SendNewsletter')->monthlyOn(15, '09:00')
+schedule()->job(SendNewsletter::class)->monthlyOn(15, '09:00')
 ```
 
 Run a Job Every 15 Minutes
 
 ```php
-schedule()->job('SyncJob')->everyMinutes(15);
+schedule()->job(SyncJob::class)->everyMinutes(15);
 ```
 
 Run a Command Every Monday at 9:15 AM
 
 ```php
-schedule()->command('WeeklySummary')->mondays()->at('9:15');
+schedule()->command(WeeklySummary::class)->mondays()->at('9:15');
 ```
 
 Run on the 1st and 15th of Each Month at 8:00 AM
 
 ```php
-schedule()->job('BiMonthlyJob')->cron('0 8 1,15 * *');
+schedule()->job(BiMonthlyJob::class)->cron('0 8 1,15 * *');
 ```
 
 ---

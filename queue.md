@@ -20,14 +20,14 @@ Although `Lightpack` will solve background jobs processing needs for most of the
 
 View `config/jobs.php` for desired job queue related configurations.
 
-## Jobs Table Migration (Database Engine)
+## Jobs Table Migration
 
 If using the **database** engine, you need a `jobs` table. 
 
 **Create the migration:**
 
 ```cli
-php console create_table_jobs
+php console create:migration jobs_table
 ```
 
 **Update the migration logic:**

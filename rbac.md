@@ -22,62 +22,19 @@ Tables created by the included migration:
 - `user_role`: Pivot table linking users and roles.
 - `role_permission`: Pivot table linking roles and permissions.
 
----
-
-## Migration
-
-Run this command to generate a migration file:
+Create schema migration file:
 
 ```cli
-php console create:migration create_table_roles_permissions
+php console create:migration --support=rbac
 ```
 
-Use the following code for the up() and down() methods:
+Run migration:
 
-```php
-public function up(): void
-{
-    $this->create('roles', function (Table $table) {
-        $table->id();
-        $table->varchar('name', 100)->unique();
-        $table->varchar('label', 150)->nullable();
-        $table->timestamps();
-    });
-
-    $this->create('permissions', function (Table $table) {
-        $table->id();
-        $table->varchar('name', 100)->unique();
-        $table->varchar('label', 150)->nullable();
-        $table->timestamps();
-    });
-
-    $this->create('user_role', function (Table $table) {
-        $table->column('user_id')->type('bigint');
-        $table->column('role_id')->type('bigint');
-        $table->unique(['user_id', 'role_id']);
-        $table->foreignKey('user_id')->references('id')->on('users');
-        $table->foreignKey('role_id')->references('id')->on('roles');
-    });
-
-    $this->create('role_permission', function (Table $table) {
-        $table->column('role_id')->type('bigint');
-        $table->column('permission_id')->type('bigint');
-        $table->unique(['role_id', 'permission_id']);
-        $table->foreignKey('role_id')->references('id')->on('roles');
-        $table->foreignKey('permission_id')->references('id')->on('permissions');
-    });
-}
-
-public function down(): void
-{
-    $this->drop('role_permission');
-    $this->drop('user_role');
-    $this->drop('permissions');
-    $this->drop('roles');
-}
+```cli
+php console migrate:up
 ```
 
-
+---
 ## Usage
 
 **Add RbacTrait to Your User Model:**

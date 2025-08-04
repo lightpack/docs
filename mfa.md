@@ -15,36 +15,11 @@
 - **Null:**  
   - No MFA (for testing or fallback)
 
-## Installation & Migration
+## Installation
 
 ### 1. Migration
 
-Add MFA fields to your users table:
-
-```php
-return new class extends Migration {
-    public function up(): void {
-        $this->alter('users')->add(function (Table $table) {
-            $table->varchar('phone', 20)->nullable(); // For SMS MFA
-            $table->varchar('mfa_method', 32)->nullable(); // Chosen factor
-            $table->boolean('mfa_enabled')->default(false);
-            $table->text('mfa_backup_codes')->nullable(); // JSON array of hashes
-            $table->varchar('mfa_totp_secret', 64)->nullable(); // TOTP secret
-        });
-    }
-    public function down(): void {
-        $this->alter('users')->modify(function (Table $table) {
-            $table->dropColumn('phone');
-            $table->dropColumn('mfa_method');
-            $table->dropColumn('mfa_enabled');
-            $table->dropColumn('mfa_backup_codes');
-            $table->dropColumn('mfa_totp_secret');
-        });
-    }
-};
-```
-
-Run your migration command to apply.
+Your **users** table already contains required fields to support **MFA** features. You do not need a seperate migration to be generated and run.
 
 ### 2. Install Dependencies
 

@@ -39,34 +39,17 @@ Lightpack Secrets is a robust, framework-level solution for managing sensitive c
 
 ## Migration
 
-Run this command to generate a migration file:
+Create schema migration file:
 
 ```cli
-php console create:migration create_table_secrets
+php console create:migration --support=secrets
 ```
 
-Use the following code for the `up()` and `down()` methods:
+Run migration:
 
-```php
-public function up(): void
-{
-    $this->create('secrets', function (Table $table) {
-        $table->id();
-        $table->varchar('key', 150);
-        $table->text('value'); // Encrypted
-        $table->varchar('group', 150)->default('global');
-        $table->column('owner_id')->type('bigint')->attribute('unsigned')->nullable();
-        $table->timestamps();
-        $table->unique(['key', 'group', 'owner_id']);
-    });
-}
-
-public function down(): void
-{
-    $this->drop('secrets');
-}
+```cli
+php console migrate:up
 ```
-
 ---
 
 ## Configuration

@@ -130,32 +130,17 @@ You can view `config/cache.php` file for cache related configurations.
 
 ### Database Migration
 
-If using database as cache driver, you need to migrate a new table for storing cache entries.
+If using **database** as cache driver, you need to migrate schema for storing cache entries.
 
-```php
-php console create:migration create_table_cache
+Create schema migration file:
+
+```cli
+php console create:migration --support=cache
 ```
 
-Update and run the migration code:
+Run migration:
 
-```php
-return new class extends Migration
-{
-    public function up(): void
-    {
-        $this->create('cache', function (Table $table) {
-            $table->varchar('key', 255)->primary();
-            $table->column('value')->type('longtext');
-            $table->column('expires_at')->type('int')->attribute('UNSIGNED');
-            $table->index('expires_at', 'idx_cache_expiry');
-        });
-    }
-
-    public function down(): void
-    {
-        $this->drop('cache');
-    }
-};
+```cli
+php console migrate:up
 ```
-
 ---

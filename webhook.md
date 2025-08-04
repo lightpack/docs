@@ -31,33 +31,16 @@ A robust, flexible, and production-ready webhook processing framework for PHP/Li
 
 ## Migration
 
-Run this command to generate a migration file:
+Create schema migration file:
 
 ```cli
-php console create:migration create_table_webhook_events
+php console create:migration --support=webhooks
 ```
 
-Use the following code for the up() and down() methods:
+Run migration:
 
-```php
-public function up(): void
-{
-    $this->create('webhook_events', function (Table $table) {
-        $table->id();
-        $table->varchar('provider', 64);
-        $table->varchar('event_id', 128)->nullable();
-        $table->column('payload')->type('text');
-        $table->column('headers')->type('text')->nullable();
-        $table->varchar('status', 32)->default('pending');
-        $table->datetime('received_at')->default('CURRENT_TIMESTAMP');
-        $table->unique(['provider', 'event_id']);
-    });
-}
-
-public function down(): void
-{
-    $this->drop('webhook_events');
-}
+```cli
+php console migrate:up
 ```
 
 ---

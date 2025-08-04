@@ -47,48 +47,18 @@ You can view available configurations in `config/cable.php` file.
 
 ### 2. Run Migration
 
-Run the following migration command if using MySQL as realtime backend:
+If you use **database** as backend for **cable** features, you need to migrate schema.
+
+Create schema migration file:
 
 ```cli
-php console create:migration create_table_cable_system
+php console create:migration --support=cable
 ```
 
-Update following in your `up()/down()` migration methods:
+Run migration:
 
-```php
-public function up(): void
-{
-    // table: cable_messages
-    $this->create('cable_messages', function(Table $table) {
-        $table->id();
-        $table->varchar('channel', 255);
-        $table->varchar('event', 255);
-        $table->column('payload')->type('json')->nullable();
-        $table->datetime('created_at')->nullable();
-        
-        $table->index('channel');
-    }); 
-
-    // table: cable_presence
-    $this->create('cable_presence', function(Table $table) {
-        $table->id();
-        $table->varchar('channel', 255);
-        $table->column('user_id')->type('bigint')->attribute('unsigned');
-        $table->datetime('last_seen');
-
-        $table->foreignKey('user_id')->references('id')->on('users')->cascadeOnDelete()->cascadeOnUpdate();
-        
-        $table->unique(['channel', 'user_id']);
-        $table->index('channel');
-        $table->index('last_seen');
-    });
-}
-
-public function down(): void
-{
-    $this->drop('cable_messages');
-    $this->drop('cable_presence');
-}
+```cli
+php console migrate:up
 ```
 
 ### 3. Define Route

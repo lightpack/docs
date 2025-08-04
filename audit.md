@@ -40,39 +40,17 @@ Lightpack's audit facility is ideal for a wide range of real-world scenarios, in
 
 ## Migration
 
-Run this command to generate a migration file:
+Create schema migration file:
 
 ```cli
-php console create:migration create_table_audit_logs
+php console create:migration --support=audits
 ```
 
-Use the following code for the up() and down() methods:
+Run migration:
 
-```php
-public function up(): void
-{
-    $this->create('audit_logs', function (Table $table) {
-        $table->id();
-        $table->column('user_id')->type('bigint')->nullable();
-        $table->varchar('action', 50);
-        $table->varchar('audit_type', 150);
-        $table->column('audit_id')->type('bigint')->nullable();
-        $table->column('old_values')->type('text')->nullable();
-        $table->column('new_values')->type('text')->nullable();
-        $table->column('message')->type('text')->nullable();
-        $table->varchar('url', 255)->nullable();
-        $table->varchar('ip_address', 45)->nullable();
-        $table->varchar('user_agent', 255)->nullable();
-        $table->timestamps();
-    });
-}
-
-public function down(): void
-{
-    $this->drop('audit_logs');
-}
+```cli
+php console migrate:up
 ```
-
 
 ## Schema
 

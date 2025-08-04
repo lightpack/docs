@@ -14,29 +14,16 @@ Check the social auth related configuration in `config/social.php` file.
 
 ## Migration
 
-Run the following command to create the migration:
+Create schema migration file:
 
 ```cli
-php console create:migration create_table_social_accounts
+php console create:migration --support=social
 ```
-```php
-public function up(): void {
-    $this->create('social_accounts', function (Table $table) {
-        $table->id();
-        $table->column('user_id')->type('BIGINT')->attribute('UNSIGNED');
-        $table->varchar('provider', 20);
-        $table->varchar('provider_id', 255);
-        $table->timestamps();
 
-        $table->foreignKey('user_id')->references('id')->on('users')->cascadeOnDelete();
-        $table->unique(['provider', 'provider_id']);
-        $table->index('user_id');
-    });
-}
+Run migration:
 
-public function down(): void {
-    $this->drop('social_accounts');
-}
+```cli
+php console migrate:up
 ```
 
 ## Usage Patterns

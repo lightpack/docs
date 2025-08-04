@@ -24,41 +24,13 @@ View `config/jobs.php` for desired job queue related configurations.
 
 If using the **database** engine, you need a `jobs` table. 
 
-**Create the migration:**
+Create schema migration file:
 
 ```cli
-php console create:migration jobs_table
+php console create:migration --support=jobs
 ```
 
-**Update the migration logic:**
-
-```php
-return new class extends Migration
-{
-    public function up(): void
-    {
-        $this->create('jobs', function (Table $table) {
-            $table->id();
-            $table->varchar('handler', 255);
-            $table->varchar('queue', 55)->index();
-            $table->text('payload');
-            $table->varchar('status', 55)->index();
-            $table->column('attempts')->type('int');
-            $table->column('exception')->type('longtext')->nullable();
-            $table->createdAt();
-            $table->datetime('scheduled_at')->default('CURRENT_TIMESTAMP')->index();
-            $table->datetime('failed_at')->nullable();
-        });
-    }
-
-    public function down(): void
-    {
-        $this->drop('jobs');
-    }
-};
-```
-
-**Run the migration:**
+Run migration:
 
 ```cli
 php console migrate:up

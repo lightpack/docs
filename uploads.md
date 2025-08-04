@@ -14,12 +14,18 @@ A flexible, model-based file upload system for the Lightpack framework.
 - SEO-friendly URLs for public assets
 - Clean, intuitive API
 
-## Installation
+## Migration
 
-The Uploads module is included with Lightpack framework. To set up the database table, run the migration:
+Create schema migration file:
 
-```php
-php console migrate create_table_uploads
+```cli
+php console create:migration --support=uploads
+```
+
+Run migration:
+
+```cli
+php console migrate:up
 ```
 
 ## Basic Usage

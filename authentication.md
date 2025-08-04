@@ -48,6 +48,22 @@ auth()->redirectLogout();
 auth()->redirectLoginUrl();
 ```
 
+## Migration
+
+You must migrate required schema in order to use **authentication** features.
+
+Create schema migration file:
+
+```cli
+php console create:migration --support=users
+```
+
+Run migration:
+
+```cli
+php console migrate:up
+```
+
 ## Logging In
 
 ### Web Based Login

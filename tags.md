@@ -10,38 +10,16 @@ The Tags system uses two tables:
 - `tags`: Stores tag definitions (`id`, `name`, `slug`, timestamps).
 - `tag_models`: Pivot table connecting tags to models (`tag_id`, `model_id`, `model_type`).
 
-Run this command to generate a migration file:
+Create schema migration file:
 
 ```cli
-php console create:migration create_table_tags
+php console create:migration --support=tags
 ```
 
-Use the following code for the `up() `and `down()` methods:
+Run migration:
 
-```php
-public function up(): void
-{
-    $this->create('tags', function (Table $table) {
-        $table->id();
-        $table->varchar('name', 150)->unique();
-        $table->varchar('slug', 150)->unique();
-        $table->timestamps();
-    });
-
-    $this->create('tag_models', function (Table $table) {
-        $table->column('tag_id')->type('bigint')->attribute('unsigned');
-        $table->column('model_id')->type('bigint')->attribute('unsigned');
-        $table->varchar('model_type', 191);
-        $table->primary(['tag_id', 'model_id', 'model_type']);
-        $table->foreignKey('tag_id')->references('id')->on('tags')->cascadeOnDelete();
-    });
-}
-
-public function down(): void
-{
-    $this->drop('tag_models');
-    $this->drop('tags');
-}
+```cli
+php console migrate:up
 ```
 
 ---

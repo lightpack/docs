@@ -59,7 +59,7 @@ class TrimFilter implements IFilter
 }
 ```
 
-**Register your filter alias in `config/filters.php`:**
+**Register your filter alias in `boot/filters.php`:**
 
 ```php
 return [

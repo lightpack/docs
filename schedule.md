@@ -52,9 +52,9 @@ This ensures your scheduled events are checked and executed on time.
 
 ---
 
-## Defining Schedules
+## Registering Schedules
 
-You should define all the schedules in `schedules/schedules.php` file.
+Register all the schedules in `boot/schedules.php` file.
 
 ```php
 // Schedule a job to run every day at midnight

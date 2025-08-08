@@ -30,9 +30,9 @@ class UserCreatedEvent
 }
 ```
 
-## Configuring Listener
+## Registering Listener
 
-Now configure this listener in <code>config/events.php</code> file.
+Now register this listener in <code>boot/events.php</code> file.
 
 ```php
 <?php

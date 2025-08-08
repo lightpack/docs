@@ -71,11 +71,11 @@ public function register(Container $container)
 }
 ```
 
-## Configuring Provider
+## Registering Provider
 
 You need to register the provider class in order to access the service.
 
-Open `config/providers.php` file and just add your provider class at the **end** of the providers array.
+Open `boot/providers.php` file and just add your provider class at the **end** of the providers array.
 
 ```php
 <?php

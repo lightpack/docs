@@ -272,7 +272,7 @@ $choice = $prompt->choice('Pick one:', ['a' => 'Apple', 'b' => 'Banana']);
 
 2. Implement the `run(array $arguments = [])` method in your class.
 
-3. Register your command in `config/commands.php`:
+3. Register your command in `boot/commands.php`:
 
    ```php
    return [

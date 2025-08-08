@@ -4,7 +4,7 @@ The `Lightpack\View\Template` class is the core of Lightpack’s view rendering 
 
 Use the helper function `template()` to utilize the view templating capabilities.
 
-<p class="tip">Lightpack expects all your view templates to be located in the <b>app/views/</b> directory of your project. You can organize your layouts, partials, and page templates here, using subdirectories as needed.</p>
+<p class="tip">Lightpack expects all your view templates to be located in the <b>views</b> directory of your project. You can organize your layouts, partials, and page templates here, using subdirectories as needed.</p>
 
 ## Available Methods
 
@@ -74,7 +74,7 @@ These methods all render templates, but their behavior around data merging, isol
 
 ### Example
 
-Render the `app/views/profile.php` template with passed data.
+Render the `views/profile.php` template with passed data.
 
 ```php
 <?= template()->render('profile', [
@@ -84,16 +84,16 @@ Render the `app/views/profile.php` template with passed data.
 ]);
 ```
 
-In `app/view/profile.php` template:
+In `views/profile.php` template:
 ```php
 <h1>Profile</h1>
 
-<!-- app/views/partials/header.php -->
+<!-- views/partials/header.php -->
 <?= template()->include('partials/header', [
     'page' => 'Profile'
 ]) ?>
 
-<!-- app/views/components/header.php -->
+<!-- views/components/header.php -->
 <?= template()->component('components/button', [
     'label' => 'Save'
 ]) ?>
@@ -142,7 +142,7 @@ class ProfileController
 }
 ```
 
-This will look for the `app/views/profile.php` template file and render it with passed data as second argument.
+This will look for the `views/profile.php` template file and render it with passed data as second argument.
 
 ```php
 <ul>
@@ -199,7 +199,7 @@ app/
 - **header.php, footer.php**: Common partials included in layouts or other templates.
 - **dashboard.php**: referenced as embedded content inside layout.
 
-`app/views/partials/header.php`
+`views/partials/header.php`
 
 ```php
 <header>
@@ -207,7 +207,7 @@ app/
 </header>
 ```
 
-`app/views/partials/footer.php`
+`views/partials/footer.php`
 
 ```php
 <footer>
@@ -215,14 +215,14 @@ app/
 </footer>
 ```
 
-`app/views/dashboard.php`
+`views/dashboard.php`
 
 ```php
 Total Sales: <?= $stats['sales'] ?>
 Total Leads: <?= $stats['leads'] ?>
 ```
 
-`app/views/layout.php`
+`views/layout.php`
 
 ```php
 <!DOCTYPE html>
@@ -242,7 +242,7 @@ Total Leads: <?= $stats['leads'] ?>
 </html>
 ```
 
-**Observe that we've embed the `app/view/dashboard.php` template using:**
+**Observe that we've embed the `views/dashboard.php` template using:**
 
 `<?= template()->embed() ?>`
 

@@ -39,7 +39,11 @@ Lightpack already ships with few route definitions for making it easy to work wi
 
 ### 1. Configure Cable
 
-You can view available configurations in `config/cable.php` file.
+Please run following command to create `config/cable.php` configuration file.
+
+```cli
+php console create:config --support=cable
+```
 
 **Choose a driver:**
    - Database (default, simple, persistent storage)

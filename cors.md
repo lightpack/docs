@@ -11,3 +11,11 @@ accessing your APIs.
 
 The class `Lightpack\Filters\CorsFilter` adds sufficient headers in the **before()**
 and **after()** methods to allow preflight requests made by browsers using `OPTIONS` request method.
+
+## Configuration
+
+If you plan to modify **CORS** related headers configurations, please run following command to create `config/cors.php` configuration file.
+
+```cli
+php console create:config --support=cors
+```

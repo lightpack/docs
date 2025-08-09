@@ -48,9 +48,13 @@ auth()->redirectLogout();
 auth()->redirectLoginUrl();
 ```
 
-## Migration
+## Installation
 
-You must migrate required schema in order to use **authentication** features.
+Before utilizing **auth** feature support, you need to migrate and publish configuration files as documented below.
+
+### Migration
+
+Migrate required schema in order to use **authentication** features.
 
 Create schema migration file:
 
@@ -62,6 +66,14 @@ Run migration:
 
 ```cli
 php console migrate:up
+```
+
+### Configuration
+
+Please run following command to creat **config/auth.php** file.
+
+```php
+php console create:config --support=auth
 ```
 
 ## Logging In

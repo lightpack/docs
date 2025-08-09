@@ -16,7 +16,13 @@ Lighpack makes it painless to add **CAPTCHA** protection to your apps—whether 
 | `recaptcha`   | `GoogleReCaptcha`           | Google reCAPTCHA v2 widget                    |
 | `turnstile`   | `CloudflareTurnstile`       | Cloudflare Turnstile widget                   |
 
-> See config/captcha.php file configuration details.
+## Configuration
+
+Please run following command to create `config/captcha.php` configuration file.
+
+```cli
+php console create:config --support=captcha
+```
 
 ---
 

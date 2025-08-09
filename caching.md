@@ -97,25 +97,6 @@ $value = cache()->rememberForever('expensive', function() {
 
 ---
 
-## Manual Configuration
-
-You can manually configure the cache provider:
-
-```php
-use Lightpack\Cache\Cache;
-use Lightpack\Cache\Drivers\FileDriver;
-
-$driver = new File(DIR_STORAGE . '/cache');
-$cache = new Cache($driver);
-```
-
-Now you can access cache methods as usual.
-
-```php
-$cache->set('name', 'Bob', 5);
-$cache->get('name'); // Bob
-```
-
 ## Available Drivers
 
 Lightpack provides several cache drivers:
@@ -126,7 +107,7 @@ Lightpack provides several cache drivers:
 - **DatabaseDriver**: Stores cache in a database table (requires schema).
 - **RedisDriver**: Stores cache in Redis (supports key prefixing).
 
-You can view `config/cache.php` file for cache related configurations.
+You can switch the cahce driver by altering `CACHE_DRIVER` key in **.env** file
 
 ### Database Migration
 

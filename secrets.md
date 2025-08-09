@@ -55,10 +55,16 @@ php console migrate:up
 ## Configuration
 - Set your secrets key in your config or `.env`:
   ```env
-  SECRETS_KEY=your-32-byte-random-string
+  APP_KEY=your-secret-key
   ```
-- The key **must** be 32 bytes for AES-256.
-- Never commit secrets keys to version control.
+
+You can auto-generate `APP_KEY` using following command:
+
+```cli
+php console app:key
+```
+
+> Never commit secrets keys to version control.
 
 ---
 

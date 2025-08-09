@@ -8,9 +8,16 @@ Out of the box:
 - GitHub
 - LinkedIn
 
-Check the social auth related configuration in `config/social.php` file.
 
 > In order to use the Google social auth feature, install the Google API Client package `composer require google/apiclient`
+
+## Configuration
+
+Please run following command to create `config/social.php` configuration file.
+
+```cli
+php console create:config --support=social
+```
 
 ## Migration
 

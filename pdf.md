@@ -18,12 +18,7 @@ A robust, extensible PDF generation API for Lightpack applications, featuring dr
 composer require dompdf/dompdf
 ```
 
-### 2. Configure PDF Provider
-
-View the available configuration option in your Lightpack `config/pdf.php` file.
-
-
-### 3. Basic Usage
+### 2. Basic Usage
 
 ```php
 $pdf = app('pdf');
@@ -88,9 +83,10 @@ $dompdf->setPaper('A4', 'landscape');
 
 ## Storage Integration
 - The `save()` method uses the Lightpack `storage` service.
-- Works with local disk or S3.
   
 ```php
 $pdf->save('public/invoices/invoice-123.pdf');
 $url = app('storage')->url('public/invoices/invoice-123.pdf');
 ```
+
+---

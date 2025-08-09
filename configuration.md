@@ -34,8 +34,13 @@ config('db.mysql.port');
 
 You can define your own custom configuration files as per your application needs. Say 
 for example, you want to have a new configuration file for your `Redis` server. For that,
-simply create a file `redis.php` in the `config` folder and put your configuration details
-as an **array** as show below.
+simply create a file `redis.php` in the `config` folder.
+
+```cli
+php console create:config redis
+```
+
+Nou you can put your configuration details as an **array** as show below.
 
 ```php
 <?php

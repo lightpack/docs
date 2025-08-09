@@ -14,7 +14,11 @@
 - Note: For S3 support:  
   `composer require aws/aws-sdk-php`
 
-View available configurations options for storage in `config/storage.php`.
+Please run following command to create `config/s3.php` configuration file.
+
+```cli
+php console create:config --support=s3
+```
 
 ## Storage Interface
 

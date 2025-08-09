@@ -18,7 +18,13 @@ Lightpack’s `Crypto` utility provides secure, easy-to-use methods for encrypti
 Your `.env` file **must** have an `APP_KEY` set. The `CryptoProvider` will throw if missing.
 
 ```
-APP_KEY=your-very-secret-key
+APP_KEY=your-secret-key
+```
+
+You can auto-generate `APP_KEY` using following command:
+
+```cli
+php console app:key
 ```
 
 ### Accessing the Utility

@@ -1,27 +1,6 @@
 # Configuration
 
-**Lightpack** ships with default configuration for authentication in `config/auth.php` file.
-
-You can check this file and find the `default` key which is configured for default authentication provided
-by the framework itself.
-
-```php
-'default' => [
-    'identifier' => DefaultIdentifier::class,
-    'login.url' => 'dashboard/login',
-    'logout.url' => 'dashboard/logout',
-    'login.redirect' => 'dashboard/home',
-    'logout.redirect' => 'dashboard/login',
-    'fields.id' => 'id',
-    'fields.username' => 'email',
-    'fields.password' => 'password',
-    'fields.remember_token' => 'remember_token',
-    'fields.last_login_at' => 'last_login_at',
-    'flash_error' => 'Invalid account credentials.',
-],
-```
-
-Here is a brief explanation for those configurations:
+Here is a brief explanation for **config/auth.php** configuration file.
 
 ## identifier
 

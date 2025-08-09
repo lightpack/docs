@@ -8,7 +8,7 @@ Lightpack ships with developer-focused command-line assistant named **console**.
 
 To generate a new controller class:
 
-```terminal
+```cli
 php console create:controller Product
 ```
 
@@ -20,24 +20,38 @@ console CLI provides a comprehensive set of commands for code generation, databa
 
 ### Code Generators
 
+#### create:config
+
+Create a new `config` file in your project's **config** by copying from the example template.
+
+```cli
+php console create:config hello
+```
+
+You can force replace existing config file having same name using `--force` flag.
+
+```cli
+php console create:config hello --force
+```
+
 #### create:env
 Create a new `.env` file in your project root by copying from the example template.
 
-```terminal
+```cli
 php console create:env
 ```
 
 #### create:event
 Generate a new event class in `app/Events`.
 
-```terminal
+```cli
 php console create:event UserRegistered
 ```
 
 #### create:model
 Generate a new model class in `app/Models`.
 
-```terminal
+```cli
 php console create:model Product
 ```
 - `--table=products` : Set the table name.
@@ -46,21 +60,21 @@ php console create:model Product
 #### create:filter
 Generate a new filter class in `app/Filters`.
 
-```terminal
+```cli
 php console create:filter InputFilter
 ```
 
 #### create:command
 Generate a new command class in `app/Commands`.
 
-```terminal
+```cli
 php console create:command HelloCommand
 ```
 
 #### create:provider
 Generate a new provider class in `app/Providers`.
 
-```terminal
+```cli
 php console create:provider MailProvider
 ```
 - `--instance` : Create a provider that calls the container's factory method.
@@ -68,49 +82,49 @@ php console create:provider MailProvider
 #### create:controller
 Generate a new controller class in `app/Controllers`.
 
-```terminal
+```cli
 php console create:controller ProductController
 ```
 
 #### create:migration
 Generate a new migration file in `database/migrations`.
 
-```terminal
+```cli
 php console create:migration create_table_users
 ```
 
 #### create:job
 Generate a new job class in `app/Jobs`.
 
-```terminal
+```cli
 php console create:job SendEmailJob
 ```
 
 #### create:mail
 Generate a new mail class in `app/Mails`.
 
-```terminal
+```cli
 php console create:mail WelcomeMail
 ```
 
 #### create:seeder
 Generate a new seeder class in `database/seeders`.
 
-```terminal
+```cli
 php console create:seeder UserSeeder
 ```
 
 #### create:transformer
 Generate a new transformer class in `app/Transformers`.
 
-```terminal
+```cli
 php console create:transformer UserTransformer
 ```
 
 #### create:request
 Generate a new request class in `app/Requests`.
 
-```terminal
+```cli
 php console create:request RegisterRequest
 ```
 
@@ -121,14 +135,14 @@ php console create:request RegisterRequest
 #### link:storage
 Create a symbolic link from `public/uploads` to `storage/uploads/public`.
 
-```terminal
+```cli
 php console link:storage
 ```
 
 #### unlink:storage
 Remove the symbolic link created by `link:storage`.
 
-```terminal
+```cli
 php console unlink:storage
 ```
 
@@ -139,7 +153,7 @@ php console unlink:storage
 #### migrate:up
 Run all pending database migrations (MySQL/MariaDB only).
 
-```terminal
+```cli
 php console migrate:up
 ```
 - Prompts for confirmation in production.
@@ -147,7 +161,7 @@ php console migrate:up
 #### migrate:down
 Rollback database migrations.
 
-```terminal
+```cli
 php console migrate:down --all
 php console migrate:down --steps=2
 ```
@@ -157,7 +171,7 @@ php console migrate:down --steps=2
 #### db:seed
 Run the `DatabaseSeeder` to seed your database.
 
-```terminal
+```cli
 php console db:seed
 ```
 - Prompts for confirmation before running.
@@ -169,7 +183,7 @@ php console db:seed
 #### process:jobs
 Run the background job worker to process queued jobs.
 
-```terminal
+```cli
 php console process:jobs
 ```
 - `--sleep=N` : Polling interval in seconds (default: 5).
@@ -179,7 +193,7 @@ php console process:jobs
 #### schedule:events
 Run all scheduled tasks (for cron integration).
 
-```terminal
+```cli
 php console schedule:events
 ```
 
@@ -190,20 +204,20 @@ php console schedule:events
 #### app:key
 Generate and set a new `APP_KEY` in your `.env` file.
 
-```terminal
+```cli
 php console app:key
 ```
 
 #### app:serve
 Start the PHP built-in server using `APP_URL` from `.env` as the host.
 
-```terminal
+```cli
 php console app:serve
 ```
 
 **You can specify the port to run:**
 
-```terminal
+```cli
 php console app:serve 8001
 ```
 
@@ -214,7 +228,7 @@ php console app:serve 8001
 #### watch
 Watch files or directories for changes and run a shell command (hot reload for development).
 
-```terminal
+```cli
 php console watch --path=app,config --ext=php,json --run="vendor/bin/phpunit"
 ```
 - `--path=app,config` : Comma-separated list of directories/files to watch (required).
@@ -266,7 +280,7 @@ $choice = $prompt->choice('Pick one:', ['a' => 'Apple', 'b' => 'Banana']);
 
 1. Generate a new command class:
 
-   ```terminal
+   ```cli
    php console create:command MyCommand
    ```
 
@@ -282,7 +296,7 @@ $choice = $prompt->choice('Pick one:', ['a' => 'Apple', 'b' => 'Banana']);
 
 4. Run your command:
 
-   ```terminal
+   ```cli
    php console my:command arg1 --flag=value
    ```
 

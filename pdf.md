@@ -83,9 +83,10 @@ $dompdf->setPaper('A4', 'landscape');
 
 ## Storage Integration
 - The `save()` method uses the Lightpack `storage` service.
-- Works with local disk or S3.
   
 ```php
 $pdf->save('public/invoices/invoice-123.pdf');
 $url = app('storage')->url('public/invoices/invoice-123.pdf');
 ```
+
+---

@@ -17,7 +17,13 @@ logger()->emergency();
 
 ## Log Driver
 
-**Lightpack** ships with `null` and `file` log drivers. The default is the `file` log driver and logs the messages in the filename configured in `config/storage.php` file.
+**Lightpack** ships with `null` and `file` log drivers. The default is the `file` log driver.
+
+If you wish to change `file` log driver related configurations, please run following command to create `config/logs.php` configuration file.
+
+```cli
+php console create:config --support=logs
+```
 
 ### Disable Logging
 

@@ -13,12 +13,12 @@ Although `Lightpack` will solve background jobs processing needs for most of the
 > **Lightpack Jobs** provides robust, extensible, and developer-friendly background job processing for PHP apps. Supports MySQL/MariaDB, Redis, synchronous, and null engines out of the box.
 
 ## Supported Engines
-- **Database:** MySQL/MariaDB-backed persistent queue
-- **Redis:** High-performance, production-grade queue (sorted sets, atomic ops, delayed jobs)
-- **Sync:** Executes jobs immediately (for synchronous execution)
-- **Null:** Discards jobs (for tests/dev)
+- **database:** MySQL/MariaDB-backed persistent queue
+- **redis:** High-performance, production-grade queue (sorted sets, atomic ops, delayed jobs)
+- **sync:** Executes jobs immediately (for synchronous execution)
+- **null:** Discards jobs (for tests/dev)
 
-View `config/jobs.php` for desired job queue related configurations.
+You can switch the queue engine by altering `JOB_ENGINE` key in **.env** file.
 
 ## Jobs Table Migration
 

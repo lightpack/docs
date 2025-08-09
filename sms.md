@@ -14,7 +14,11 @@ Out of the box:
 For **Twilio** support, you will need to install its PHP SDK:  
   `composer require twilio/sdk`
 
-View the config file `config/sms.php` to see available configuration options for SMS feature.
+Please run following command to create `config/sms.php` configuration file.
+
+```cli
+php console create:config --support=sms
+```
 
 ## Sending an SMS
 

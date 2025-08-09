@@ -32,7 +32,11 @@ Your **users** table already contains required fields to support **MFA** feature
 
 ### 3. Configure MFA
 
-View `config/mfa.php` for available configuration options.
+Please run following command to create `config/mfa.php` configuration file.
+
+```cli
+php console create:config --support=mfa
+```
 
 ## User Model Integration
 

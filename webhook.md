@@ -47,7 +47,13 @@ php console migrate:up
 
 ## Configuration
 
-In your config (e.g., `config/webhook.php`):
+Please run following command to create `config/webhooks.php` configuration file.
+
+```cli
+php console create:config --support=webhooks
+```
+
+In your config (e.g., `config/webhook.php`) you need to configure webhook provider details. Below are sample examples for `stripe` and `github` webhooks.
 
 ```php
 return [

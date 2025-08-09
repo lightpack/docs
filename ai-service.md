@@ -26,7 +26,13 @@ ai()->task(); // Structured text output
 
 ## Configuration
 
-All settings live in `config/ai.php`:
+Please run following command to create `config/ai.php` configuration file.
+
+```cli
+php console create:config --support=ai
+```
+
+Below is a brief explanation of **config/ai.php** file.
 
 | Key                          | Description                              | Example / Default         |
 |------------------------------|------------------------------------------|---------------------------|

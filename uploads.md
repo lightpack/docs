@@ -14,6 +14,14 @@ A flexible, model-based file upload system for the Lightpack framework.
 - SEO-friendly URLs for public assets
 - Clean, intuitive API
 
+## Configuration
+
+Please run following command to create `config/uploads.php` configuration file.
+
+```cli
+php console create:config --support=uploads
+```
+
 ## Migration
 
 Create schema migration file:

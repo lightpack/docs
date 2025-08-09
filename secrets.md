@@ -55,7 +55,7 @@ php console migrate:up
 ## Configuration
 - Set your secrets key in your config or `.env`:
   ```env
-  APP_KEY=your-secret-key-string
+  APP_KEY=your-secret-key
   ```
 
 You can auto-generate `APP_KEY` using following command:

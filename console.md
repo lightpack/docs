@@ -20,6 +20,20 @@ console CLI provides a comprehensive set of commands for code generation, databa
 
 ### Code Generators
 
+#### create:config
+
+Create a new `config` file in your project's **config** by copying from the example template.
+
+```terminal
+php console create:config hello
+```
+
+You can force replace existing config file having same name using `--force` flag.
+
+```terminal
+php console create:config hello --force
+```
+
 #### create:env
 Create a new `.env` file in your project root by copying from the example template.
 

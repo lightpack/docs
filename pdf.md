@@ -18,12 +18,7 @@ A robust, extensible PDF generation API for Lightpack applications, featuring dr
 composer require dompdf/dompdf
 ```
 
-### 2. Configure PDF Provider
-
-View the available configuration option in your Lightpack `config/pdf.php` file.
-
-
-### 3. Basic Usage
+### 2. Basic Usage
 
 ```php
 $pdf = app('pdf');

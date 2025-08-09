@@ -51,16 +51,10 @@ php console migrate:up
 
 ## Configuration
 
-Look into `config/settings.php` file for configuration related options:
+Please run following command to create `config/settings.php` configuration file.
 
-```php
-'settings' => [
-    // Enable or disable caching for settings
-    'cache' => true,
-
-    // Cache TTL (time to live) in seconds (e.g., 3600 = 1 hour)
-    'ttl' => 3600,
-],
+```cli
+php console create:config --support=settings
 ```
 
 ---

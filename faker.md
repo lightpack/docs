@@ -96,7 +96,6 @@ All methods are explicit, chainable, and deterministic (with seeding):
 ### Text
 - `sentence($words)` — Sentence
 - `paragraph($sentences)` — Paragraph
-- `words` (locale data) — Word list used internally by methods like `sentence()`, `paragraph()`, and `slug()`. Not a direct method, but can be customized in your locale.
 
 ### Dates & Time
 - `date($format)` — Date string

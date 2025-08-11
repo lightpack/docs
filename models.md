@@ -71,7 +71,7 @@ $product = new Product;
 // Set product properties
 $product->name = 'ACME Shoes';
 $product->size = 10;
-$product->color = 'black'
+$product->color = 'black';
 
 // Create new product
 $product->insert();

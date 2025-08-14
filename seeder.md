@@ -43,20 +43,18 @@ public function seed()
 
 Here in each loop, we populate a new product using the `Product` [model class](models.md).
 
-## Calling Seeders
+## Specifying Seeders
 
-`Lightpack` ships with a `database/seeders/DatabaseSeeder.php` class file where you can execute the seeders you have created in the order you find appropriate.
-
-For example, suppose we have two seeders for `brands` and `products` and you wish to seed `brands` first and then `products`. You can do so by calling seeders inside the `seed()` method of `DatabaseSeeder` class.
+You can specify seeders inside the `seed()` method of `DatabaseSeeder` class. Seeders are run in the order of their specification.
 in that order.
-
-For example:
 
 ```php
 public function seed()
 {
-    (new BrandsSeeder)->seed();
-    (new ProductsSeeder)->seed();
+    $this->run([
+        BrandSeeder::class,
+        ProductSeeder::class,
+    ]);
 }
 ```
 

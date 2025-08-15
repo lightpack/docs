@@ -227,6 +227,19 @@ request()->params(null);
 request()->params('userId', 0);
 ```
 
+To check if the current request's resolved route name matches the given pattern or array of patterns. Wildcard patterns are supported, allowing flexible route checks for authorization, navigation, or context-aware logic.
+
+```php
+// Returns true if the current route's name is 'dashboard'
+request()->matchesRoute('dashboard');
+
+// Returns true if the current route's name starts with 'admin.'
+request()->matchesRoute('admin.*');
+
+// Returns true if the current route's name matches any of the patterns
+request()->matchesRoute(['dashboard', 'admin.*']);
+```
+
 ---
 
 ## URL Signature Validation

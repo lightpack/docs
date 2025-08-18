@@ -72,17 +72,10 @@ The `TaskBuilder` enables advanced, schema-aware structured AI response:
 ```php
 // Get a structured JSON object with validation
 $result = ai()->task()
-    ->prompt('What is your name and age?')
+    ->prompt('Who created Monalisa and at what age?')
     ->expect(['name' => 'string', 'age' => 'int'])
     ->required('name', 'age')
     ->run();
-
-if ($result['success']) {
-    echo $result['data']['name']; // "Alice"
-    echo $result['data']['age'];  // 30
-} else {
-    print_r($result['errors']);
-}
 ```
 
 **It exposes following capabilities:**
@@ -93,17 +86,6 @@ if ($result['success']) {
 - **example(array $example):** Provide an example for the model.
 - **messages/system:** Compose multi-turn, role-based conversations.
 - **Robust JSON extraction:** Handles messy LLM output.
-
-**The returned response contains:**
-
-```php
-[
-    'text' => 'The generated content.',
-    'finish_reason' => 'stop', // or other reason, if available
-    'usage' => [...],          // token stats, if available
-    'raw' => [...],            // full provider response
-]
-```
 
 ---
 

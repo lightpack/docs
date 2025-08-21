@@ -20,7 +20,7 @@ Although `Lightpack` will solve background jobs processing needs for most of the
 
 You can switch the queue engine by altering `JOB_ENGINE` key in **.env** file.
 
-## Jobs Table Migration
+## Database Migration
 
 If using the **database** engine, you need a `jobs` table. 
 

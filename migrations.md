@@ -45,13 +45,18 @@ php console migrate:down
 
 This will run the `down()` method in all the migration scripts inside **database/migrations** folder.
 
-To rollback a limited number of migrations, provide the `steps` flag:
+To rollback a limited number of migrations, provide the `steps` flag. For example, 
+this will rollback last two **batches** of migrations if present.
 
 ```terminal
 php console migrate:down --steps=2
 ```
 
-This will rollback last two **batches** of migrations if present.
+To rollback all the migrations in one go, provide the `--all` flag:
+
+```terminal
+php console migrate:down --all
+```
 
 ## Defining Migrations
 

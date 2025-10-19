@@ -285,9 +285,13 @@ protected function beforeRedirect()
 
 ### Conditional Rules
 - `requiredIf($field, $value)` — Required when another field has specific value
+- `requiredWith($fields)` — Required when any of the specified fields are present
+- `requiredWithout($fields)` — Required when none of the specified fields are present
+- `requiredUnless($field, $value)` — Required unless another field has specific value
 
 ### Database Rules
 - `dbUnique($table, $columns, $ignoreId = null, $idColumn = 'id')` — Check database uniqueness
+- `exists($table, $columns = null, $where = [])` — Value must exist in database table
 
 ### File & Image Rules
 - `file()` — Valid file upload
@@ -424,7 +428,7 @@ $validator
 
 ### Conditional Validation
 
-Use `requiredIf()` to make fields required based on other field values:
+**`requiredIf()` - Required when another field has specific value:**
 
 ```php
 // Reason required when status is rejected
@@ -441,11 +445,48 @@ $validator
 $validator
     ->field('user.type')->required()
     ->field('company_details.name')->requiredIf('user.type', 'business');
+```
 
-// Delivery address required for delivery orders
+**`requiredWith()` - Required when other fields are present:**
+
+```php
+// Phone required if country code is provided
 $validator
-    ->field('order_type')->required()->in(['pickup', 'delivery'])
-    ->field('delivery_address')->requiredIf('order_type', 'delivery')->min(10);
+    ->field('country_code')->string()
+    ->field('phone')->requiredWith('country_code')->numeric();
+
+// Address fields work together
+$validator
+    ->field('city')->string()
+    ->field('state')->string()
+    ->field('address')->requiredWith(['city', 'state']);
+```
+
+**`requiredWithout()` - Required when other fields are NOT present:**
+
+```php
+// Email required if phone is not provided (at least one contact method)
+$validator
+    ->field('email')->requiredWithout('phone')->email()
+    ->field('phone')->requiredWithout('email')->numeric();
+
+// Billing address required if not using saved address
+$validator
+    ->field('billing_address')->requiredWithout('use_saved_address');
+```
+
+**`requiredUnless()` - Required unless another field has specific value:**
+
+```php
+// Shipping address required unless same as billing
+$validator
+    ->field('same_as_billing')->bool()
+    ->field('shipping_address')->requiredUnless('same_as_billing', true);
+
+// Reason required unless status is approved
+$validator
+    ->field('status')->required()->in(['approved', 'rejected', 'pending'])
+    ->field('reason')->requiredUnless('status', 'approved')->min(10);
 ```
 
 ### Database Uniqueness Validation
@@ -522,6 +563,119 @@ $validator
     ->dbUnique('products', 'code', ignoreId: $uuid, idColumn: 'uuid');
 ```
 
+---
+
+### Database Existence Validation
+
+Use `exists()` to verify that values exist in the database (e.g., foreign key validation):
+
+**Single Column Check:**
+
+```php
+// Category ID must exist in categories table
+$validator
+    ->field('category_id')
+    ->required()
+    ->int()
+    ->exists('categories', 'id');
+
+// User ID must exist
+$validator
+    ->field('user_id')
+    ->required()
+    ->exists('users', 'id');
+
+// Email must exist (for login/password reset)
+$validator
+    ->field('email')
+    ->required()
+    ->email()
+    ->exists('users', 'email');
+```
+
+**With Additional Conditions:**
+
+```php
+// Category must exist AND be active
+$validator
+    ->field('category_id')
+    ->required()
+    ->exists('categories', 'id', where: ['status' => 'active']);
+
+// User must exist and not be banned
+$validator
+    ->field('user_id')
+    ->required()
+    ->exists('users', 'id', where: [
+        'status' => 'active',
+        'banned' => false
+    ]);
+
+// Product must exist in specific warehouse
+$validator
+    ->field('product_id')
+    ->required()
+    ->exists('products', 'id', where: ['warehouse_id' => $warehouseId]);
+```
+
+**Composite Column Check:**
+
+```php
+// Check if SKU exists in specific warehouse
+$validator
+    ->field('sku')
+    ->required()
+    ->exists('inventory', ['sku', 'warehouse_id']);
+
+// Validates: SELECT COUNT(*) FROM inventory 
+//            WHERE sku = ? AND warehouse_id = ?
+
+// Input data must contain both fields:
+$validator->setInput([
+    'sku' => 'PROD-001',
+    'warehouse_id' => 5
+]);
+```
+
+**Default Column (uses field name):**
+
+```php
+// If no column specified, uses the field name
+$validator
+    ->field('id')
+    ->required()
+    ->exists('categories'); // Checks 'id' column automatically
+```
+
+**Practical Examples:**
+
+```php
+// Order form validation
+$validator
+    ->field('customer_id')
+    ->required()
+    ->exists('customers', 'id', where: ['status' => 'active'])
+    
+    ->field('product_id')
+    ->required()
+    ->exists('products', 'id', where: ['in_stock' => true])
+    
+    ->field('shipping_method')
+    ->required()
+    ->exists('shipping_methods', 'code', where: ['enabled' => true]);
+
+// Assignment validation
+$validator
+    ->field('user_id')
+    ->required()
+    ->exists('users', 'id', where: ['role' => 'employee'])
+    
+    ->field('project_id')
+    ->required()
+    ->exists('projects', 'id', where: ['status' => 'active']);
+```
+
+---
 
 ## Custom Rules & Transformers
 

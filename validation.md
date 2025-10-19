@@ -277,11 +277,17 @@ protected function beforeRedirect()
 ### Array Rules
 - `array($min = null, $max = null)` — Must be array, with optional length
 - `in($values)` / `notIn($values)` — Value must (not) be in list
-- `unique()` — All values must be unique
+- `unique()` — All array values must be unique
 
 ### Comparison Rules
 - `same($field)` — Must match another field
 - `different($field)` — Must not match another field
+
+### Conditional Rules
+- `requiredIf($field, $value)` — Required when another field has specific value
+
+### Database Rules
+- `dbUnique($table, $columns, $ignoreId = null, $idColumn = 'id')` — Check database uniqueness
 
 ### File & Image Rules
 - `file()` — Valid file upload
@@ -396,6 +402,8 @@ $validator
 
 ## Nested & Conditional Validation
 
+### Nested Data Validation
+
 ```php
 $validator
     ->field('user.profile.name')->required()
@@ -412,6 +420,106 @@ $validator
         }
         return $primaryCount === 1;
     }, 'Only one address can be marked as primary');
+```
+
+### Conditional Validation
+
+Use `requiredIf()` to make fields required based on other field values:
+
+```php
+// Reason required when status is rejected
+$validator
+    ->field('status')->required()->in(['pending', 'approved', 'rejected'])
+    ->field('reason')->requiredIf('status', 'rejected')->min(20);
+
+// Company name required for business accounts
+$validator
+    ->field('account_type')->required()->in(['personal', 'business'])
+    ->field('company_name')->requiredIf('account_type', 'business');
+
+// Works with nested fields
+$validator
+    ->field('user.type')->required()
+    ->field('company_details.name')->requiredIf('user.type', 'business');
+
+// Delivery address required for delivery orders
+$validator
+    ->field('order_type')->required()->in(['pickup', 'delivery'])
+    ->field('delivery_address')->requiredIf('order_type', 'delivery')->min(10);
+```
+
+### Database Uniqueness Validation
+
+Use `dbUnique()` to check if values are unique in the database:
+
+**Single Column Uniqueness:**
+
+```php
+// Email must be unique in users table
+$validator
+    ->field('email')
+    ->required()
+    ->email()
+    ->dbUnique('users', 'email');
+
+// Username must be unique
+$validator
+    ->field('username')
+    ->required()
+    ->alphaNum()
+    ->dbUnique('users', 'username');
+```
+
+**Composite Uniqueness:**
+
+```php
+// Email must be unique per organization
+$validator
+    ->field('email')
+    ->required()
+    ->email()
+    ->dbUnique('users', ['email', 'organization_id']);
+
+// Slug must be unique per category
+$validator
+    ->field('slug')
+    ->required()
+    ->slug()
+    ->dbUnique('posts', ['slug', 'category_id']);
+
+// SKU must be unique per warehouse
+$validator
+    ->field('sku')
+    ->required()
+    ->dbUnique('inventory', ['sku', 'warehouse_id']);
+```
+
+**Ignoring Records (For Updates):**
+
+```php
+// Ignore current user when updating email
+$validator
+    ->field('email')
+    ->required()
+    ->email()
+    ->dbUnique('users', 'email', ignoreId: $userId);
+
+// Ignore current post when updating slug
+$validator
+    ->field('slug')
+    ->required()
+    ->slug()
+    ->dbUnique('posts', ['slug', 'category_id'], ignoreId: $postId);
+```
+
+**Custom ID Column:**
+
+```php
+// For tables using UUID or custom primary keys
+$validator
+    ->field('code')
+    ->required()
+    ->dbUnique('products', 'code', ignoreId: $uuid, idColumn: 'uuid');
 ```
 
 

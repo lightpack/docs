@@ -2,10 +2,16 @@
 
 > **Lightpack** extends `PHPUnit` to support integration tests for your HTTP routes, responses, and API endpoints. To feature test a route and its response, create a test class in `tests/Http` folder in your project root. 
 
-You can see an example of a test class provided in `tests/Http` folder.
+You can see an example of a test class provided in `tests/` folder.
 
 ```php
-class HomeTest extends HttpTestCase
+<?php
+
+namespace Tests\Http;
+
+use Lightpack\Testing\TestCase;
+
+class HomeTest extends TestCase
 {
     public function testItRendersHomePage()
     {
@@ -321,218 +327,283 @@ $this->withFiles();
   $this->request('POST', '/upload');
   ```
 
-## Asserting File Uploads
-
-- **assertResponseStatus()** (after upload)
-  
-  Asserts that the upload response status is as expected.
-
-  ```php
-  $this->request('POST', '/upload', [], ['avatar' => $file]);
-  $this->assertResponseStatus(200);
-  ```
-
-- **assertTrue() / assertEquals()** (for uploaded file checks)
-  
-  Use these to check if the file exists in storage or matches expected properties after upload.
-
-  ```php
-  $this->request('POST', '/upload', [], ['avatar' => $file]);
-  $this->assertTrue(file_exists(storage_path('uploads/avatar.png')));
-  ```
-
-## Asserting Mails
+## Asserting Emails
 
 ```php
 $this->assertMailSent();
 $this->assertMailNotSent();
+$this->assertMailCount();
 $this->assertMailSubject();
 $this->assertMailContains();
 $this->assertMailSentFrom();
-$this->assertMailCount();
 $this->assertMailSentTo();
 $this->assertNoMailSentTo();
 $this->assertMailSentToAll();
 $this->assertMailCc();
-$this->assertMailBcc();
 $this->assertMailCcAll();
+$this->assertMailBcc();
 $this->assertMailBccAll();
 $this->assertMailReplyTo();
 $this->assertMailReplyToAll();
-$this->assertMailHasAttachments();
 $this->assertMailHasAttachment();
+$this->assertMailHasAttachments();
 $this->assertMailHasNoAttachments();
 ```
-
 
 - **assertMailSent()**
   
   Asserts that at least one email was sent during the test.
+
   ```php
+  $this->request('POST', '/register', ['email' => 'new@example.com']);
   $this->assertMailSent();
   ```
 
 - **assertMailNotSent()**
   
   Asserts that no emails were sent during the test.
+
   ```php
+  $this->request('GET', '/');
   $this->assertMailNotSent();
-  ```
-
-- **assertMailSubject()**
-  
-  Asserts that an email with the given subject was sent.
-  ```php
-  $this->assertMailSubject('Welcome to Lightpack');
-  ```
-
-- **assertMailContains()**
-  
-  Asserts that the email body contains the given text.
-  ```php
-  $this->assertMailContains('Your verification code is');
-  ```
-
-- **assertMailSentFrom()**
-  
-  Asserts that an email was sent from the given address.
-  ```php
-  $this->assertMailSentFrom('noreply@example.com');
   ```
 
 - **assertMailCount()**
   
-  Asserts that the number of emails sent matches the expected count.
+  Asserts that an exact number of emails were sent.
+
   ```php
+  $this->request('POST', '/invite-team', [
+      'emails' => ['user1@example.com', 'user2@example.com']
+  ]);
   $this->assertMailCount(2);
+  ```
+
+- **assertMailSubject()**
+  
+  Asserts that an email with the specified subject was sent.
+
+  ```php
+  $this->request('POST', '/register', ['email' => 'new@example.com']);
+  $this->assertMailSubject('Welcome to Lightpack!');
+  ```
+
+- **assertMailContains()**
+  
+  Asserts that an email body contains the specified text.
+
+  ```php
+  $this->request('POST', '/register', ['email' => 'new@example.com']);
+  $this->assertMailContains('Thank you for registering');
+  ```
+
+- **assertMailSentFrom()**
+  
+  Asserts that an email was sent from the specified address.
+
+  ```php
+  $this->request('POST', '/contact', ['message' => 'Hello']);
+  $this->assertMailSentFrom('noreply@example.com');
   ```
 
 - **assertMailSentTo()**
   
-  Asserts that an email was sent to the given recipient.
+  Asserts that an email was sent to the specified recipient.
+
   ```php
-  $this->assertMailSentTo('user@example.com');
+  $this->request('POST', '/register', ['email' => 'new@example.com']);
+  $this->assertMailSentTo('new@example.com');
   ```
 
 - **assertNoMailSentTo()**
   
-  Asserts that no email was sent to the given recipient.
+  Asserts that no email was sent to the specified recipient.
+
   ```php
-  $this->assertNoMailSentTo('banned@example.com');
+  $this->request('POST', '/register', ['email' => 'new@example.com']);
+  $this->assertNoMailSentTo('admin@example.com');
   ```
 
 - **assertMailSentToAll()**
   
-  Asserts that emails were sent to all recipients in the given list.
+  Asserts that an email was sent to all specified recipients.
+
   ```php
-  $this->assertMailSentToAll(['a@example.com', 'b@example.com']);
+  $this->request('POST', '/invite-team', [
+      'emails' => ['user1@example.com', 'user2@example.com']
+  ]);
+  $this->assertMailSentToAll(['user1@example.com', 'user2@example.com']);
   ```
 
 - **assertMailCc()**
   
-  Asserts that an email was CC'd to the given address.
-  ```php
-  $this->assertMailCc('manager@example.com');
-  ```
+  Asserts that an email was CC'd to the specified address.
 
-- **assertMailBcc()**
-  
-  Asserts that an email was BCC'd to the given address.
   ```php
-  $this->assertMailBcc('auditor@example.com');
+  $this->request('POST', '/send-report');
+  $this->assertMailCc('manager@example.com');
   ```
 
 - **assertMailCcAll()**
   
-  Asserts that all given addresses were CC'd on the email.
+  Asserts that an email was CC'd to all specified addresses.
+
   ```php
-  $this->assertMailCcAll(['a@example.com', 'b@example.com']);
+  $this->request('POST', '/send-report');
+  $this->assertMailCcAll(['manager@example.com', 'supervisor@example.com']);
+  ```
+
+- **assertMailBcc()**
+  
+  Asserts that an email was BCC'd to the specified address.
+
+  ```php
+  $this->request('POST', '/send-invoice');
+  $this->assertMailBcc('accounting@example.com');
   ```
 
 - **assertMailBccAll()**
   
-  Asserts that all given addresses were BCC'd on the email.
+  Asserts that an email was BCC'd to all specified addresses.
+
   ```php
-  $this->assertMailBccAll(['a@example.com', 'b@example.com']);
+  $this->request('POST', '/send-invoice');
+  $this->assertMailBccAll(['accounting@example.com', 'archive@example.com']);
   ```
 
 - **assertMailReplyTo()**
   
-  Asserts that the email has the given reply-to address.
+  Asserts that an email has the specified reply-to address.
+
   ```php
+  $this->request('POST', '/contact', ['email' => 'customer@example.com']);
   $this->assertMailReplyTo('support@example.com');
   ```
 
 - **assertMailReplyToAll()**
   
-  Asserts that all given reply-to addresses are set on the email.
-  ```php
-  $this->assertMailReplyToAll(['a@example.com', 'b@example.com']);
-  ```
+  Asserts that an email has all specified reply-to addresses.
 
-- **assertMailHasAttachments()**
-  
-  Asserts that the email has at least one attachment.
   ```php
-  $this->assertMailHasAttachments();
+  $this->request('POST', '/contact');
+  $this->assertMailReplyToAll(['support@example.com', 'sales@example.com']);
   ```
 
 - **assertMailHasAttachment()**
   
-  Asserts that the email has the specified attachment.
+  Asserts that an email has the specified attachment.
+
   ```php
+  $this->request('POST', '/send-invoice');
   $this->assertMailHasAttachment('invoice.pdf');
+  ```
+
+- **assertMailHasAttachments()**
+  
+  Asserts that an email has all specified attachments.
+
+  ```php
+  $this->request('POST', '/send-documents');
+  $this->assertMailHasAttachments(['contract.pdf', 'terms.pdf']);
   ```
 
 - **assertMailHasNoAttachments()**
   
-  Asserts that the email has no attachments.
+  Asserts that an email has no attachments.
+
   ```php
+  $this->request('POST', '/send-notification');
   $this->assertMailHasNoAttachments();
   ```
 
-## Asserting Databases
+## Database Testing
 
-**Lightpack** ships with `phpunit.xml` file in the project's root directory. You can specify the database configurations you will use for testing.
-
-Once you have configured database settings, use the `Lightpack\Testing\DatabaseTrait` in your test classes that need to interect with database. 
-- This migrates all the required schema changes per test method before it runs and destroys them after every test method execution completion.
-- This also wraps the test method execution within a transaction ensuring a clean slate for each test method.
+For tests that interact with the database, use the `DatabaseTrait` to automatically manage migrations and transactions.
 
 ```php
-class LoginTest extends TestCase
+<?php
+
+use Lightpack\Testing\TestCase;
+use Lightpack\Testing\DatabaseTrait;
+
+class UserDatabaseTest extends TestCase
 {
     use DatabaseTrait;
-
-    public function testUserCanLoginWithValidData()
+    
+    public function testUserCreation()
     {
-        $user = [
-            'email' => 'johndoe@example.com',
-            'password' => '!secret!';
-        ];
-
-        // Make the login post request
-        $this->request('POST', url()->route('login'), $user);
-
-        // Assert tge response status is 302
-        $this->assertResponseStatus(302);
-
-        // Assert response is a redirect
-        $this->assertInstanceOf(Redirect::class, $this->response);
-
-        // Assert redirect url is to dashboard route
-        $this->assertRedirectUrl(url()->route('dashboard'));
-
-        // Assert user login session is set
-        $this->assertTrue(auth()->isLoggedIn());
+        $user = new User();
+        $user->email = 'test@example.com';
+        $user->save();
+        
+        $this->assertNotNull($user->id);
     }
 }
 ```
 
-### Seeding
+The `DatabaseTrait` provides:
 
-In case you want to seed some test data, execute all your seeder classes:
+- Runs migrations before all tests in the class
+- Wraps each test in a database transaction
+- Automatically rolls back changes after each test
+- Ensures clean database state between tests
 
-```cli
-php console db:seed
+## Authentication Testing
+
+Use `auth()->loginAs()` to simulate a logged-in user without requiring credentials.
+
+```php
+public function testAuthenticatedUserCanAccessDashboard()
+{
+    $user = new User(1);
+
+    auth()->loginAs($user);
+    
+    $this->request('GET', '/dashboard');
+    $this->assertResponseStatus(200);
+}
+```
+
+Testing protected routes:
+
+```php
+public function testGuestCannotAccessProtectedRoute()
+{
+    $this->request('GET', '/admin/users');
+    $this->assertResponseStatus(302);
+    $this->assertRedirectUrl('/login');
+}
+```
+
+Testing API authentication:
+
+```php
+public function testApiRequiresAuthentication()
+{
+    $this->requestJson('GET', '/api/users');
+    $this->assertResponseStatus(401);
+}
+
+public function testApiWithValidToken()
+{
+    $this->withHeaders(['Authorization' => 'Bearer valid-token'])
+         ->requestJson('GET', '/api/users');
+    $this->assertResponseStatus(200);
+}
+```
+
+## Method Chaining
+
+All assertion methods return `$this`, allowing you to chain multiple assertions:
+
+```php
+$this->request('POST', '/login', [
+        'email' => 'user@example.com',
+        'password' => 'secret'
+    ])
+    ->assertResponseStatus(302)
+    ->assertRedirectUrl('/dashboard')
+    ->assertSessionHas('_logged_in', true)
+    ->assertMailSent()
+    ->assertMailSentTo('user@example.com');
 ```

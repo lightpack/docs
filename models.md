@@ -95,17 +95,17 @@ class Product extends Model
 }
 ```
 
-Now when calling `insert()` method, you must pass a unique primary key value for the new record to be created.
+Now when calling `insert()` method, you must set a unique primary key value before inserting the new record.
 
 ```php
 // Create the instance
 $product = new Product;
 
-// Set product properties
+// Set product properties including manual primary key
 $product->id = 'sku1000';
 $product->name = 'ACME Shoes';
 $product->size = 10;
-$product->color = 'black'
+$product->color = 'black';
 
 // Create new product
 $product->insert();
@@ -123,7 +123,7 @@ $product = new Product(23);
 Now you can access the column values as model properties.
 
 ```php
-echo $product->title;
+echo $product->name;
 echo $product->size;
 echo $product->color;
 ```
@@ -139,7 +139,7 @@ $product = new Product(23);
 // Set product properties to update
 $product->name = 'ACME Footwear';
 $product->size = 11;
-$product->color = 'brown'
+$product->color = 'brown';
 
 // Update the product
 $product->update();
@@ -159,6 +159,32 @@ If you already have an existing instance of model, you can call `delete()` metho
 $product = new Product(23);
 $product->delete(); // passing id not required
 ```
+
+### Save
+
+The `save()` method provides a convenient way to persist model changes without worrying whether you're creating or updating a record:
+
+- If the primary key is **not set**, it inserts a new record
+- If the primary key **is set**, it updates the existing record
+
+```php
+// Creating a new record
+$product = new Product;
+$product->name = 'ACME Shoes';
+$product->size = 10;
+$product->save(); // Inserts new record
+
+echo $product->id; // Auto-generated ID is now available
+```
+
+```php
+// Updating an existing record
+$product = new Product(23);
+$product->name = 'Updated Name';
+$product->save(); // Updates existing record
+```
+
+<p class="tip"><b>Note:</b> The <code>save()</code> method is most reliable for models with auto-incrementing primary keys. For non-auto-increment primary keys, use <code>insert()</code> and <code>update()</code> explicitly.</p>
 
 ## Timestamps
 
@@ -221,13 +247,13 @@ Attribute casting converts model attributes to a specific type (like integer, bo
 | Cast Type           | Description & Example                                      |
 |---------------------|-----------------------------------------------------------|
 | `int` / `integer`   | Converts to integer: `'123'` → `123`                      |
-| `float` / `double`  | Converts to float: `'123.45'` → `123.45`                  |
+| `real` / `float` / `double` | Converts to float: `'123.45'` → `123.45`          |
 | `string`            | Converts to string: `123` → `'123'`                       |
 | `bool` / `boolean`  | Converts to boolean: `'1'`, `1`, `'true'` → `true`        |
 | `array` / `json`    | Converts JSON string to array and vice versa               |
-| `date`              | Converts to `Y-m-d` string or from `DateTime`             |
-| `datetime`          | Converts to `DateTime` object or from string              |
-| `timestamp`         | Converts to Unix timestamp (int or string)                |
+| `date`              | Converts to `DateTime` object from date string            |
+| `datetime`          | Converts to `DateTime` object from datetime string        |
+| `timestamp`         | Converts to Unix timestamp (integer)                      |
 
 ### Example Usage
 
@@ -307,7 +333,7 @@ When working with models, you may want to know if you’ve made changes that hav
 
 **Check if anything changed:**
 ```php
-$user = User::find(1);
+$user = new User(1);
 $user->name = 'New Name';
 
 if ($user->isDirty()) {
@@ -471,9 +497,6 @@ class User extends Model
 Apply filters using the static `filters()` method:
 
 ```php
-// Fetch all users
-$users = User::filters(['status' => 'active'])->all();
-
 // Fetch active users
 $users = User::filters(['status' => 'active'])->all();
 
@@ -577,6 +600,8 @@ Lightpack Lucid models provide a set of protected lifecycle hook methods that al
 
 | Hook                | When is it called?                                 |
 |---------------------|---------------------------------------------------|
+| `beforeSave()`      | Before `save()` (both insert and update)           |
+| `afterSave()`       | After `save()` (both insert and update)            |
 | `beforeInsert()`    | Before `insert()`                                  |
 | `afterInsert()`     | After `insert()`                                   |
 | `beforeUpdate()`    | Before `update()`                                  |

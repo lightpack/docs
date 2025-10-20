@@ -309,10 +309,10 @@ foreach($rows as $product) {
 This methods returns the total number of rows in the table.
 
 ```php
-// SELECT count(*) AS num FROM products
+// SELECT count(*) AS total FROM products
 $products->count();
 
-// SELECT count(* AS num FROM products WHERE price > 200
+// SELECT count(*) AS total FROM products WHERE price > 200
 $products->where('price', '>', 200)->count();
 ```
 
@@ -531,12 +531,21 @@ $products->when($isAdmin, function($q) {
 
 ## Increment/Decrement
 
-Atomically increase or decrease a column value:
+Atomically increase or decrease a column value. **IMPORTANT:** A `where()` clause is **required** - the operation will throw a `RuntimeException` if no where clause is present.
 
 ```php
+// Increment stock by 5 for product with id 1
 $products->where('id', 1)->increment('stock', 5);
+
+// Decrement stock by 2 for product with id 1
 $products->where('id', 1)->decrement('stock', 2);
+
+// Default increment/decrement is 1
+$products->where('id', 1)->increment('views'); // +1
+$products->where('id', 1)->decrement('stock'); // -1
 ```
+
+> **Warning:** Calling `increment()` or `decrement()` without a `where()` clause will throw: `RuntimeException: Increment/Decrement operations require a where clause`
 
 ---
 

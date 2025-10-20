@@ -1,6 +1,6 @@
 # Faker System
 
-Lightpack's **Faker** provides a lighweight fake data generator for tests, seeding, and development.
+Lightpack's **Faker** provides a lightweight fake data generator for tests, seeding, and development.
 
 ---
 
@@ -44,9 +44,20 @@ return [
     'firstNames' => ['Jean'],
     'lastNames' => ['Dupont'],
     'domains' => ['monsite.fr'],
+    'cities' => ['Paris'],
+    'states' => ['Île-de-France'],
+    'countries' => ['France'],
+    'streets' => ['Rue de la Paix'],
+    'companies' => ['Acme Corp'],
+    'jobTitles' => ['Engineer'],
+    'productNames' => ['Widget'],
+    'phonePrefixes' => ['+33'],
+    'words' => ['lorem', 'ipsum', 'dolor'],
     // ...
 ];
 ```
+
+> **Note:** If a locale key is missing, Faker automatically falls back to the English (`en`) locale data for that key.
 
 ### Injecting Locale Data Directly
 
@@ -67,54 +78,57 @@ $faker->setLocaleData([
 All methods are explicit, chainable, and deterministic (with seeding):
 
 ### Identity & Contact
-- `name()` — Full name
-- `email()` — Email address
-- `username()` — Username
-- `phone()` — Phone number
-- `address()` — Full address
-- `city()`, `state()`, `country()` — Location fields
+- `name(): string` — Full name (first + last)
+- `email(): string` — Email address (derived from name + domain)
+- `username(): string` — Username (format: `firstname.lastname##`)
+- `phone(): string` — Phone number (prefix + 8 digits)
+- `address(): string` — Full address (number, street, city, state, country)
+- `city(): string` — City name
+- `state(): string` — State name
+- `country(): string` — Country name
 
 ### Business & Commerce
 - `company()` — Company name
 - `jobTitle()` — Job title
 - `productName()` — Product name
-- `price($min, $max, $currency)` — Price string
+- `price(float $min = 1, float $max = 9999, string $currency = '$'): string` — Formatted price string
 
 ### Internet & Tech
-- `url()` — URL
-- `ipv4()`, `ipv6()` — IP addresses
-- `hexColor()` — Color code
-- `uuid()` — RFC 4122 UUID
-- `slug($words)` — URL slug
+- `url(): string` — Random URL
+- `ipv4(): string` — Random IPv4 address
+- `ipv6(): string` — Random IPv6 address
+- `hexColor(): string` — Random hex color code (e.g., '#A3F2B1')
+- `uuid(): string` — RFC 4122 version 4 UUID
+- `slug(int $words = 3): string` — URL-friendly slug
 
 ### Numbers & Types
-- `number($min, $max)` — Integer
-- `float($min, $max, $decimals)` — Float
-- `bool()` — Boolean
-- `enum($values)` — Random value from array
+- `number(int $min = 0, int $max = PHP_INT_MAX): int` — Random integer
+- `float(float $min = 0, float $max = 1, int $decimals = 2): float` — Random float
+- `bool(): bool` — Random boolean
+- `enum(array $values)` — Random value from array
 
 ### Text
-- `sentence($words)` — Sentence
-- `paragraph($sentences)` — Paragraph
+- `sentence(int $words = 8): string` — Random sentence with specified word count
+- `paragraph(int $sentences = 3): string` — Random paragraph (each sentence has 7-15 words)
 
 ### Dates & Time
-- `date($format)` — Date string
-- `dob($minAge, $maxAge)` — Date of birth
-- `age($min, $max)` — Age
+- `date(string $format = 'Y-m-d'): string` — Random date (between 10 years ago and now)
+- `dob(int $minAge = 18, int $maxAge = 65): string` — Date of birth in 'Y-m-d' format
+- `age(int $min = 0, int $max = 100): int` — Random age
 
 ### Security & Finance
-- `password($length)` — Password
-- `creditCardNumber()` — Card number (plausible, not valid)
-- `otp($digits)` — One-time code
+- `password(int $length = 12): string` — Random password with letters, numbers, and special characters
+- `creditCardNumber(): string` — Plausible card number (Visa/MasterCard/Amex format, **not Luhn-valid**)
+- `otp(int $digits = 6): string` — Numeric one-time password code
 
 ### Geo
-- `latitude()` — Latitude
-- `longitude()` — Longitude
-- `zipCode()` — Zip/postal code
+- `latitude(): float` — Random latitude (-90 to 90, 6 decimals)
+- `longitude(): float` — Random longitude (-180 to 180, 6 decimals)
+- `zipCode(): string` — Random zip/postal code (various formats)
 
 ### Utilities
-- `arrayOf($method, $count, ...$args)` — Generate array of fake values
-- `seed($seed)` — Set deterministic seed
+- `arrayOf(string $method, int $count, ...$args): array` — Generate array of fake values
+- `seed(int $seed): void` — Set deterministic seed (uses `mt_srand()`)
 
 ---
 
@@ -127,8 +141,21 @@ $uniqueFaker = $faker->unique();
 $email1 = $uniqueFaker->email();
 $email2 = $uniqueFaker->email(); // Always different from $email1
 ```
-- Guarantees uniqueness up to the pool size (throws if exhausted)
-- Supports all Faker methods
+
+**Important Details:**
+- Attempts up to **100 times** to generate a unique value
+- Throws `RuntimeException` if unable to generate unique value after 100 attempts
+- Tracks all generated values in memory to ensure uniqueness
+- Supports all Faker methods via `__call()` magic method
+
+**Example of exhaustion:**
+```php
+$unique = $faker->unique();
+// This will eventually throw RuntimeException after 100 failed attempts
+for ($i = 0; $i < 1000; $i++) {
+    $unique->enum(['A', 'B']); // Only 2 possible values
+}
+```
 
 ---
 

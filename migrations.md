@@ -94,6 +94,26 @@ public function down(): void
 }
 ```
 
+### Truncate Table
+
+```php
+public function up(): void
+{
+    $this->truncate('users');
+}
+```
+
+### Execute Raw SQL
+
+You can execute raw SQL queries when needed:
+
+```php
+public function up(): void
+{
+    $this->execute('ALTER TABLE users ADD COLUMN custom_field VARCHAR(255)');
+}
+```
+
 ### Alter Table
 
 You may alter an existing table definition as documented below.
@@ -126,9 +146,28 @@ public function up(): void
 ```php
 public function up(): void
 {
-    $this->alter('users')->modify(function(Table $table) {
-        $table->dropColumn('password');
-    });
+    // Drop single column
+    $this->alter('users')->dropColumn('password');
+}
+
+public function down(): void
+{
+    // Drop multiple columns at once
+    $this->alter('users')->dropColumn('password', 'email', 'phone');
+}
+```
+
+#### Rename Column
+
+```php
+public function up(): void
+{
+    $this->alter('users')->renameColumn('name', 'full_name');
+}
+
+public function down(): void
+{
+    $this->alter('users')->renameColumn('full_name', 'name');
 }
 ```
 
@@ -165,8 +204,8 @@ This documentation summarizes all available column types, their configuration op
 - **deletedAt()**: DATETIME, nullable
 - **timestamps()**: Adds both createdAt and updatedAt
 
-### Boolean/Bit Columns
-- **boolean(string $name, bool $default = false)**: TINYINT(1), default 0/1
+### Boolean Columns
+- **boolean(string $name, bool $default = false)**: TINYINT(1) with default value 0 or 1
 
 ### Special Columns
 - **ipAddress(string $name = 'ip_address')**: VARCHAR(45) for IPv4/IPv6
@@ -179,16 +218,24 @@ This documentation summarizes all available column types, their configuration op
 All column methods return a `Column` object, allowing further configuration:
 - **type(string $type)**: Set SQL type manually
 - **length(int $length)**: Set length for applicable types
-- **default(mixed $value)**: Set default value
-- **nullable()**: Mark column as nullable
-- **attribute(string $attr)**: Add SQL attribute (e.g., UNSIGNED, ZEROFILL)
-- **increments()**: Set AUTO_INCREMENT
+- **default(bool|string $value)**: Set default value
+- **nullable(bool $nullable = true)**: Mark column as nullable
+- **attribute(string $attr)**: Add SQL attribute (e.g., UNSIGNED, ON UPDATE CURRENT_TIMESTAMP)
+- **unsigned()**: Fluent shortcut for UNSIGNED attribute
+- **current()**: Fluent shortcut for CURRENT_TIMESTAMP default
+- **increments()**: Set AUTO_INCREMENT and PRIMARY KEY
+- **primary(?string $indexName = null)**: Mark as primary key
+- **unique(?string $indexName = null)**: Add unique index
+- **index(?string $indexName = null)**: Add regular index
+- **fulltext(?string $indexName = null)**: Add fulltext index
 
 **Example:**
 ```php
 $table->varchar('username', 50)->unique()->nullable();
 $table->int('age')->default(0);
+$table->int('score')->unsigned();
 $table->decimal('balance', 12, 2)->attribute('UNSIGNED');
+$table->datetime('created_at')->current();
 ```
 
 ---
@@ -222,6 +269,12 @@ $table->primary(['user_id', 'post_id']);
 
 - Drops the primary key constraint (not the column).
 
+<p class="tip"><b>Important Notes:</b></p>
+
+- Dropping the primary key does not remove the column from the table but only the primary key constraint.
+- Remember that there can be only one auto column and it must be defined as a key. So if the primary key is defined as auto, you will need to remove the auto attribute first.
+- Do not forget to drop or alter foreign keys referencing the primary key.
+
 ```php
 $table->dropPrimary();
 ```
@@ -231,6 +284,8 @@ $table->dropPrimary();
 - Adds a unique index to one or more columns.
 - `unique(string|array $columns, ?string $indexName = null)`
 - Supports custom unique index name.
+
+<p class="tip"><b>Note:</b> You should remove duplicate values from the columns before adding unique index otherwise it may result in "mysql error 1062".</p>
 
 ```php
 $table->unique('email');
@@ -243,8 +298,7 @@ $table->unique(['first', 'last'], 'name_unique');
 - `dropUnique(string $indexName)`
 
 ```php
-$table->dropUnique('email');
-$table->unique(['first', 'last'], 'name_unique');
+$this->alter('users')->dropUnique('email_unique');
 ```
 
 ### index()
@@ -263,7 +317,7 @@ $table->index(['user_id', 'status'], 'user_status_idx');
 - `dropIndex(string $indexName)`
 
 ```php
-$this->dropIndex('user_status_idx');
+$this->alter('users')->dropIndex('user_status_idx');
 ```
 
 ### fulltext()
@@ -281,7 +335,11 @@ $table->fulltext(['title', 'body'], 'post_fulltext');
 - `dropFulltext(string ...$indexName)`
 
 ```php
-$table->dropFulltext('post_fulltext');
+// Drop single fulltext index
+$this->alter('posts')->dropFulltext('post_fulltext');
+
+// Drop multiple fulltext indexes
+$this->alter('posts')->dropFulltext('title_fulltext', 'body_fulltext');
 ```
 
 ### spatial()
@@ -298,7 +356,28 @@ $table->spatial('location', 'loc_idx');
 - `dropSpatial(string $indexName)`
 
 ```php
-$this->dropSpatial('loc_idx');
+$this->alter('locations')->dropSpatial('loc_idx');
+```
+
+---
+
+## Table Configuration
+
+You can configure table engine, charset, and collation:
+
+```php
+public function up(): void
+{
+    $this->create('users', function(Table $table) {
+        $table->id();
+        $table->varchar('name');
+        
+        // Configure table settings
+        $table->engine('InnoDB');  // Default: InnoDB
+        $table->charset('utf8mb4'); // Default: utf8mb4
+        $table->collation('utf8mb4_unicode_ci'); // Default: utf8mb4_unicode_ci
+    });
+}
 ```
 
 ---
@@ -307,26 +386,75 @@ $this->dropSpatial('loc_idx');
 **Foreign keys** enforce referential integrity between tables, ensuring that a column (or set of columns) in one table matches the primary key or unique key in another table. Foreign keys can be defined during table creation or added/removed during schema alteration. The following document details the support for working with foreign keys.
 
 
-### foreignKey()
+### Defining Foreign Keys
 
-- `foreignKey(string $column)`
-- Defines a foreign key on the specified column.
+To define a foreign key constraint, use the `foreignKey()` method which automatically infers the parent table from the column name:
 
 ```php
-$table->foreignKey('user_id')
-    ->references('id')
-    ->on('users')
-    ->onDelete('CASCADE') // CASCADE, SET NULL, RESTRICT
-    ->onUpdate('CASCADE'); // CASCADE, SET NULL, RESTRICT
+public function up(): void
+{
+    $this->create('posts', function(Table $table) {
+        $table->id();
+        $table->bigint('user_id')->unsigned();
+        $table->varchar('title');
+        
+        // Define foreign key - automatically references users.id
+        $table->foreignKey('user_id')
+            ->cascadeOnDelete()
+            ->cascadeOnUpdate();
+    });
+}
 ```
 
-### dropForeign()
-
-- `dropForeign(string ...$constraintNames)`
-- Drop one or more foreign key constraints by name.
+You can also explicitly specify the parent table and column:
 
 ```php
-$table->dropForeign('users_user_id_foreign');
+$table->foreignKey('author_id')
+    ->references('id')
+    ->on('users')
+    ->cascadeOnDelete();
+```
+
+### Foreign Key Actions
+
+Available actions for `ON UPDATE` and `ON DELETE`:
+
+- **CASCADE**: Automatically update/delete related rows
+- **RESTRICT**: Prevent update/delete if related rows exist (default)
+- **SET NULL**: Set foreign key column to NULL
+
+**Available Methods:**
+- `cascadeOnDelete()`: Set ON DELETE CASCADE
+- `cascadeOnUpdate()`: Set ON UPDATE CASCADE
+- `restrictOnDelete()`: Set ON DELETE RESTRICT (default)
+- `restrictOnUpdate()`: Set ON UPDATE RESTRICT (default)
+- `nullOnDelete()`: Set ON DELETE SET NULL
+- `nullOnUpdate()`: Set ON UPDATE SET NULL
+
+<p class="tip"><b>Note:</b> Default behavior is RESTRICT for both ON UPDATE and ON DELETE.</p>
+
+**Example:**
+```php
+$table->foreignKey('category_id')
+    ->references('id')
+    ->on('categories')
+    ->nullOnDelete()      // Set to NULL when parent is deleted
+    ->restrictOnUpdate(); // Prevent parent updates if children exist
+```
+
+### Dropping Foreign Keys
+
+To drop one or more foreign key constraints:
+
+```php
+public function up(): void
+{
+    // Drop single foreign key
+    $this->alter('posts')->dropForeign('posts_user_id_foreign');
+    
+    // Drop multiple foreign keys
+    $this->alter('posts')->dropForeign('posts_user_id_foreign', 'posts_category_id_foreign');
+}
 ```
 
 ---

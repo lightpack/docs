@@ -108,14 +108,16 @@ request()->query();
 
 ```php
 // Get the raw request body as a string
-request()->getRawBody();
+request()->getRawBody(); // Returns: string
 
 // Get the parsed body (for PUT/PATCH/DELETE with form data)
-request()->getParsedBody();
+request()->getParsedBody(); // Returns: array
 
 // Get a specific parsed body value with a default
-request()->getParsedBody('key', 'default');
+request()->getParsedBody('key', 'default'); // Returns: mixed
 ```
+
+> **Note:** `getParsedBody()` uses `parse_str()` to convert the raw body into an associative array for PUT/PATCH/DELETE requests.
 
 ---
 
@@ -245,22 +247,40 @@ request()->matchesRoute(['dashboard', 'admin.*']);
 ## URL Signature Validation
 
 ```php
-// Throws an exception if the URL signature is invalid
+// Throws InvalidUrlSignatureException if the URL signature is invalid
 request()->validateUrlSignature();
 
+// With ignored parameters (e.g., ignore 'page' parameter in validation)
+request()->validateUrlSignature(['page']);
+
 // Returns true if the URL signature is valid
-request()->hasValidSignature();
+request()->hasValidSignature(); // bool
+
+// With ignored parameters
+request()->hasValidSignature(['page']); // bool
 
 // Returns true if the URL signature is invalid
-request()->hasInValidSignature();
+request()->hasInValidSignature(); // bool
+
+// With ignored parameters
+request()->hasInValidSignature(['page']); // bool
 ```
+
+> **Note:** All signature validation methods accept an optional `array $ignoredParameters` argument to exclude specific query parameters from validation.
 
 ## Client IP Address
 
 ```php
 // Get the client's IP address
-request()->ip();
+request()->ip(); // Returns: string
 ```
+
+**IP Detection Priority:**
+1. `X-Forwarded-For` header (first IP from comma-separated list)
+2. `X-Real-IP` header (nginx)
+3. `$_SERVER['REMOTE_ADDR']`
+
+> **Important:** Throws `RuntimeException` if IP address cannot be determined (e.g., `REMOTE_ADDR` not set).
 
 ## File Uploads
 
@@ -311,17 +331,28 @@ foreach ($photos as $photo) {
 
 Each `UploadedFile` instance provides:
 
-- `getName()`: Original filename
-- `getSize()`: File size in bytes
-- `getType()`: MIME type (e.g., `image/jpeg`)
-- `getExtension()`: File extension (e.g., `jpg`)
-- `getTmpName()`: Temporary path on disk
-- `hasError()`: Returns `true` if there was an upload error
-- `getError()`: Returns the error code (see PHP file upload errors)
-- `isEmpty()`: Returns `true` if file is empty
-- `isImage()`: Returns `true` if file is an image
-- `getDimensions()`: Returns `['width' => ..., 'height' => ...]` for images
-- `getWidth()`, `getHeight()`: Image dimensions (0 if not an image)
+- `getName(): string` — Original filename
+- `getSize(): int` — File size in bytes
+- `getType(): string` — MIME type (e.g., `image/jpeg`)
+- `getExtension(): string` — File extension (e.g., `jpg`)
+- `getTmpName(): string` — Temporary path on disk
+- `hasError(): bool` — Returns `true` if upload error occurred (checks `$error !== UPLOAD_ERR_OK`)
+- `getError(): int` — Returns PHP upload error code (UPLOAD_ERR_* constants)
+- `isEmpty(): bool` — Returns `true` if filename is empty
+- `isImage(): bool` — Returns `true` for: gif, jpeg, pjpeg, png, webp
+- `getDimensions(): ?array` — Returns `['width' => int, 'height' => int]` (or `['width' => 0, 'height' => 0]` if not an image)
+- `getWidth(): int` — Image width (0 if not an image)
+- `getHeight(): int` — Image height (0 if not an image)
+
+**Upload Error Codes:**
+- `UPLOAD_ERR_OK` (0): No error
+- `UPLOAD_ERR_INI_SIZE` (1): Exceeds `upload_max_filesize`
+- `UPLOAD_ERR_FORM_SIZE` (2): Exceeds `MAX_FILE_SIZE` in HTML form
+- `UPLOAD_ERR_PARTIAL` (3): File was only partially uploaded
+- `UPLOAD_ERR_NO_FILE` (4): No file was uploaded
+- `UPLOAD_ERR_NO_TMP_DIR` (6): Missing temporary folder
+- `UPLOAD_ERR_CANT_WRITE` (7): Failed to write file to disk
+- `UPLOAD_ERR_EXTENSION` (8): PHP extension stopped the upload
 
 ### Storing Uploaded Files
 
@@ -330,46 +361,112 @@ Lightpack abstracts the storage of uploaded files to utilize the configured [Sto
 #### Store in Arbitrary Location
 
 ```php
-$path = $file->store('some/directory');
+// Returns the full path where file was stored
+$path = $file->store('some/directory'); // string
+// Example result: 'some/directory/filename.jpg'
 ```
 
 #### Store in Public Uploads
 
 ```php
-$path = $file->storePublic('avatars');
+// Stores in uploads/public/avatars/ (web-accessible)
+$path = $file->storePublic('avatars'); // string
+// Example result: 'uploads/public/avatars/filename.jpg'
 ```
-- Stores in `uploads/public/avatars/` (web-accessible).
 
 #### Store in Private Uploads
 
 ```php
-$path = $file->storePrivate('documents');
+// Stores in uploads/private/documents/ (not web-accessible by default)
+$path = $file->storePrivate('documents'); // string
+// Example result: 'uploads/private/documents/filename.pdf'
 ```
-- Stores in `uploads/private/documents/` (not web-accessible by default).
+
+> **Note:** All storage methods return the relative path where the file was stored. They may throw `FileUploadException` if the file cannot be uploaded or directory issues occur.
 
 #### Storage Options
 
 You can customize storage via the `$options` array:
 
-- `'name'`: Custom filename (string or callable)
-- `'unique'`: Generate a unique filename (bool)
-- `'preserve_name'`: Keep original name as prefix when unique (bool)
+- `'name'` (string|callable): Custom filename
+  - String: Use exact filename
+  - Callable: Function receives `UploadedFile` instance, returns filename
+- `'unique'` (bool, default: `false`): Generate unique 32-character random filename
+- `'preserve_name'` (bool, default: `false`): When `unique` is true, prefix with original slugified name
 
-Example:
+**Examples:**
 
 ```php
+// Generate unique filename, preserve original name as prefix
 $path = $file->storePublic('avatars', [
     'unique' => true,
     'preserve_name' => true,
 ]);
+// Result: 'uploads/public/avatars/my-photo-a1b2c3d4...xyz.jpg'
+
+// Generate completely unique filename (no prefix)
+$path = $file->storePublic('avatars', [
+    'unique' => true,
+]);
+// Result: 'uploads/public/avatars/a1b2c3d4e5f6...xyz.jpg'
+
+// Custom filename as string
+$path = $file->storePublic('avatars', [
+    'name' => 'profile-picture.jpg',
+]);
+// Result: 'uploads/public/avatars/profile-picture.jpg'
+
+// Custom filename via callback
+$path = $file->storePublic('avatars', [
+    'name' => function($file) {
+        return 'user-' . auth()->id() . '.' . $file->getExtension();
+    },
+]);
+// Result: 'uploads/public/avatars/user-123.jpg'
 ```
+
+> **Note:** Filenames are automatically slugified (lowercase, hyphens) unless a custom name is provided.
 
 ### Troubleshooting
 
-- `request()->file('key')` returns `null` if no file was uploaded.
-- For multiple files, always check `is_array()` before looping.
-- Always check `hasError()` to avoid processing failed uploads.
-- Use `storePublic` for files that should be accessible via URL, and `storePrivate` for protected files.
+- `request()->file('key')` returns `null` if no file was uploaded for that key.
+- For multiple files (`<input name="files[]">`), `request()->file('files')` returns an **array** of `UploadedFile` instances.
+- Always check `hasError()` before processing to avoid handling failed uploads.
+- Always check `!$file->isEmpty()` to ensure a file was actually selected.
+- Use `storePublic()` for files that should be accessible via URL (images, downloads).
+- Use `storePrivate()` for protected files (user documents, sensitive data).
+- The `store()` methods may throw `FileUploadException` — wrap in try-catch for production.
+
+**Complete Example:**
+```php
+$file = request()->file('document');
+
+if ($file === null) {
+    // No file uploaded
+    return;
+}
+
+if ($file->hasError()) {
+    $errorCode = $file->getError();
+    // Handle error based on code
+    return;
+}
+
+if ($file->isEmpty()) {
+    // File is empty
+    return;
+}
+
+try {
+    $path = $file->storePrivate('documents', [
+        'unique' => true,
+        'preserve_name' => true,
+    ]);
+    // File stored successfully at $path
+} catch (FileUploadException $e) {
+    // Handle storage error
+}
+```
 
 ---
 

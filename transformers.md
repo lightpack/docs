@@ -205,7 +205,30 @@ $result = $transformer
 ```
 
 ### Including Relations
-Include related models by name:
+
+To include related models, you must first define transformers for those relations in your transformer's `transformerMap()` method:
+
+```php
+class ProjectTransformer extends Transformer
+{
+    protected function data($model): array
+    {
+        return [
+            'id' => $model->id,
+            'name' => $model->name,
+        ];
+    }
+
+    protected function transformerMap(): array
+    {
+        return [
+            'tasks' => TaskTransformer::class,
+        ];
+    }
+}
+```
+
+Now you can include related models by name:
 ```php
 $result = $transformer
     ->includes('tasks')
@@ -217,10 +240,47 @@ $result = $transformer
 // [ 'name' => 'Project 1', 'tasks' => [ [ 'id' => 1, 'name' => 'Task 1' ] ] ]
 ```
 
+<p class="tip"><b>Important:</b> If you try to include a relation that is not defined in <code>transformerMap()</code>, a <code>RuntimeException</code> will be thrown with a clear message indicating which relation is missing.</p>
+
 ---
 
 ## Nested Relations & Deep Includes
-You can include nested relations using dot notation:
+
+You can include nested relations using dot notation. Each level must have its transformer defined:
+
+```php
+class ProjectTransformer extends Transformer
+{
+    protected function data($model): array
+    {
+        return ['id' => $model->id, 'name' => $model->name];
+    }
+
+    protected function transformerMap(): array
+    {
+        return [
+            'tasks' => TaskTransformer::class,
+        ];
+    }
+}
+
+class TaskTransformer extends Transformer
+{
+    protected function data($model): array
+    {
+        return ['id' => $model->id, 'name' => $model->name];
+    }
+
+    protected function transformerMap(): array
+    {
+        return [
+            'comments' => CommentTransformer::class,
+        ];
+    }
+}
+```
+
+Now you can include nested relations:
 ```php
 $result = $transformer
     ->includes('tasks.comments')
@@ -248,8 +308,11 @@ $result = $transformer
 ---
 
 ## Handling Missing or Null Relations
-- If a relation is missing or not included, it is omitted from the output.
-- If a relation is included but null or empty, it appears as an empty array or null, as appropriate.
+- If a relation is not included in the `includes()` call, it is omitted from the output.
+- If a relation is included but the value is `null`, it returns an empty array `[]`.
+- If a relation is included but the collection is empty, it returns an empty array `[]`.
+- If a relation method doesn't exist on the model, it is silently skipped (not loaded).
+- If a relation is already eager loaded, the transformer uses the cached result instead of lazy loading it again.
 
 ---
 
@@ -295,7 +358,25 @@ $result = $pagination->transform([
         'tasks' => ['name'],
     ],
 ]);
-// Output includes 'data', 'meta', and 'links' keys
+```
+
+**Output Structure:**
+```php
+[
+    'data' => [ /* transformed items */ ],
+    'meta' => [
+        'current_page' => 1,
+        'per_page' => 10,
+        'total' => 100,
+        'total_pages' => 10
+    ],
+    'links' => [
+        'first' => '?page=1',
+        'last' => '?page=10',
+        'prev' => null,
+        'next' => '?page=2'
+    ]
+]
 ```
 
 ---
@@ -327,10 +408,47 @@ If an invalid context is provided, a clear exception is thrown listing available
 
 ---
 
+## Defining Relation Transformers
+
+The `transformerMap()` method is essential for including relations in your transformed output. It maps relation names to their transformer classes:
+
+```php
+class UserTransformer extends Transformer
+{
+    protected function data($model): array
+    {
+        return [
+            'id' => $model->id,
+            'name' => $model->name,
+            'email' => $model->email,
+        ];
+    }
+
+    protected function transformerMap(): array
+    {
+        return [
+            'profile' => ProfileTransformer::class,
+            'roles' => RoleTransformer::class,
+            'posts' => PostTransformer::class,
+        ];
+    }
+}
+```
+
+**Key Points:**
+- Each relation you want to include must be defined in `transformerMap()`
+- You can pass either a transformer class name (string) or an instance
+- If you try to include a relation not in the map, a `RuntimeException` is thrown
+- The exception message clearly indicates which relation is missing and which transformer needs updating
+
+---
+
 ## Error Handling & Robustness
-- If you include a non-existent relation, it is simply ignored in the output.
-- If you call `transform()` on a model without a transformer, you get a clear exception: `No transformer defined for model: ModelClass`.
-- If you specify an invalid context, a descriptive exception is thrown: `Invalid transformer context 'admin' for ModelClass. Available contexts: api, view`.
-- Null or missing relations are output as empty arrays or omitted, never causing errors.
+- **Missing transformer definition**: If you call `transform()` on a model without a `$transformer` property, you get: `No transformer defined for model: ModelClass`.
+- **Invalid context**: If you specify an invalid context, you get: `Invalid transformer context 'admin' for ModelClass. Available contexts: api, view`.
+- **Missing relation transformer**: If you include a relation not defined in `transformerMap()`, you get: `No transformer defined for relation 'tasks'. Define it in ProjectTransformer::transformerMap()`.
+- **Non-existent relation method**: If a relation method doesn't exist on the model, it is silently skipped.
+- **Null relations**: Always return empty arrays `[]`, never causing errors.
+- **Already loaded relations**: If a relation is already eager loaded, the transformer uses the cached result.
 
 ---

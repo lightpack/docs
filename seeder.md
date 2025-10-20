@@ -25,6 +25,20 @@ php console create:seeder ProductsSeeder
 
 This should have created a seeder class named `ProductsSeeder` in `database/seeders` directory. 
 
+The generated seeder class will look like this:
+
+```php
+namespace Database\Seeders;
+
+class ProductsSeeder
+{
+    public function seed()
+    {
+        // ...
+    }
+}
+```
+
 This class has a method named `seed()` where you can write the logic for populating `products` table with test data.
 
 For example, here we populate **25 fake products** as shown:
@@ -46,7 +60,6 @@ Here in each loop, we populate a new product using the `Product` [model class](m
 ## Specifying Seeders
 
 You can specify seeders inside the `seed()` method of `DatabaseSeeder` class. Seeders are run in the order of their specification.
-in that order.
 
 ```php
 public function seed()
@@ -57,6 +70,8 @@ public function seed()
     ]);
 }
 ```
+
+> **Note:** The `run()` method accepts either a single seeder class name (string) or an array of seeder class names. Each seeder's `seed()` method is called in sequence.
 
 ## Executing Seeders
 

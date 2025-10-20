@@ -316,6 +316,30 @@ $products->count();
 $products->where('price', '>', 200)->count();
 ```
 
+## Exists / Not Exists
+
+Check if any rows exist matching the query conditions:
+
+```php
+// Check if expensive products exist
+if ($products->where('price', '>', 1000)->exists()) {
+    // Show premium category
+}
+
+// Check if out-of-stock products exist
+if ($products->where('stock', '=', 0)->notExists()) {
+    // All products are in stock
+}
+
+// Check if user has any orders
+$orders = db()->table('orders');
+if ($orders->where('user_id', '=', $userId)->exists()) {
+    // Show order history
+}
+```
+
+> **Note:** `exists()` internally uses `SELECT 1` with a `LIMIT 1` for optimal performance. It returns a boolean, not a count.
+
 ## Joins
 
 You can also join multiple tables.

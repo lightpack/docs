@@ -40,23 +40,32 @@ class UserFactory extends Factory
 ```
 
 ### Core Methods
-- `times(int $count)` — Specify how many entities to generate (fluent interface).
-- `make(array $overrides = [])` — Generate a single entity array, or a batch if `times()` was called.
-- Field overrides: pass an array to `make()` to override default values.
+- `times(int $count): static` — Specify how many entities to generate. Returns `$this` for method chaining.
+- `make(array $overrides = []): array` — Generate a single entity array, or an array of arrays if `times()` was called. **Resets the batch count after use.**
+- **Field overrides:** Pass an array to `make()` to override default values. In batch mode, the same overrides apply to **all** generated items.
 
 **Examples:**
 ```php
-// Generate a single user entity
+// Generate a single user entity (returns array)
 $user = (new UserFactory)->make();
+// Result: ['name' => 'John Doe', 'email' => 'john@example.com', ...]
 
-// Generate a batch of 3 user entities
+// Generate a batch of 3 user entities (returns array of arrays)
 $users = (new UserFactory)->times(3)->make();
+// Result: [['name' => ...], ['name' => ...], ['name' => ...]]
 
 // Generate a single user entity overriding email
 $user = (new UserFactory)->make([
     'email' => 'custom@example.com'
 ]);
+// Result: ['name' => 'John Doe', 'email' => 'custom@example.com', ...]
+
+// Batch with overrides - same override applies to ALL items
+$users = (new UserFactory)->times(3)->make(['email' => 'same@example.com']);
+// All 3 users will have 'same@example.com' as email
 ```
+
+> **Important:** The batch count is automatically reset to `null` after calling `make()`, so you can reuse the factory instance.
 
 ---
 
@@ -79,6 +88,7 @@ class ProductFactory extends ModelFactory
             'name' => 'Dummy Product',
         ];
     }
+    
     protected function model(): string
     {
         return Product::class;
@@ -89,13 +99,21 @@ class ProductFactory extends ModelFactory
 **Usage**
 
 ```php
-// Save a single model
-$model = (new ProductFactory)->save();
+// Save a single model (returns Product instance)
+$product = (new ProductFactory)->save();
+// $product is a Product model instance, already inserted
 
-// Save a batch of models with name override
-$models = (new ProductFactory)
+// Save a batch of models (returns array of Product instances)
+$products = (new ProductFactory)->times(2)->save();
+// $products is an array of 2 Product model instances
+
+// Save with overrides - same override applies to all in batch
+$products = (new ProductFactory)
     ->times(2)
     ->save(['name' => 'Batch Name']);
+// Both products will have 'name' => 'Batch Name'
 ```
+
+> **Note:** `save()` returns **Model instances**, not arrays. Use `make()` if you only need the data arrays without persisting.
 
 ---

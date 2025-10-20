@@ -244,16 +244,16 @@ Attribute casting converts model attributes to a specific type (like integer, bo
 
 ### Supported Cast Types
 
-| Cast Type           | Description & Example                                      |
-|---------------------|-----------------------------------------------------------|
-| `int` / `integer`   | Converts to integer: `'123'` → `123`                      |
-| `real` / `float` / `double` | Converts to float: `'123.45'` → `123.45`          |
-| `string`            | Converts to string: `123` → `'123'`                       |
-| `bool` / `boolean`  | Converts to boolean: `'1'`, `1`, `'true'` → `true`        |
-| `array` / `json`    | Converts JSON string to array and vice versa               |
-| `date`              | Converts to `DateTime` object from date string            |
-| `datetime`          | Converts to `DateTime` object from datetime string        |
-| `timestamp`         | Converts to Unix timestamp (integer)                      |
+| Cast Type  | Description & Example                                                |
+|------------|----------------------------------------------------------------------|
+| `int`      | Converts to integer: `'123'` → `123`                                 |
+| `float`    | Converts to float: `'123.45'` → `123.45`                             |
+| `string`   | Converts to string: `123` → `'123'`                                  |
+| `bool`     | Converts to boolean: `'1'`, `1`, `'true'` → `true`                   |
+| `array`    | Converts JSON string to array (stores as JSON in database)           |
+| `date`     | Converts to `DateTime` object (stores as `Y-m-d` in database)        |
+| `datetime` | Converts to `DateTime` object (stores as `Y-m-d H:i:s` in database)  |
+| `timestamp`| Converts to Unix timestamp integer (stores as integer in database)   |
 
 ### Example Usage
 

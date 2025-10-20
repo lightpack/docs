@@ -176,14 +176,6 @@ $payload = $users->transform([
 - **Countable:** Use `count($users)` to get the number of items.
 - **JsonSerializable:** Collections can be safely passed to `json_encode()`.
 
-## Additional Methods
-
-### getItems()
-Get the raw array of models in the collection.
-```php
-$items = $users->getItems(); // Returns array of Model instances
-```
-
 ---
 
 ## Best Practices & Tips

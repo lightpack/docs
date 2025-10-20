@@ -338,8 +338,6 @@ if ($orders->where('user_id', '=', $userId)->exists()) {
 }
 ```
 
-> **Note:** `exists()` internally uses `SELECT 1` with a `LIMIT 1` for optimal performance. It returns a boolean, not a count.
-
 ## Joins
 
 You can also join multiple tables.

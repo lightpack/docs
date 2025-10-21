@@ -143,9 +143,11 @@ response()
   response()->download('/path/to/file.pdf', null, ['X-Header' => 'Value']);
   ```
 
-  - Sets appropriate headers for download.
-  - Automatically detects MIME type.
-  - Reads file into memory (not recommended for large files).
+  - Sets appropriate headers for download (`Content-Disposition: attachment`).
+  - Automatically detects MIME type via `MimeTypes::getMime()`.
+  - Uses `file_get_contents()` to read entire file into memory.
+  - **Not recommended for files larger than a few MB** - use `downloadStream()` instead.
+  - Does not throw exceptions - ensure file exists before calling.
 
 - **Stream a File Download (Memory Efficient):**
   ```php
@@ -155,22 +157,29 @@ response()
   response()->downloadStream('/path/to/large.zip', 'archive.zip', [], 2*1024*1024); 
   ```
 
-  - Streams file in chunks to client.
-  - Use for large files to avoid memory issues.
+  - Streams file in chunks to client (default: 1MB chunks).
+  - **Throws `RuntimeException`** if file does not exist.
+  - Disables output buffering with `ob_end_clean()`.
+  - Checks `connection_status()` to stop if client disconnects.
+  - Essential for files larger than a few MB.
 
 - **Display a File Inline in Browser:**
   ```php
   response()->file('/path/to/image.jpg');
+  response()->file('/path/to/image.jpg', 'photo.jpg');
+  response()->file('/path/to/image.jpg', null, ['X-Custom' => 'Value']);
   ```
 
-  - Like `download()`, but sets `Content-Disposition: inline`.
+  - Reads entire file into memory - not for large files.
 
 - **Stream a File Inline:**
   ```php
   response()->fileStream('/path/to/large-video.mp4');
+  response()->fileStream('/path/to/large-video.mp4', 'video.mp4', [], 2*1024*1024);
   ```
   
-  - Streams large files for in-browser display.
+  - **Throws `RuntimeException`** if file does not exist.
+  - Ideal for streaming videos, PDFs, or large images.
 
 - **Best Practice:** Always use streaming methods for files larger than a few megabytes.
 
@@ -274,9 +283,14 @@ response()->streamCsv(function() {
     }
 }, 'users.csv');
 ```
-- Sets `Content-Type: text/csv` and download headers.
-- The callback writes CSV rows directly to output.
-- Ideal for exporting large or streaming datasets.
+
+**What it does:**
+- Sets `Content-Type: text/csv`
+- Sets `Content-Disposition: attachment; filename="users.csv"`
+- The callback writes CSV rows directly to output
+- Ideal for exporting large or streaming datasets
+
+**Default filename:** If you don't provide a filename, it defaults to `'export.csv'`.
 
 ### 5. Streaming Gotchas and Best Practices
 
@@ -370,7 +384,11 @@ public function post()
     return redirect()->refresh();
 }
 ```
-- Useful for preventing duplicate form submissions.
+
+**How it works:**
+- Uses `request()->fullUrl()` to get the current full URL (including query string).
+- Sets status 302 and `Location` header to current URL.
+- Useful for preventing duplicate form submissions via POST/Redirect/GET pattern.
 
 ---
 

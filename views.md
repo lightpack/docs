@@ -229,7 +229,7 @@ Total Leads: <?= $stats['leads'] ?>
 <html>
     <body>
         <!-- include header template -->
-        <?= template()->include('header') ?>
+        <?= template()->include('partials/header') ?>
 
         <main>
             <!-- embed child content -->
@@ -237,7 +237,7 @@ Total Leads: <?= $stats['leads'] ?>
         </main>
 
         <!-- include footer template -->
-        <?= template()->include('footer') ?>
+        <?= template()->include('partials/footer') ?>
     </body>
 </html>
 ```
@@ -256,10 +256,47 @@ Lightpack provides a convenient global function, `_e()`, to help you safely outp
 - Prevents Cross-Site Scripting (XSS) by ensuring user-supplied or dynamic data cannot break out of HTML context.
 - Use it whenever you output any data that may contain special HTML characters or come from user input.
 
+### ⚠️ Security: Always Escape User Input
+
+**DANGEROUS (XSS Vulnerability):**
+```php
+<!-- ❌ Never do this with user input! -->
+<div><?= $userComment ?></div>
+<h1><?= $userName ?></h1>
+<a href="<?= $userUrl ?>">Link</a>
+```
+
+**SAFE (Properly Escaped):**
+```php
+<!-- ✅ Always escape user-provided data -->
+<div><?= _e($userComment) ?></div>
+<h1><?= _e($userName) ?></h1>
+<a href="<?= _e($userUrl) ?>">Link</a>
+```
+
+### When to Escape
+
+**Always escape:**
+- ✅ User-submitted data (comments, posts, names, bios)
+- ✅ Database content that users can edit
+- ✅ URL parameters and query strings
+- ✅ Form input values
+- ✅ Any data from external sources (APIs, files, etc.)
+
+**Do NOT escape:**
+- ❌ HTML you control and trust (like template includes)
+- ❌ Data that's already been escaped
+- ❌ Output from `template()->include()` or `template()->component()`
+
+### Example
+
 ```php
 <?php foreach($comments as $comment): ?>
-    <?= _e($comment) ?>
-<?php endforeach  ?>
+    <div class="comment">
+        <strong><?= _e($comment->author) ?></strong>
+        <p><?= _e($comment->text) ?></p>
+    </div>
+<?php endforeach ?>
 ```
 
 ## Few Suggestions

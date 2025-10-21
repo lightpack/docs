@@ -1,6 +1,8 @@
 # Rate Limiting
 
-Rate limiting (throttling) helps control access rates to any resource - from HTTP routes to API calls to background jobs. Lightpack provides a simple, efficient utility for **rate limiting** actions—such as login attempts, API requests, or any operation you want to restrict to a certain number of times within a time window.. Use cases include:
+Rate limiting (throttling) helps control access rates to any resource - from HTTP routes to API calls to background jobs. Lightpack provides a simple, efficient utility for **rate limiting** actions—such as login attempts, API requests, or any operation you want to restrict to a certain number of times within a time window.
+
+## Use Cases
 
 - API request throttling
 - Login attempt limits
@@ -62,17 +64,23 @@ Keys can be anything unique to what you're limiting:
 'jobs:processor:1'       // Job processing
 ```
 
-## Checking Attempts
+## Checking Status
 
-You can check how many attempts have been made in the current window:
+### Get Current Hits
 
 ```php
 $hits = limiter()->getHits('login:user:123'); // returns int|null
 
 if ($hits !== null) {
-    $remaining = 5 - $hits; // If max is 5
-    echo "You have {$remaining} attempts remaining";
+    echo "You've made {$hits} attempts";
 }
+```
+
+### Get Remaining Attempts
+
+```php
+$remaining = limiter()->getRemaining('login:user:123', 5);
+echo "You have {$remaining} attempts remaining";
 ```
 
 ## How It Works
@@ -82,16 +90,17 @@ if ($hits !== null) {
 - If the max is reached, `attempt()` returns `false` until the window expires.
 - Once expired, the count resets automatically.
 
-## Examples
+### Example: IP-Based Rate Limiting
 
 ```php
 // Allow 3 requests per 10 seconds from an IP
-if ($limiter->attempt(request()->ip(), 3, 10)) {
-    // process request
-} else {
-    // too many requests
+$key = 'ip:' . request()->ip();
+
+if (!limiter()->attempt($key, 3, 10)) {
+    return response('Too many requests', 429);
 }
 
+// Process request
 ```
 
 ## HTTP Rate Limiting
@@ -197,7 +206,115 @@ Get current hit count for a key. Returns `null` if key doesn't exist.
 
 ```php
 $hits = limiter()->getHits('action:user:123');
-$remaining = 5 - ($hits ?? 0);
+```
+
+### `getRemaining(string $key, int $max): int`
+Get remaining attempts for a key. Returns `0` if rate limited, `$max` if no attempts yet.
+
+```php
+$remaining = limiter()->getRemaining('login:user:123', 5);
+
+if ($remaining > 0) {
+    echo "You have {$remaining} attempts remaining";
+} else {
+    echo "Rate limit exceeded. Please try again later.";
+}
+```
+
+---
+
+## Best Practices
+
+### 1. Use Descriptive Keys
+
+```php
+// Good
+'login:email:user@example.com'
+'api:user:123:endpoint:/posts'
+'upload:user:456:type:image'
+
+// Bad
+'user123'
+'limit'
+'check'
+```
+
+### 2. Choose Appropriate Windows
+
+```php
+// Login attempts: 5 per 5 minutes
+limiter()->attempt('login:' . $email, 5, 300);
+
+// API calls: 1000 per hour
+limiter()->attempt('api:' . $userId, 1000, 3600);
+
+// Sensitive operations: 3 per day
+limiter()->attempt('delete:' . $userId, 3, 86400);
+
+// Real-time operations: 10 per second
+limiter()->attempt('websocket:' . $userId, 10, 1);
+```
+
+### 3. Provide User Feedback
+
+```php
+$key = 'action:user:' . $userId;
+$max = 10;
+
+if (!limiter()->attempt($key, $max, 3600)) {
+    $hits = limiter()->getHits($key);
+    $remaining = limiter()->getRemaining($key, $max);
+    
+    return response()->json([
+        'error' => 'Rate limit exceeded',
+        'limit' => $max,
+        'current' => $hits,
+        'remaining' => $remaining,
+        'reset_in' => '1 hour'
+    ], 429);
+}
+```
+
+### 4. Different Limits for Different Users
+
+```php
+$user = auth()->user();
+
+// Premium users get higher limits
+$max = $user->isPremium() ? 10000 : 1000;
+$window = 3600; // 1 hour
+
+if (!limiter()->attempt('api:user:' . $user->id, $max, $window)) {
+    return response('Rate limit exceeded', 429);
+}
+```
+
+---
+
+## Distributed Systems
+
+When running multiple servers/workers, the rate limiter works correctly because it uses a shared cache backend:
+
+**With Redis (Recommended for Production):**
+```php
+// config/cache.php
+return [
+    'driver' => 'redis',
+    // ...
+];
+```
+
+**How it works:**
+- All servers share the same Redis instance
+- Rate limits are enforced globally across all servers
+- No coordination needed between servers
+
+**Example: 3 servers, 100 req/min limit**
+```
+Server 1: User makes 40 requests → Redis counter = 40
+Server 2: User makes 35 requests → Redis counter = 75
+Server 3: User makes 25 requests → Redis counter = 100
+Server 1: User makes 1 request  → BLOCKED (limit reached)
 ```
 
 ---

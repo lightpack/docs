@@ -42,29 +42,100 @@ This command is handled by the `ScheduleEvents` class and will execute all jobs 
 
 **Production Setup:**
 
-In thr production environment, you should set up a system **cron** job to call this command every minute:
+In the production environment, you should set up a system **cron** job to call this command every minute:
 
 ```cron
-* * * * * php /path/to/lightpack schedule:run
+* * * * * cd /path/to/lightpack && php console schedule:events >> /dev/null 2>&1
 ```
 
 This ensures your scheduled events are checked and executed on time.
 
 ---
 
+## How It Works
+
+The scheduler works in three steps:
+
+1. **Define schedules** in `boot/schedules.php` - You register jobs and commands with their timing
+2. **Cron checks every minute** - System cron runs `schedule:events` command every minute
+3. **Scheduler executes due events** - Only events that are due at that moment are executed
+
+### Job vs Command
+
+**Jobs** are dispatched to your queue system (async):
+```php
+schedule()->job(SendEmailJob::class)->daily();
+// Dispatches to queue → processed by worker → non-blocking
+```
+
+**Commands** run immediately (sync):
+```php
+schedule()->command(BackupCommand::class)->daily();
+// Executes directly → blocks until complete → returns output
+```
+
+**Use jobs for:** Email sending, API calls, long-running tasks  
+**Use commands for:** Database cleanup, file operations, quick scripts
+
+---
+
 ## Registering Schedules
 
-Register all the schedules in `boot/schedules.php` file.
+Create or edit `boot/schedules.php` in your project root:
 
 ```php
+<?php
+
+// boot/schedules.php
+
 // Schedule a job to run every day at midnight
 schedule()->job(SendDailyReport::class)->daily();
 
 // Schedule a command to run every hour
 schedule()->command(CleanupCommand::class)->hourly();
 
-// Schedules a command with arguments
-schedule()->command(MyCommandClass::class, ['--force' => true]); 
+// Schedule a command with arguments
+schedule()->command(BackupCommand::class, ['--force' => true])->daily()->at('02:00');
+
+// Schedule a job every 15 minutes
+schedule()->job(SyncDataJob::class)->everyMinutes(15);
+```
+
+**Complete Setup Example:**
+
+```php
+<?php
+
+// boot/schedules.php
+
+use App\Jobs\SendDailyReport;
+use App\Jobs\CleanupTempFiles;
+use App\Jobs\SyncExternalData;
+use App\Console\Commands\BackupDatabase;
+use App\Console\Commands\GenerateReports;
+
+// Send daily report at 9 AM
+schedule()->job(SendDailyReport::class)
+    ->daily()
+    ->at('09:00');
+
+// Cleanup temp files every hour
+schedule()->job(CleanupTempFiles::class)
+    ->hourly();
+
+// Sync data every 30 minutes
+schedule()->job(SyncExternalData::class)
+    ->everyMinutes(30);
+
+// Backup database every day at 2 AM
+schedule()->command(BackupDatabase::class)
+    ->daily()
+    ->at('02:00');
+
+// Generate weekly reports on Mondays at 8 AM
+schedule()->command(GenerateReports::class, ['--type' => 'weekly'])
+    ->mondays()
+    ->at('08:00');
 ```
 
 ## Setting When Events Run
@@ -96,7 +167,7 @@ schedule()->job(SendNewsletter::class)->fridays()->at('17:00');
 15th of each month at 9:00 AM
 
 ```php
-schedule()->job(SendNewsletter::class)->monthlyOn(15, '09:00')
+schedule()->job(SendNewsletter::class)->monthlyOn(15, '09:00');
 ```
 
 Run a Job Every 15 Minutes
@@ -115,6 +186,43 @@ Run on the 1st and 15th of Each Month at 8:00 AM
 
 ```php
 schedule()->job(BiMonthlyJob::class)->cron('0 8 1,15 * *');
+```
+
+---
+
+## Important Notes
+
+### Timezone
+All scheduled times use your server's timezone. Make sure your server timezone is configured correctly:
+
+```sh
+date  # Check current server time
+```
+
+### Overlapping Jobs
+If a job takes longer than its schedule interval, multiple instances can run simultaneously. For example:
+
+```php
+schedule()->job(LongRunningJob::class)->everyMinutes(5);
+// If job takes 10 minutes, 2 instances will run at once
+```
+
+To prevent this, ensure jobs complete quickly or use a queue with single worker.
+
+### Testing Schedules
+You can test if events are scheduled correctly:
+
+```php
+$event = schedule()->job(MyJob::class)->daily()->at('09:00');
+
+// Check if due at specific time
+$isDue = $event->isDueAt(new \DateTime('2024-01-15 09:00:00'));
+
+// Get next run time
+$nextRun = $event->nextDueAt();
+
+// Get previous run time
+$previousRun = $event->previousDueAt();
 ```
 
 ---

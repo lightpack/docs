@@ -234,7 +234,7 @@ $projects = Project::query()->with(['tasks' => function($q) {
 
     // Load comments with approved status
     $q->with(['comments' => function($q) {
-        $q->where('status', =, 'approved');
+        $q->where('status', '=', 'approved');
     }]);
 })->all();
 ```
@@ -282,7 +282,7 @@ $products->load('seo')->loadCount('options');
 
 **Note:** All the capabilities that `with()` and `withCount()` methods have also applies to `load()` and `loadCount()` methods.
 
-For example, you can pass provide **callbacks** to restric eager loading:
+For example, you can pass **callbacks** to restrict eager loading:
 
 ```php
 $products->load(['reviews' => function($q) {
@@ -339,7 +339,7 @@ Now, for each comment, `$comment->parent` will be the appropriate parent model i
 If you access a relation property that hasn't been loaded yet, Lightpack ORM will transparently execute a new query to fetch it. This aspect is know as **lazy loading** relationships.
 
 ```php
-$user = User::find(1); // No relations loaded
+$user = new User(1); // No relations loaded
 $posts = $user->posts; // Triggers a query to fetch posts for this user
 ```
 

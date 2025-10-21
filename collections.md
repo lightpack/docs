@@ -42,9 +42,10 @@ if ($users->isNotEmpty()) { ... }
 ```
 
 ### find()
-Find a model by its primary key.
+Find a model by its primary key. Returns `null` if not found, or a default value if provided.
 ```php
 $user = $users->find(5);
+$user = $users->find(99, new User()); // Returns default if not found
 ```
 
 ### first()
@@ -61,15 +62,20 @@ $emails = $users->column('email');
 ```
 
 ### filter()
-Return a new collection with only items matching the callback.
+Return a new `Collection` with only items matching the callback.
 ```php
 $activeUsers = $users->filter(fn($u) => $u->active);
+// Returns a new Collection instance
 ```
 
 ### map()
-Transform each item in the collection, returning a new collection.
+Transform each item in the collection, returning a new `Collection`. The callback can return any type, not just models.
 ```php
 $names = $users->map(fn($u) => strtoupper($u->name));
+// Returns Collection of strings
+
+$transformed = $users->map(fn($u) => ['id' => $u->id, 'name' => $u->name]);
+// Returns Collection of arrays
 ```
 
 ### asMap()
@@ -86,17 +92,23 @@ if ($users->any('last_login')) { ... }
 ```
 
 ### exclude()
-Return a new collection excluding models with the given primary key(s).
+Return a new `Collection` excluding models with the given primary key(s). Accepts a single key or array of keys.
 ```php
 $withoutAdmins = $users->exclude([1, 2]);
+$withoutOne = $users->exclude(5); // Single key
+// Returns a new Collection instance
 ```
 
 ### each()
-Run a callback on each item in the collection.
+Run a callback on each item in the collection. Returns `$this` for chaining.
 ```php
 $users->each(function($user) {
     $user->sendWelcomeEmail();
 });
+
+// Can be chained
+$users->each(fn($u) => $u->activate())
+      ->load('profile');
 ```
 
 ### toArray()
@@ -121,25 +133,40 @@ foreach ($users as $user) {
 ```
 
 ### loadMorphs()
-Efficiently eager load polymorphic parents for a collection of models with a `morphTo` relation.
+Efficiently eager load polymorphic parents for a collection of models with a `morphTo` relation. Optionally specify the attribute name for the parent (default: `'parent'`).
 ```php
 $comments->loadMorphs([
     Post::class,
     Video::class,
     Photo::class,
 ]);
+
+// Access the parent
+foreach ($comments as $comment) {
+    echo $comment->parent->title; // Post, Video, or Photo instance
+}
+
+// Custom parent key
+$comments->loadMorphs([Post::class, Video::class], 'commentable');
+echo $comment->commentable->title;
 ```
 
 ## Transforming Collections
 
-Collections support transforming all models using the model’s transformer. This is especially useful for APIs:
+Collections support transforming all models using the model's transformer. This is especially useful for APIs:
 
 ```php
 $payload = $users->transform([
-    'fields' => ['id', 'name', 'email'],
+    'fields' => [
+        'self' => ['id', 'name', 'email'],
+        'profile' => ['bio', 'avatar']
+    ],
     'includes' => ['profile'],
+    'context' => 'api' // Optional: for multi-context transformers
 ]);
 ```
+
+**Returns:** An array of transformed data (not a Collection).
 
 > **See also:** For advanced transformation options, custom field selection, relation includes, and best practices for API responses, refer to the [Transformers documentation](transformers.md).
 
@@ -149,13 +176,15 @@ $payload = $users->transform([
 - **Countable:** Use `count($users)` to get the number of items.
 - **JsonSerializable:** Collections can be safely passed to `json_encode()`.
 
+---
+
 ## Best Practices & Tips
 
 - **Chain methods** for expressive code:
   ```php
   $emails = $users->filter(fn($u) => $u->active)
-                  ->map(fn($u) => $u->email)
-                  ->toArray();
+                  ->map(fn($u) => $u->email);
+  // Returns Collection, call toArray() if you need a plain array
   ```
 - **Avoid N+1 queries**: Use `load()` or `loadMorphs()` before accessing related models in a loop.
 - **Use asMap()** for fast lookups by a property value.

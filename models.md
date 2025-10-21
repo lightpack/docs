@@ -95,17 +95,17 @@ class Product extends Model
 }
 ```
 
-Now when calling `insert()` method, you must pass a unique primary key value for the new record to be created.
+Now when calling `insert()` method, you must set a unique primary key value before inserting the new record.
 
 ```php
 // Create the instance
 $product = new Product;
 
-// Set product properties
+// Set product properties including manual primary key
 $product->id = 'sku1000';
 $product->name = 'ACME Shoes';
 $product->size = 10;
-$product->color = 'black'
+$product->color = 'black';
 
 // Create new product
 $product->insert();
@@ -123,7 +123,7 @@ $product = new Product(23);
 Now you can access the column values as model properties.
 
 ```php
-echo $product->title;
+echo $product->name;
 echo $product->size;
 echo $product->color;
 ```
@@ -139,7 +139,7 @@ $product = new Product(23);
 // Set product properties to update
 $product->name = 'ACME Footwear';
 $product->size = 11;
-$product->color = 'brown'
+$product->color = 'brown';
 
 // Update the product
 $product->update();
@@ -159,6 +159,32 @@ If you already have an existing instance of model, you can call `delete()` metho
 $product = new Product(23);
 $product->delete(); // passing id not required
 ```
+
+### Save
+
+The `save()` method provides a convenient way to persist model changes without worrying whether you're creating or updating a record:
+
+- If the primary key is **not set**, it inserts a new record
+- If the primary key **is set**, it updates the existing record
+
+```php
+// Creating a new record
+$product = new Product;
+$product->name = 'ACME Shoes';
+$product->size = 10;
+$product->save(); // Inserts new record
+
+echo $product->id; // Auto-generated ID is now available
+```
+
+```php
+// Updating an existing record
+$product = new Product(23);
+$product->name = 'Updated Name';
+$product->save(); // Updates existing record
+```
+
+<p class="tip"><b>Note:</b> The <code>save()</code> method is most reliable for models with auto-incrementing primary keys. For non-auto-increment primary keys, use <code>insert()</code> and <code>update()</code> explicitly.</p>
 
 ## Timestamps
 
@@ -218,16 +244,16 @@ Attribute casting converts model attributes to a specific type (like integer, bo
 
 ### Supported Cast Types
 
-| Cast Type           | Description & Example                                      |
-|---------------------|-----------------------------------------------------------|
-| `int` / `integer`   | Converts to integer: `'123'` → `123`                      |
-| `float` / `double`  | Converts to float: `'123.45'` → `123.45`                  |
-| `string`            | Converts to string: `123` → `'123'`                       |
-| `bool` / `boolean`  | Converts to boolean: `'1'`, `1`, `'true'` → `true`        |
-| `array` / `json`    | Converts JSON string to array and vice versa               |
-| `date`              | Converts to `Y-m-d` string or from `DateTime`             |
-| `datetime`          | Converts to `DateTime` object or from string              |
-| `timestamp`         | Converts to Unix timestamp (int or string)                |
+| Cast Type  | Description & Example                                                |
+|------------|----------------------------------------------------------------------|
+| `int`      | Converts to integer: `'123'` → `123`                                 |
+| `float`    | Converts to float: `'123.45'` → `123.45`                             |
+| `string`   | Converts to string: `123` → `'123'`                                  |
+| `bool`     | Converts to boolean: `'1'`, `1`, `'true'` → `true`                   |
+| `array`    | Converts JSON string to array (stores as JSON in database)           |
+| `date`     | Converts to `DateTime` object (stores as `Y-m-d` in database)        |
+| `datetime` | Converts to `DateTime` object (stores as `Y-m-d H:i:s` in database)  |
+| `timestamp`| Converts to Unix timestamp integer (stores as integer in database)   |
 
 ### Example Usage
 
@@ -256,6 +282,83 @@ Now, whenever you access `$user->settings`, you’ll get an array. `$user->creat
 ### Common Pitfalls
 - Make sure your database column type matches the cast (e.g., don’t cast a string column as an array unless it stores JSON).
 - Invalid input (like malformed JSON or dates) will throw exceptions—handle these in your code if needed.
+
+## Custom Casts
+
+When built-in cast types aren't enough, you can create your own custom cast classes. This is useful for domain-specific types like money, coordinates, encrypted data, or value objects.
+
+### Creating a Custom Cast
+
+To create a custom cast, implement the `CastInterface` which requires two methods:
+
+- `get()` - Converts database value to PHP type
+- `set()` - Converts PHP type back to database format
+
+```php
+use Lightpack\Database\Lucid\Casts\CastInterface;
+
+class MoneyCast implements CastInterface
+{
+    public function get(mixed $value): Money
+    {
+        // Convert database cents to Money object
+        return new Money($value);
+    }
+
+    public function set(mixed $value): int
+    {
+        // Convert Money object back to cents for database
+        return $value instanceof Money ? $value->toCents() : $value;
+    }
+}
+```
+
+### Using Custom Casts
+
+Once defined, use your custom cast just like built-in types:
+
+```php
+class Product extends Model
+{
+    protected $casts = [
+        'price' => MoneyCast::class,  // Custom cast
+        'quantity' => 'int',           // Built-in cast
+    ];
+}
+```
+
+Now your model attributes will be automatically cast:
+
+```php
+$product = new Product(1);
+echo $product->price->format();     // "$99.99"
+echo $product->price->currency();   // "USD"
+
+$product->price = new Money(5000);  // Set as Money object
+$product->save();                    // Stored as 5000 cents in database
+```
+
+### Null Handling
+
+You don't need to handle `null` values in your custom casts—the framework does this automatically:
+
+- If a value is `null`, your `get()` and `set()` methods are never called
+- `null` is always returned as `null`
+
+```php
+$product->price = null;
+$product->save();                    // Stored as NULL
+echo $product->price;                // null (not a Money object)
+```
+
+### When to Use Custom Casts
+
+Custom casts are ideal when you need to:
+- Work with domain-specific value objects (Money, Email, Address)
+- Encrypt/decrypt data transparently
+- Parse complex formats (coordinates, JSON structures)
+- Enforce type safety and validation at the model level
+- Keep your models clean by encapsulating conversion logic
 
 ---
 
@@ -307,7 +410,7 @@ When working with models, you may want to know if you’ve made changes that hav
 
 **Check if anything changed:**
 ```php
-$user = User::find(1);
+$user = new User(1);
 $user->name = 'New Name';
 
 if ($user->isDirty()) {
@@ -471,9 +574,6 @@ class User extends Model
 Apply filters using the static `filters()` method:
 
 ```php
-// Fetch all users
-$users = User::filters(['status' => 'active'])->all();
-
 // Fetch active users
 $users = User::filters(['status' => 'active'])->all();
 
@@ -577,6 +677,8 @@ Lightpack Lucid models provide a set of protected lifecycle hook methods that al
 
 | Hook                | When is it called?                                 |
 |---------------------|---------------------------------------------------|
+| `beforeSave()`      | Before `save()` (both insert and update)           |
+| `afterSave()`       | After `save()` (both insert and update)            |
 | `beforeInsert()`    | Before `insert()`                                  |
 | `afterInsert()`     | After `insert()`                                   |
 | `beforeUpdate()`    | Before `update()`                                  |

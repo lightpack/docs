@@ -387,7 +387,12 @@ class Patient extends Model
     // Each patient has one doctor through their appointment
     public function doctor()
     {
-        return $this->hasOneThrough(Doctor::class, Appointment::class, 'patient_id', 'doctor_id');
+        return $this->hasOneThrough(
+            Doctor::class,      // Final model
+            Appointment::class, // Through model
+            'patient_id',       // Foreign key on through table
+            'doctor_id'         // Foreign key on final table
+        );
     }
 }
 ```
@@ -422,7 +427,12 @@ class Author extends Model
     // One author has many reviews through books
     public function reviews()
     {
-        return $this->hasManyThrough(Review::class, Book::class, 'author_id', 'book_id');
+        return $this->hasManyThrough(
+            Review::class, // Final model
+            Book::class,   // Through model
+            'author_id',   // Foreign key on through table
+            'book_id'      // Foreign key on final table
+        );
     }
 }
 ```
@@ -681,7 +691,7 @@ class Organization extends Model
     // All departments for this organization
     public function departments()
     {
-        return $this->hasMany(Department::class);
+        return $this->hasMany(Department::class, 'organization_id');
     }
 }
 ```
@@ -694,19 +704,19 @@ class Organization extends Model
     // Only active departments
     public function activeDepartments()
     {
-        return $this->hasMany(Department::class)->where('status', 'active');
+        return $this->hasMany(Department::class, 'organization_id')->where('status', 'active');
     }
 
     // Only HR departments
     public function hrDepartments()
     {
-        return $this->hasMany(Department::class)->where('type', 'hr');
+        return $this->hasMany(Department::class, 'organization_id')->where('type', 'hr');
     }
 
     // Departments created in the last 30 days
     public function recentlyCreatedDepartments()
     {
-        return $this->hasMany(Department::class)
+        return $this->hasMany(Department::class, 'organization_id')
                     ->where('created_at', '>=', now()->subDays(30));
     }
 }

@@ -8,25 +8,15 @@ Use the helper function `template()` to utilize the view templating capabilities
 
 ## Available Methods
 
-### render()
-
-`render(string $file, array $data = []): string`
-
-- **Purpose:** Render a template file with provided data.
-- **Usage:**
-  ```php
-  <?= template()->render('profile', ['user' => $user]) ?>
-  ```
-
 ### include()
 
 `include(string $file, array $data = []): string`
 
-- **Purpose:** Render a sub-template (partial) with provided data, 
-- Also has access to parent template but overrides data with same matching keys.
-- However, the data set in the included template does not affect the parent template’s data.
+- **Purpose:** Include and render a template file with provided data.
+- **Behavior:** Merges provided data with instance data and renders the template.
 - **Usage:**
   ```php
+  <?= template()->include('profile', ['user' => $user]) ?>
   <?= template()->include('partials/header', ['title' => 'Home']) ?>
   ```
 
@@ -58,26 +48,39 @@ Use the helper function `template()` to utilize the view templating capabilities
 
 ## Understanding Differences
 
-These methods all render templates, but their behavior around data merging, isolation, and intended use is different. Here’s a practical breakdown to make their differences clear:
+These methods all render templates, but their behavior around data merging and intended use is different. Here's a practical breakdown to make their differences clear:
 
-- **render()**
-  - Think of this as "show me a complete page." 
-  - Used for top-level views.
 - **include()**
-  - Like "inserting a partial inside another template." 
-  - It creates a new, isolated template instance, merges the parent’s data with any additional data, and renders the partial. 
-  - Used for reusable bits (headers, nav, footers).
+  - The primary method for template composition.
+  - Used for main views, partials, and nested templates.
+  - Merges instance data with provided data.
+  - Think of this as "include this template with this data."
 - **component()**
-  - Used for stateless, reusable UI pieces (buttons, alerts).
+  - Used for stateless, reusable UI pieces (buttons, alerts, cards).
   - Think of this as "render a widget with only the data I give it." 
-  - It does **NOT** merge with parent data—only what you pass is available. 
+  - It does **NOT** merge with parent data—only what you pass is available.
+  - Perfect for isolated, reusable components.
+
+### Variable Scope Isolation
+
+**All templates have isolated variable scope**, regardless of which method you use. Variables defined or modified in one template cannot affect another template.
+
+```php
+// In parent.php:
+<?php $title = 'Parent Title'; ?>
+<?= template()->include('child') ?>
+<?= $title ?>  <!-- Still "Parent Title" -->
+
+// In child.php:
+<?php $title = 'Child Title'; ?>  <!-- Does NOT affect parent -->
+``` 
 
 ### Example
 
-Render the `views/profile.php` template with passed data.
+Include the `views/profile.php` template with passed data.
 
 ```php
-<?= template()->render('profile', [
+<?= template()->include('profile', [
     'user' => 'Alice', 
     'role' => 'admin',
     'theme' => 'dark'
@@ -93,7 +96,7 @@ In `views/profile.php` template:
     'page' => 'Profile'
 ]) ?>
 
-<!-- views/components/header.php -->
+<!-- views/components/button.php -->
 <?= template()->component('components/button', [
     'label' => 'Save'
 ]) ?>
@@ -103,25 +106,23 @@ In `views/profile.php` template:
 
 | Method      | Available Data           |
 |-------------|--------------------------------------|
-| render()      | user, role, theme                    |
 | include()     | user, role, theme, page              |
 | component()   | label                                |
 
-- `render` acts as parent template with access to all data passed.
-- `include` merges parent data + provided arguments (for the partial).
+- `include` merges parent data + provided arguments.
 - `component` only gets what you pass—no parent data.
 
 ### Decision Table
 
 | Use case                        | Method      |
 |---------------------------------|-------------|
-| Render a full page              | render      |
+| Include a full page             | include     |
 | Insert a partial (header, nav)  | include     |
 | Render a stateless widget       | component   |
-| Need parent data in partial     | include     |
+| Need parent data in template    | include     |
 | Want only explicit data         | component   |
 
-> **Tip:** If you want maximum isolation and reusability, use `component`. For partials that need context, use `include`. For the main view, use `render`.
+> **Tip:** Use `include()` for all template composition (main views, partials, nested templates). Use `component()` for isolated, reusable widgets that shouldn't access parent data.
 
 ---
 
@@ -164,7 +165,7 @@ template()->embed()
 
 ### 1. Controller
 
-Specify the `__embed` key in view data with the name of the template you are expect to be embedded in **layout.php** view.
+Specify the `__embed` key in view data with the name of the template you expect to be embedded in **layout.php** view.
 
 ```php
 public function dashboard()
@@ -192,7 +193,6 @@ app/
     └── partials/
         └── header.php
         └── footer.php
-        └── header.php
 ```
 
 - **layout.php**: Your main layout file (includes header, footer, and an embed slot for child content).
@@ -229,7 +229,7 @@ Total Leads: <?= $stats['leads'] ?>
 <html>
     <body>
         <!-- include header template -->
-        <?= template()->include('header') ?>
+        <?= template()->include('partials/header') ?>
 
         <main>
             <!-- embed child content -->
@@ -237,7 +237,7 @@ Total Leads: <?= $stats['leads'] ?>
         </main>
 
         <!-- include footer template -->
-        <?= template()->include('footer') ?>
+        <?= template()->include('partials/footer') ?>
     </body>
 </html>
 ```
@@ -256,10 +256,47 @@ Lightpack provides a convenient global function, `_e()`, to help you safely outp
 - Prevents Cross-Site Scripting (XSS) by ensuring user-supplied or dynamic data cannot break out of HTML context.
 - Use it whenever you output any data that may contain special HTML characters or come from user input.
 
+### ⚠️ Security: Always Escape User Input
+
+**DANGEROUS (XSS Vulnerability):**
+```php
+<!-- ❌ Never do this with user input! -->
+<div><?= $userComment ?></div>
+<h1><?= $userName ?></h1>
+<a href="<?= $userUrl ?>">Link</a>
+```
+
+**SAFE (Properly Escaped):**
+```php
+<!-- ✅ Always escape user-provided data -->
+<div><?= _e($userComment) ?></div>
+<h1><?= _e($userName) ?></h1>
+<a href="<?= _e($userUrl) ?>">Link</a>
+```
+
+### When to Escape
+
+**Always escape:**
+- ✅ User-submitted data (comments, posts, names, bios)
+- ✅ Database content that users can edit
+- ✅ URL parameters and query strings
+- ✅ Form input values
+- ✅ Any data from external sources (APIs, files, etc.)
+
+**Do NOT escape:**
+- ❌ HTML you control and trust (like template includes)
+- ❌ Data that's already been escaped
+- ❌ Output from `template()->include()` or `template()->component()`
+
+### Example
+
 ```php
 <?php foreach($comments as $comment): ?>
-    <?= _e($comment) ?>
-<?php endforeach  ?>
+    <div class="comment">
+        <strong><?= _e($comment->author) ?></strong>
+        <p><?= _e($comment->text) ?></p>
+    </div>
+<?php endforeach ?>
 ```
 
 ## Few Suggestions

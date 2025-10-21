@@ -200,14 +200,35 @@ date  # Check current server time
 ```
 
 ### Overlapping Jobs
-If a job takes longer than its schedule interval, multiple instances can run simultaneously. For example:
+If a job takes longer than its schedule interval, multiple instances will be dispatched. For example:
 
 ```php
 schedule()->job(LongRunningJob::class)->everyMinutes(5);
-// If job takes 10 minutes, 2 instances will run at once
+// If job takes 10 minutes, scheduler dispatches it again at 5 min mark
+// Result: 2+ instances running simultaneously
 ```
 
-To prevent this, ensure jobs complete quickly or use a queue with single worker.
+**To prevent overlaps, following are few guidelines:**
+
+1. **Make jobs faster** - Break large jobs into smaller chunks
+2. **Increase interval** - Schedule less frequently than job duration
+3. **Add job locking** - Check if job is already running before starting:
+
+```php
+public function run() {
+    if (cache()->has('my_job_lock')) {
+        return; // Already running, skip this execution
+    }
+    
+    cache()->put('my_job_lock', true, 600); // Lock for 10 minutes
+    
+    try {
+        // Your job logic here
+    } finally {
+        cache()->forget('my_job_lock');
+    }
+}
+```
 
 ### Testing Schedules
 You can test if events are scheduled correctly:

@@ -158,10 +158,17 @@ This will hang your terminal prompt and will wait for any jobs to process. If a 
 ### Worker Options
 - `--sleep=N` (default 5): Seconds to sleep between polling
 - `--queue=emails,default`: Comma-separated queue names (note: singular)
-- `--cooldown=N`: Max seconds to run before exiting
+- `--cooldown=N` (default 0): Total runtime in seconds before worker stops (0 = unlimited)
+
+**Cooldown Explained:**
+Cooldown is the **total runtime** (not idle time). After running for the specified seconds, the worker stops gracefully. This is useful for:
+- Preventing memory leaks by restarting workers periodically
+- Picking up new code after deployment (worker restarts with fresh code)
+- Works with Supervisor's auto-restart feature
 
 Example:
 ```cli
+# Worker runs for 10 minutes of total runtime, then stops (Supervisor will restart it)
 php console process:jobs --sleep=2 --queue=emails,default --cooldown=600
 ```
 
@@ -207,15 +214,23 @@ Create a file named `lightpack-worker.conf` in `/etc/supervisor/conf.d` director
 ```text
 [program:lightpack-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/lightpack-app/console process:jobs
+command=php /var/www/lightpack-app/console process:jobs --cooldown=3600
 autostart=true
 autorestart=true
 stopasgroup=true
+killasgroup=true
 user=www-data
 numprocs=4
 redirect_stderr=true
 stdout_logfile=/var/www/lightpack-app/worker.log
+stopwaitsecs=60
 ```
+
+**Configuration Notes:**
+- `--cooldown=3600`: Workers stop after 1 hour of total runtime (not idle time), then Supervisor restarts them. This prevents memory leaks and picks up new code on restart.
+- `autorestart=true`: Supervisor automatically restarts workers after they stop
+- `stopwaitsecs=60`: Gives workers 60 seconds to finish current job before force-killing
+- `numprocs=4`: Runs 4 worker processes in parallel
 
 Finally, fire these commands to start supervisor:
 

@@ -283,6 +283,83 @@ Now, whenever you access `$user->settings`, you’ll get an array. `$user->creat
 - Make sure your database column type matches the cast (e.g., don’t cast a string column as an array unless it stores JSON).
 - Invalid input (like malformed JSON or dates) will throw exceptions—handle these in your code if needed.
 
+## Custom Casts
+
+When built-in cast types aren't enough, you can create your own custom cast classes. This is useful for domain-specific types like money, coordinates, encrypted data, or value objects.
+
+### Creating a Custom Cast
+
+To create a custom cast, implement the `CastInterface` which requires two methods:
+
+- `get()` - Converts database value to PHP type
+- `set()` - Converts PHP type back to database format
+
+```php
+use Lightpack\Database\Lucid\Casts\CastInterface;
+
+class MoneyCast implements CastInterface
+{
+    public function get(mixed $value): Money
+    {
+        // Convert database cents to Money object
+        return new Money($value);
+    }
+
+    public function set(mixed $value): int
+    {
+        // Convert Money object back to cents for database
+        return $value instanceof Money ? $value->toCents() : $value;
+    }
+}
+```
+
+### Using Custom Casts
+
+Once defined, use your custom cast just like built-in types:
+
+```php
+class Product extends Model
+{
+    protected $casts = [
+        'price' => MoneyCast::class,  // Custom cast
+        'quantity' => 'int',           // Built-in cast
+    ];
+}
+```
+
+Now your model attributes will be automatically cast:
+
+```php
+$product = new Product(1);
+echo $product->price->format();     // "$99.99"
+echo $product->price->currency();   // "USD"
+
+$product->price = new Money(5000);  // Set as Money object
+$product->save();                    // Stored as 5000 cents in database
+```
+
+### Null Handling
+
+You don't need to handle `null` values in your custom casts—the framework does this automatically:
+
+- If a value is `null`, your `get()` and `set()` methods are never called
+- `null` is always returned as `null`
+
+```php
+$product->price = null;
+$product->save();                    // Stored as NULL
+echo $product->price;                // null (not a Money object)
+```
+
+### When to Use Custom Casts
+
+Custom casts are ideal when you need to:
+- Work with domain-specific value objects (Money, Email, Address)
+- Encrypt/decrypt data transparently
+- Parse complex formats (coordinates, JSON structures)
+- Enforce type safety and validation at the model level
+- Keep your models clean by encapsulating conversion logic
+
 ---
 
 ## Cloning a Model

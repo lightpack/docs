@@ -212,23 +212,24 @@ schedule()->job(LongRunningJob::class)->everyMinutes(5);
 
 1. **Make jobs faster** - Break large jobs into smaller chunks
 2. **Increase interval** - Schedule less frequently than job duration
-3. **Add job locking** - Check if job is already running before starting:
+3. **Add job locking** - Use Lightpack's built-in lock utility to prevent overlaps:
 
 ```php
 public function run() {
-    if (cache()->has('my_job_lock')) {
+    // Try to acquire lock (expires after 600 seconds)
+    if (lock()->acquire('long-running-job', 600) === false) {
         return; // Already running, skip this execution
     }
-    
-    cache()->put('my_job_lock', true, 600); // Lock for 10 minutes
     
     try {
         // Your job logic here
     } finally {
-        cache()->forget('my_job_lock');
+        lock()->release('long-running-job');
     }
 }
 ```
+
+See [Mutex Lock documentation](/mutex-lock.md) for more details.
 
 ### Testing Schedules
 You can test if events are scheduled correctly:

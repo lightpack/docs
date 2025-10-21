@@ -177,7 +177,7 @@ route()->map(['GET', 'POST'], '/feedback', FeedbackController::class, 'submit');
 route()->any('/status', StatusController::class);
 ```
 
-> **Note:** `any()` registers the route for exactly 6 HTTP verbs: GET, POST, PUT, PATCH, DELETE, OPTIONS.
+> **Note:** `any()` registers the route for all supported HTTP verbs: GET, POST, PUT, PATCH, DELETE, OPTIONS.
 
 ---
 
@@ -206,6 +206,24 @@ route()->group(['host' => ':subdomain.example.com'], function() {
 // Subdomain available as parameter in controller method
 ```
 
+The wildcard `:subdomain` extracts everything before `.example.com`:
+- `tenant1.example.com` → `subdomain = 'tenant1'`
+- `api.v2.example.com` → `subdomain = 'api.v2'` (multi-level subdomains work!)
+
+Access the subdomain parameter in your controller:
+```php
+public function dashboard()
+{
+    $subdomain = request()->params('subdomain');
+    // or as method parameter
+}
+
+public function dashboard($subdomain)
+{
+    // $subdomain is automatically injected
+}
+```
+
 ---
 
 ## Best Practices & Gotchas
@@ -218,7 +236,8 @@ route()->group(['host' => ':subdomain.example.com'], function() {
 - **Group nesting:** Prefixes concatenate, filters merge, host is inherited.
 - **Optional params:** Only the **last** parameter can be optional using `:param?`; missing params are `null`.
 - **Default pattern:** Parameters without explicit patterns default to `:seg` (matches `[^/]+`).
-- **Host matching:** When a route has a host, matching checks `request()->host() . '/' . path`.
+- **Host matching:** When a route has a host, matching checks `request()->host() . '/' . path`. Routes with hosts will NOT match if the request comes from a different host.
+- **Wildcard subdomains:** The pattern `:subdomain.example.com` only matches hosts ending with `.example.com`. Other domains are rejected.
 - **404s:** If no route matches, Lightpack throws a `RouteNotFoundException`.
 
 ---

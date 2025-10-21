@@ -1,4 +1,4 @@
-# Containers
+# Container
 
 Lightpack provides an IoC container to configure your class dependencies in a manner that
 helps write maintainable code. 

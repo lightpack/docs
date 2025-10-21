@@ -57,7 +57,11 @@ use Lightpack\Jobs\Job;
 
 class SendMail extends Job {
     public function run() {
-        // Your job logic, e.g. send email using $this->payload
+        // Access payload data
+        $to = $this->payload['to'];
+        $message = $this->payload['message'];
+        
+        // Your job logic - send email
     }
 }
 ```
@@ -149,16 +153,16 @@ Once you have dispatched your job its time to run them. Fire this command from t
 php console process:jobs
 ```
 
-This will hang your terminal prompt and will wait for any jobs to process. If a job is processed successfully or faile, you should see a terminal message accordingly.
+This will hang your terminal prompt and will wait for any jobs to process. If a job is processed successfully or failed, you should see a terminal message accordingly.
 
 ### Worker Options
 - `--sleep=N` (default 5): Seconds to sleep between polling
-- `--queues=emails,default`: Comma-separated queue names
+- `--queue=emails,default`: Comma-separated queue names (note: singular)
 - `--cooldown=N`: Max seconds to run before exiting
 
 Example:
 ```cli
-php console process:jobs --sleep=2 --queues=emails,default --cooldown=600
+php console process:jobs --sleep=2 --queue=emails,default --cooldown=600
 ```
 
 ### Signal Handling
@@ -201,7 +205,7 @@ Let us assume that your project root path is `/var/www/lightpack-app`.
 Create a file named `lightpack-worker.conf` in `/etc/supervisor/conf.d` directory with following contents:
 
 ```text
-[program:lightshop-worker]
+[program:lightpack-worker]
 process_name=%(program_name)s_%(process_num)02d
 command=php /var/www/lightpack-app/console process:jobs
 autostart=true
@@ -218,7 +222,7 @@ Finally, fire these commands to start supervisor:
 ```terminal
 sudo supervisorctl reread
 sudo supervisorctl update
-sudo supervisorctl start lightshop-worker:*
+sudo supervisorctl start lightpack-worker:*
 ```
 
 ---

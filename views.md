@@ -1,6 +1,6 @@
 # Lightpack View Template System
 
-The `Lightpack\View\Template` class is the core of Lightpack’s view rendering system. It provides a minimal, robust, and flexible API for rendering PHP templates, including support for data injection, template composition, conditional inclusion, and error handling. This documentation provides an exhaustive breakdown of its design, usage, and internals.
+The `Lightpack\View\Template` class is the core of Lightpack's view rendering system. It provides a minimal, robust, and flexible API for rendering PHP templates, including support for data injection, template composition, layout inheritance, and content stacking.
 
 Use the helper function `template()` to utilize the view templating capabilities.
 
@@ -13,24 +13,11 @@ Use the helper function `template()` to utilize the view templating capabilities
 `include(string $file, array $data = []): string`
 
 - **Purpose:** Include and render a template file with provided data.
-- **Behavior:** Merges provided data with instance data and renders the template.
+- **Behavior:** Merges provided data with parent data and renders the template.
 - **Usage:**
   ```php
   <?= template()->include('profile', ['user' => $user]) ?>
   <?= template()->include('partials/header', ['title' => 'Home']) ?>
-  ```
-
-### includeIf()
-
-`includeIf(bool $flag, string $file, array $data = []): string`
-
-- **Purpose:** Conditionally include a sub-template based on a boolean flag.
-- **Pattern:**
-  - If `$flag` is `true`, includes the template (via `include`).
-  - If `false`, returns an empty string.
-- **Usage:**
-  ```php
-  <?= template()->includeIf($user->isAdmin(), 'partials/admin', ['user' => $user]) ?>
   ```
 
 ### component()
@@ -60,20 +47,6 @@ These methods all render templates, but their behavior around data merging and i
   - Think of this as "render a widget with only the data I give it." 
   - It does **NOT** merge with parent data—only what you pass is available.
   - Perfect for isolated, reusable components.
-
-### Variable Scope Isolation
-
-**All templates have isolated variable scope**, regardless of which method you use. Variables defined or modified in one template cannot affect another template.
-
-```php
-// In parent.php:
-<?php $title = 'Parent Title'; ?>
-<?= template()->include('child') ?>
-<?= $title ?>  <!-- Still "Parent Title" -->
-
-// In child.php:
-<?php $title = 'Child Title'; ?>  <!-- Does NOT affect parent -->
-``` 
 
 ### Example
 
@@ -153,98 +126,264 @@ This will look for the `views/profile.php` template file and render it with pass
 ```
 ---
 
-## Building Layouts
+## Layout Inheritance
 
-Layouts enable you to define a common structure for your pages (such as headers, footers, navigation, and meta tags) while allowing individual templates to inject their own content.
+Layout inheritance allows child templates to declare which layout they want to use, and layouts render the child content where specified.
 
-There is a special method for rendering embedded child content inside a layout:
+### layout()
 
-```php
-template()->embed()
-```
+`layout(string $file): void`
 
-### 1. Controller
-
-Specify the `__embed` key in view data with the name of the template you expect to be embedded in **layout.php** view.
+- **Purpose:** Declare which layout file should wrap the current template.
+- **Usage:** Call this at the top of your child template.
+- **Pattern:** Child declares parent, parent renders child.
 
 ```php
-public function dashboard()
-{
-    return response()->view('layout', [
-        '__embed' => 'dashboard', // dashboard template
-        'title'   => 'Dashboard',
-        'copyright' => '@Lightpack',
-        'stats'    => ['sales' => 23, 'leads' => 100],
-    ]);
-}
+<?= template()->layout('layouts/app') ?>
+
+<h1>Dashboard</h1>
+<p>Welcome back!</p>
 ```
 
-> All the data is automatically passed to **layout.php** except `__embed` which is unset by the framework when rendering the view template.
+### content()
 
-### 2. Define Templates
+`content(): string`
 
-An example directory structure for defining view templates might look like:
-
-```
-app/
-└── views/
-    ├── layout.php           # Main layout template
-    ├── dashboard.php        # Dashboard content template
-    └── partials/
-        └── header.php
-        └── footer.php
-```
-
-- **layout.php**: Your main layout file (includes header, footer, and an embed slot for child content).
-- **header.php, footer.php**: Common partials included in layouts or other templates.
-- **dashboard.php**: referenced as embedded content inside layout.
-
-`views/partials/header.php`
-
-```php
-<header>
-    <?= $title ?>
-</header>
-```
-
-`views/partials/footer.php`
-
-```php
-<footer>
-    <?= $copyright ?>
-</footer>
-```
-
-`views/dashboard.php`
-
-```php
-Total Sales: <?= $stats['sales'] ?>
-Total Leads: <?= $stats['leads'] ?>
-```
-
-`views/layout.php`
+- **Purpose:** Render the child template's content within a layout.
+- **Usage:** Call this in your layout file where you want the child content to appear.
 
 ```php
 <!DOCTYPE html>
 <html>
     <body>
-        <!-- include header template -->
-        <?= template()->include('partials/header') ?>
-
         <main>
-            <!-- embed child content -->
-            <?= template()->embed() ?>
+            <?= template()->content() ?>
         </main>
-
-        <!-- include footer template -->
-        <?= template()->include('partials/footer') ?>
     </body>
 </html>
 ```
 
-**Observe that we've embed the `views/dashboard.php` template using:**
+### Complete Example
 
-`<?= template()->embed() ?>`
+**Controller:**
+
+```php
+class DashboardController
+{
+    public function index()
+    {
+        return response()->view('dashboard', [
+            'title' => 'Dashboard',
+            'stats' => ['sales' => 23, 'leads' => 100],
+        ]);
+    }
+}
+```
+
+**Directory Structure:**
+
+```
+views/
+├── layouts/
+│   └── app.php          # Main layout
+├── dashboard.php        # Dashboard page
+└── partials/
+    ├── header.php
+    └── footer.php
+```
+
+**views/dashboard.php** (Child Template):
+
+```php
+<?= template()->layout('layouts/app') ?>
+
+<div class="dashboard">
+    <h1><?= $title ?></h1>
+    <p>Total Sales: <?= $stats['sales'] ?></p>
+    <p>Total Leads: <?= $stats['leads'] ?></p>
+</div>
+```
+
+**views/layouts/app.php** (Layout):
+
+```php
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My App</title>
+</head>
+<body>
+    <?= template()->include('partials/header') ?>
+    
+    <main>
+        <?= template()->content() ?>
+    </main>
+    
+    <?= template()->include('partials/footer') ?>
+</body>
+</html>
+```
+
+### Nested Layouts
+
+You can nest layouts multiple levels deep. Each template declares its immediate parent.
+
+**views/dashboard.php:**
+```php
+<?= template()->layout('layouts/admin') ?>
+<h1>Dashboard</h1>
+```
+
+**views/layouts/admin.php:**
+```php
+<?= template()->layout('layouts/app') ?>
+
+<div>
+    <aside>Admin Sidebar</aside>
+    <div>
+        <?= template()->content() ?>
+    </div>
+</div>
+```
+
+**views/layouts/app.php:**
+```php
+<!DOCTYPE html>
+<html>
+<body>
+    <?= template()->content() ?>
+</body>
+</html>
+```
+
+**Result:** `app.php` wraps `admin.php`, which wraps `dashboard.php`.
+
+---
+
+## Stacks (Assets Management)
+
+Stacks allow child templates to push content (like CSS/JS links) into specific locations in parent layouts. This is perfect for managing page-specific assets.
+
+### push()
+
+`push(string $stack): void`
+
+- **Purpose:** Start pushing content to a named stack.
+- **Usage:** Call this before the content you want to stack, then call `endPush()` after.
+
+### endPush()
+
+`endPush(): void`
+
+- **Purpose:** Stop pushing and save the content to the stack.
+- **Usage:** Always pair with `push()`.
+
+### stack()
+
+`stack(string $stack): string`
+
+- **Purpose:** Render all content that has been pushed to a stack.
+- **Usage:** Call this in your layout where you want the stacked content to appear.
+- **Behavior:** Returns all pushed content joined with newlines.
+
+### Example: Page-Specific Assets
+
+**views/layouts/app.php:**
+
+```php
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My App</title>
+    
+    <!-- Common CSS -->
+    <link rel="stylesheet" href="/css/app.css">
+    
+    <!-- Page-specific styles stack -->
+    <?= template()->stack('styles') ?>
+</head>
+<body>
+    <?= template()->content() ?>
+    
+    <!-- Common JS -->
+    <script src="/js/app.js"></script>
+    
+    <!-- Page-specific scripts stack -->
+    <?= template()->stack('scripts') ?>
+</body>
+</html>
+```
+
+**views/dashboard.php:**
+
+```php
+<?= template()->layout('layouts/app') ?>
+
+<?php template()->push('styles') ?>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/dashboard.css">
+<?php template()->endPush() ?>
+
+<?php template()->push('scripts') ?>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="/js/dashboard.js"></script>
+<?php template()->endPush() ?>
+
+<h1>Dashboard</h1>
+<p>Your dashboard content here...</p>
+```
+
+**Rendered Output:**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My App</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <p>Your dashboard content here...</p>
+    
+    <script src="/js/app.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>
+```
+
+### Multiple Pushes to Same Stack
+
+You can push to the same stack multiple times—all content accumulates:
+
+```php
+<?php template()->push('scripts') ?>
+<script src="/js/charts.js"></script>
+<?php template()->endPush() ?>
+
+<!-- Later in the same template -->
+
+<?php template()->push('scripts') ?>
+<script src="/js/analytics.js"></script>
+<?php template()->endPush() ?>
+```
+
+Both scripts will be rendered when `stack('scripts')` is called.
+
+### Common Stack Names
+
+| Stack Name | Purpose | Location in Layout |
+|------------|---------|--------------------|
+| `styles` | CSS files and `<style>` tags | In `<head>` |
+| `scripts` | JavaScript files and `<script>` tags | Before `</body>` |
+| `meta` | Meta tags | In `<head>` |
+| `head` | Any other head content | In `<head>` |
 
 ---
 

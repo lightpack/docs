@@ -388,25 +388,7 @@ public function up(): void
 
 ### Defining Foreign Keys
 
-To define a foreign key constraint, use the `foreignKey()` method which automatically infers the parent table from the column name:
-
-```php
-public function up(): void
-{
-    $this->create('posts', function(Table $table) {
-        $table->id();
-        $table->bigint('user_id')->unsigned();
-        $table->varchar('title');
-        
-        // Define foreign key - automatically references users.id
-        $table->foreignKey('user_id')
-            ->cascadeOnDelete()
-            ->cascadeOnUpdate();
-    });
-}
-```
-
-You can also explicitly specify the parent table and column:
+To define a foreign key constraint, use the `foreignKey()` method:
 
 ```php
 $table->foreignKey('author_id')

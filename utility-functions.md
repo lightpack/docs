@@ -88,3 +88,37 @@ pp($myArray);
 ```php
 pp($var1, $var2, $var3)
 ```
+
+## halt()
+
+`halt(int $code, string $message = '', array $headers = [])`
+
+**What it does:**
+Immediately halts execution and throws an HTTP exception with the specified status code. If no message is provided, uses the standard HTTP status message (e.g., "Not Found" for 404).
+
+**When to use:**
+- When you need to stop request processing and return an HTTP error response.
+- For access control (403 Forbidden), missing resources (404 Not Found), or server errors (500 Internal Server Error).
+- As a clean way to handle error conditions in controllers, middleware, or route handlers.
+
+**Example:**
+```php
+// Simple halt with standard message
+halt(404);  // Throws "Not Found"
+halt(403);  // Throws "Forbidden"
+
+// With custom message
+halt(404, 'User not found');
+halt(403, 'You need admin access');
+
+// With custom headers
+halt(503, 'Service Unavailable', ['Retry-After' => '3600']);
+
+// In conditional logic
+if (!$user) {
+    halt(404, 'User not found');
+}
+
+// One-liner
+if (!$user) halt(404);
+```

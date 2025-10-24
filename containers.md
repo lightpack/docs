@@ -32,9 +32,9 @@ registered service.
 By default, all the services are registered in a lazy manner.
 </p>
 
-## Register Instance
+## Register Factory
 
-In some cases you might want a new instance every time you access the service through
+In some cases you might want a **new instance** every time you access the service through
 the container. For that use the <code>factory()</code> method of container.
 
 ```php
@@ -42,6 +42,23 @@ $container->factory('service', function($container) {
     return new ServiceProvider();
 });
 ```
+
+<p class="tip">Use <code>factory()</code> when you need a fresh instance each time, and <code>register()</code> when you want a singleton.</p>
+
+## Register Instance
+
+You can register an already created instance directly:
+
+```php
+$mailer = new Mailer('smtp.example.org', 25);
+$mailer->setUsername('your username');
+$mailer->setPassword('your password');
+
+// Register the configured instance
+$container->instance('mailer', $mailer);
+```
+
+This is useful when you need to configure an object before registering it in the container.
 
 ## Accessing Service
 
@@ -71,4 +88,67 @@ To get a configured item from the **container**, call `get()` method passing it 
 
 ```php
 $container->get('service');
+```
+
+### resolve()
+
+The container can automatically resolve classes with dependencies using reflection. This is one of the most powerful features.
+
+```php
+class UserService
+{
+    public function __construct(Database $db, Cache $cache)
+    {
+        // Dependencies auto-injected
+    }
+}
+
+// Container resolves dependencies automatically
+$service = $container->resolve(UserService::class);
+```
+
+<p class="tip">The <code>resolve()</code> method works for any class with type-hinted constructor dependencies that are registered in the container.</p>
+
+### bind()
+
+Bind an interface or abstract class to a concrete implementation:
+
+```php
+$container->bind(MailerInterface::class, SmtpMailer::class);
+
+// Resolve interface
+$mailer = $container->resolve(MailerInterface::class);  // Gets SmtpMailer
+```
+
+This is useful for dependency inversion and testing.
+
+### alias()
+
+Create an alias for a service to enable multiple ways of accessing it:
+
+```php
+$container->register('auth', function() {
+    return new Auth();
+});
+
+// Create alias for class name
+$container->alias(Auth::class, 'auth');
+
+// Now both work:
+app('auth');           // Via alias
+app(Auth::class);      // Via class name
+```
+
+### getInstance()
+
+The container itself is a singleton. You can get the instance anywhere:
+
+```php
+$container = Container::getInstance();
+```
+
+For testing purposes, you can destroy the instance:
+
+```php
+Container::destroy();
 ```

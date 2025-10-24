@@ -362,12 +362,6 @@ Create a markdown template file with `.md.php` extension in your views folder:
 
 Welcome to **Lightpack Framework**.
 
-## Getting Started
-
-- Read the [documentation](https://lightpack.dev/docs)
-- Join our [community](https://lightpack.dev/community)
-- Build something **awesome**!
-
 Your email: <?= $email ?>
 
 ---

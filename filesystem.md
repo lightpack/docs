@@ -110,9 +110,7 @@ $file->extension('path/to/file');
 
 ## size()
 
-The get the size of a file in bytes, call `size()` method.
-
-- **Returns `null` if the file does not exist.**
+To get the size of a file in bytes, call `size()` method.
 
 ```php
 $file->size('/path/to/file'); // 1024
@@ -121,7 +119,7 @@ $file->size('/path/to/file'); // 1024
 You can also get the formatted file size as `B, KB, MB, GB, TB`. Pass `true` as second parameter to this method.
 
 ```php
-$file->size('/path/to/file'); // 1KB
+$file->size('/path/to/file', true); // 1.00KB
 ```
 
 ## modified()
@@ -157,7 +155,7 @@ It is worth your time to have a look at this class details.
 [SplFileInfo](https://www.php.net/manual/en/class.splfileinfo.php)
 
 ```php
-$fielinfo = $file->info('/path/to/file');
+$fileinfo = $file->info('/path/to/file');
 ```
 
 Now you can call all the methods defined in `SplFileInfo` class. For example:
@@ -265,50 +263,128 @@ foreach($files as $file) {
 
 ## moveDir()
 
-Move a directory and all its contents to a new location. This is a wrapper around `copyDir()` that deletes the source after copy.
+To move a directory and all its contents to a new location, call `moveDir()` method. This is a wrapper around `copyDir()` that deletes the source after copy.
 
 ```php
 $file->moveDir('/path/to/source', '/path/to/destination');
 ```
 
----
-
 ## hash()
 
-Get a cryptographic hash (checksum) of a file’s contents. Useful for verifying file integrity, cache-busting, or detecting changes. Supports any hash algorithm supported by PHP (`sha256`, `md5`, etc).
+To get a cryptographic hash (checksum) of a file's contents, call `hash()` method. This is useful for verifying file integrity, cache-busting, or detecting changes.
+
+- **Returns `null` if the file does not exist.**
+
+By default it uses `sha256` algorithm, but you can specify any hash algorithm supported by PHP.
 
 ```php
-$file->hash('/path/to/file'); // default: sha256
-$file->hash('/path/to/file', 'md5');
+$file->hash('/path/to/file'); // sha256 by default
+$file->hash('/path/to/file', 'md5'); // using MD5
+$file->hash('/path/to/file', 'sha1'); // using SHA1
 ```
 
----
+Common use cases:
+
+```php
+// Verify file integrity
+$hash1 = $file->hash('original.zip');
+$hash2 = $file->hash('downloaded.zip');
+if ($hash1 === $hash2) {
+    echo 'Files are identical';
+}
+
+// Cache busting
+$version = $file->hash('app.js'); // Use hash as version
+echo "<script src='app.js?v={$version}'"></script>";
+```
 
 ## atomic()
 
-Write contents to a file atomically. This prevents partial/corrupted writes by writing to a temp file and then renaming. Especially useful for config, cache, or data files that must never be corrupted.
+To write contents to a file atomically, call `atomic()` method. This prevents partial or corrupted writes by writing to a temporary file first and then renaming it.
+
+This is especially useful for:
+
+* Configuration files that must never be corrupted
+* Cache files that need consistency
+* Data files that are read by other processes
 
 ```php
-$file->atomic('/path/to/file', $contents);
+$file->atomic('/path/to/config.json', $jsonData);
 ```
 
----
+**How it works:**
 
-## Directory Iterators
+1. Writes content to a temporary file (e.g., `config.json.tmp.abc123`)
+2. If write succeeds, renames temp file to target file
+3. If anything fails, removes temp file and returns `false`
 
-For advanced directory traversal, you can get iterators:
+This ensures the target file is either completely written or not modified at all.
+
+## getIterator()
+
+To get a non-recursive iterator for a directory, call `getIterator()` method. This returns a `FilesystemIterator` that lists only the immediate contents of a directory.
+
+- **Returns `null` if the path is not a directory.**
 
 ```php
-$iterator = $file->getIterator('/path/to/dir'); // FilesystemIterator, non-recursive
-$iterator = $file->getRecursiveIterator('/path/to/dir'); // RecursiveIteratorIterator, recursive
+$iterator = $file->getIterator('/path/to/dir');
+
+foreach ($iterator as $file) {
+    echo $file->getFilename();
+}
 ```
 
----
+<p class="tip">Use this when you only need files in the immediate directory, not subdirectories.</p>
 
-## Path Sanitization
+## getRecursiveIterator()
 
-For security, you can sanitize file paths:
+To get a recursive iterator that traverses through all subdirectories, call `getRecursiveIterator()` method. This returns a `RecursiveIteratorIterator`.
+
+- **Returns `null` if the path is not a directory.**
 
 ```php
-$safe = $file->sanitizePath($userInputPath);
+$iterator = $file->getRecursiveIterator('/path/to/dir');
+
+foreach ($iterator as $file) {
+    if ($file->isFile()) {
+        echo $file->getRealPath();
+    }
+}
 ```
+
+You can also control the iteration mode:
+
+```php
+// Default: SELF_FIRST (parent before children)
+$iterator = $file->getRecursiveIterator('/path/to/dir');
+
+// CHILD_FIRST (children before parent, useful for deletion)
+$iterator = $file->getRecursiveIterator('/path/to/dir', RecursiveIteratorIterator::CHILD_FIRST);
+```
+
+## sanitizePath()
+
+To sanitize a file path for safe usage, call `sanitizePath()` method. This helps prevent directory traversal attacks and path manipulation vulnerabilities.
+
+```php
+$userInput = $_GET['file'];
+$safePath = $file->sanitizePath($userInput);
+```
+
+**What it does:**
+
+* Normalizes directory separators to the system standard
+* Removes parent directory traversal sequences (`..`)
+* Prevents path manipulation attacks
+
+**Example:**
+
+```php
+// Dangerous user input
+$input = '../../../etc/passwd';
+
+// Sanitized output
+$safe = $file->sanitizePath($input); // 'etcpasswd'
+```
+
+<p class="tip">Always sanitize user-provided file paths before using them in file operations.</p>

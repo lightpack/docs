@@ -319,6 +319,69 @@ Use this method to set a `plain` text email message.
 $this->altBody('Hello Devs');
 ```
 
+### markdownView()
+
+Use this method to send emails using Markdown templates. Markdown is automatically converted to HTML.
+
+**Note:** Requires `league/commonmark` package installed.
+
+```cli
+composer require league/commonmark
+```
+
+```php
+$this->markdownView('emails/welcome.md', [
+    'name' => 'Bob',
+    'email' => 'bob@example.com'
+]);
+```
+
+If you need a plain text version, use `textView()` in addition:
+
+```php
+$this->markdownView('emails/welcome.md', ['name' => 'Bob'])
+    ->textView('emails/welcome.text')  // Optional plain text version
+    ->send();
+```
+
+**Important:** Do not use `markdownView()` together with `htmlView()` or `body()`. They all set the HTML content, and the last one called will overwrite the others.
+
+✅ **Valid combinations:**
+- `markdownView()` + `textView()`
+- `htmlView()` + `textView()`
+
+❌ **Invalid combinations:**
+- `markdownView()` + `htmlView()` (conflict - last one wins)
+- `markdownView()` + `body()` (conflict - last one wins)
+
+Create a markdown template file with `.md.php` extension in your views folder:
+
+```markdown
+<!-- app/views/emails/welcome.md.php -->
+# Hello <?= $name ?>!
+
+Welcome to **Lightpack Framework**.
+
+## Getting Started
+
+- Read the [documentation](https://lightpack.dev/docs)
+- Join our [community](https://lightpack.dev/community)
+- Build something **awesome**!
+
+Your email: <?= $email ?>
+
+---
+
+Thanks for joining us!
+```
+
+**Key Points:**
+- Template files must have `.md.php` extension
+- Use PHP syntax for variables: `<?= $var ?>`
+- HTML is auto-generated from markdown
+- Use `textView()` if you need a plain text version
+- Supports all standard markdown features (headings, lists, links, bold, italic, etc.)
+
 ### send()
 
 Use this method to finally send the mail.

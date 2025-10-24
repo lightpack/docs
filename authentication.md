@@ -20,17 +20,14 @@ auth()->isGuest();
 // Attempt login and start session
 auth()->login();
 
-// Login as a specific user without credentials
-auth()->loginAs();
+// Login as a specific user without credentials (useful for testing/impersonation)
+auth()->loginAs($user);
 
 // Attempt login once without starting session
 auth()->attempt();
 
 // Logout the user 
 auth()->logout();
-
-// Returns auth token when logged in via api
-auth()->token();
 
 // Attempts to automatically login based on remember me cookie
 auth()->recall();
@@ -70,13 +67,24 @@ php console migrate:up
 
 ### Configuration
 
-Please run following command to creat **config/auth.php** file.
+Please run following command to create **config/auth.php** file.
 
 ```php
 php console create:config --support=auth
 ```
 
 ## Logging In
+
+### Login Methods Comparison
+
+Different login methods serve different purposes. Choose the right one for your use case:
+
+| Method | Returns | Sets Session | Sets Cookie | Use Case |
+|--------|---------|--------------|-------------|----------|
+| `login()` | `Redirect` | ✅ Yes | ✅ Yes (if remember me) | Traditional web forms |
+| `attempt()` | `Identity\|null` | ❌ No | ❌ No | API/AJAX requests |
+| `loginAs($user)` | `Auth` | ✅ Yes | ❌ No | Testing/Admin impersonation |
+| `viaToken()` | `Identity\|null` | ❌ No | ❌ No | Bearer token authentication |
 
 ### Web Based Login
 To login a user via **session-cookie** mechanism, call the `login()` method on **auth** object.
@@ -96,14 +104,23 @@ Behind the scenes, this method performs following actions:
 To authenticate a user without maintaining **session-cookie**, use `attempt()` method.
 
 ```php
-auth()->attempt();
+$user = auth()->attempt();
+
+if ($user) {
+    // Authentication successful - create token
+    $token = $user->createToken('api');
+    return response()->json(['token' => $token->plainTextToken]);
+}
+
+return response()->json(['error' => 'Invalid credentials'], 401);
 ```
 
 This is useful when authenticating user via API requests based on **username/password** credentials. Behind the scenes, this method performs following actions:
 
 * Check if `email/password` credentials match in **users** table.
-* On **success**, returns an API **token** in JSON response.
-* On **failure**, returns a **failure** response as JSON.
+* On **success**, returns the authenticated **user** object (or `null` on failure).
+* Does NOT start a session or set cookies.
+* You must manually create an API token and return it to the client.
 
 #### Bearer Token
 
@@ -135,14 +152,7 @@ To access currently authenticated **user**, call `user()` method.
 auth()->user();
 ```
 
-To access currently authenticated user's **api token** , call `token()` method.
-
-```php
-auth()->token();
-```
-
-This method will return `null` when logged-in via **session-cookie** mechanism. So use this
-method only when logged-in with `attempt()` method for API based login requests.
+> **Note:** The `user()` method works for both session-based and token-based authentication.
 
 ## Remember Me
 
@@ -159,5 +169,9 @@ Behind the scenes, this method performs the following actions:
 * If **no**, checks if a `remember_me` cookie is present and valid.
 * If the **cookie is valid**, the user is automatically logged in (a new session is started) and redirected to the **post-login** URL.
 * If the **cookie is missing or invalid**, the user is redirected to the **login** page.
+
+### Cookie Duration
+
+By default, remember me cookies last for **30 days**. You can configure the duration in `config/auth.php` using the `remember_duration` key. See [Configuration](auth-configuration.md#remember_duration) for details.
 
 ---

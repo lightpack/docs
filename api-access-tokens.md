@@ -104,5 +104,102 @@ $user->deleteTokensById([23, 24, 24]);
 
 - Deleting tokens immediately invalidates them for future authentication.
 - Use this to implement logout-from-all-devices or token revocation endpoints.
+
+## Token Tracking
+
+Access tokens automatically track usage information for monitoring and debugging:
+
+```php
+$token = AccessToken::find($id);
+
+echo $token->last_used_at;  // Timestamp of last authentication
+```
+
+**Use cases:**
+- **Detect stale tokens**: Find tokens not used in 90+ days
+- **Security monitoring**: Track when/how tokens are used
+- **Debugging**: "When was this token last active?"
+
+```php
+// Find inactive tokens
+$staleTokens = AccessToken::query()
+    ->where('last_used_at', '<', date('Y-m-d H:i:s', strtotime('-90 days')))
+    ->get();
+```
+
+## Best Practices
+
+### 1. Use Namespaced Abilities
+
+Instead of generic abilities like `read` or `write`, use a `resource:action` format:
+
+```php
+$token = $user->createToken('api', [
+    'posts:read',
+    'posts:write',
+    'users:read',
+    'comments:delete',
+]);
+```
+
+**Benefits:**
+- Clear what resource and action are allowed
+- Easy to understand permissions
+- Industry standard (OAuth scopes use this pattern)
+
+### 2. Set Expiration Dates
+
+Tokens should expire to limit security exposure:
+
+```php
+// Recommended: 30-90 days
+$token = $user->createToken(
+    'mobile-app',
+    ['*'],
+    date('Y-m-d H:i:s', strtotime('+30 days'))
+);
+```
+
+### 3. Monitor Token Usage
+
+Regularly check `last_used_at` to detect and revoke stale tokens:
+
+```php
+// Revoke tokens not used in 6 months
+$staleTokens = AccessToken::query()
+    ->where('user_id', $userId)
+    ->where('last_used_at', '<', date('Y-m-d H:i:s', strtotime('-6 months')))
+    ->get();
+
+foreach ($staleTokens as $token) {
+    $token->delete();
+}
+```
+
+### 4. Limit Token Count
+
+Consider limiting how many tokens a user can have:
+
+```php
+$tokenCount = AccessToken::query()
+    ->where('user_id', '=', $user->id)
+    ->count();
+
+if ($tokenCount >= 10) {
+    return response()->json(['error' => 'Maximum token limit reached'], 400);
+}
+```
+
+### 5. Revoke on Logout
+
+Delete tokens when user logs out or changes password:
+
+```php
+// Logout from all devices
+$user->deleteTokens();
+
+// Or delete current token only
+$user->deleteCurrentRequestToken();
+```
   
 ---

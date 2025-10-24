@@ -43,14 +43,20 @@ php console create:provider MailerProvider
 
 This should have generated `MailerProvider` class in `app/Providers` directory. 
 
-Inside that class you will find a `register()` method:
+Inside that class you will find a `register()` method. Note that all providers must implement `Lightpack\Providers\ProviderInterface`:
 
 ```php
-public function register(Container $container)
+use Lightpack\Container\Container;
+use Lightpack\Providers\ProviderInterface;
+
+class MailerProvider implements ProviderInterface
 {
-    $container->register('mailer', function ($container) {
-        //
-    });
+    public function register(Container $container)
+    {
+        $container->register('mailer', function ($container) {
+            //
+        });
+    }
 }
 ```
 
@@ -80,18 +86,12 @@ Open `boot/providers.php` file and just add your provider class at the **end** o
 ```php
 <?php
 
-/**
- * ------------------------------------------------------------
- * List service providers here.
- * ------------------------------------------------------------
- */
-
 return [
-    'providers' => [
-        App\Providers\MailerProvider::class,
-    ],
+    App\Providers\MailerProvider::class,
 ];
 ```
+
+<p class="tip">Framework providers are loaded first, then your application providers. If your provider depends on services from another provider, make sure to order them correctly.</p>
 
 ## Using Provider
 
@@ -111,5 +111,30 @@ class ReportController
     }
 }
 ```
+
+## Aliasing Services
+
+You can create aliases for your services to enable type-hinted dependency injection:
+
+```php
+public function register(Container $container)
+{
+    $container->register('mailer', function ($container) {
+        return new Mailer('smtp.example.org', 25);
+    });
+
+    // Create alias for class name
+    $container->alias(Mailer::class, 'mailer');
+}
+```
+
+Now you can access the service using either the alias or the class name:
+
+```php
+app('mailer');        // Via alias
+app(Mailer::class);   // Via class name
+```
+
+---
 
 As you can see that in **providers** you bind services in container, so you should read more about [containers](/containers) in Lightpack.

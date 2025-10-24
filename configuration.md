@@ -23,7 +23,7 @@ config('key');
 To view configurations for your application browse `config` folder. It
 lists some pre-defined configurations as an `array` of key-value pairs.
 
-For example, you c an access `config/db.php` configuration file keys like:
+For example, you can access `config/db.php` configuration file keys like:
 
 ```php
 config('db.mysql.host');
@@ -40,7 +40,7 @@ simply create a file `redis.php` in the `config` folder.
 php console create:config redis
 ```
 
-Nou you can put your configuration details as an **array** as show below.
+Now you can put your configuration details as an **array** as shown below.
 
 ```php
 <?php
@@ -61,13 +61,54 @@ config('redis.host'); // 127.0.0.1
 config('redis.port'); // 6666
 ```
 
-## Changing configuration
+## Default values
 
-You can dynamically add new configuration values at runtime by simply
-setting the config item key as show below.
+You can provide a default value as the second argument to `config()` function. This value will be returned if the configuration key does not exist.
 
 ```php
-config()->set('key', 'value');
+config('app.timezone', 'UTC');  // Returns 'UTC' if not set
+```
+
+## Setting configuration
+
+You can dynamically add new configuration values at runtime by calling the `set()` method:
+
+```php
+config()->set('cache.driver', 'redis');
+```
+
+<p class="tip">The <code>set()</code> method only sets the value if the key doesn't already exist. This prevents accidental overwrites.</p>
+
+## Checking configuration
+
+To check if a configuration key exists, you can use the `has()` method:
+
+```php
+if (config()->has('redis.host')) {
+    // Configuration exists
+}
+```
+
+## Nested configuration
+
+Configuration files can have deeply nested arrays. You can access nested values using dot notation:
+
+```php
+// config/database.php
+return [
+    'database' => [
+        'connections' => [
+            'mysql' => [
+                'host' => 'localhost',
+                'port' => 3306,
+            ],
+        ],
+    ],
+];
+
+// Access nested values
+config('database.connections.mysql.host');  // localhost
+config('database.connections.mysql.port');  // 3306
 ```
 
 ---

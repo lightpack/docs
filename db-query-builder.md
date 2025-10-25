@@ -249,6 +249,8 @@ $products->select('id', 'name')->orderBy('id', 'DESC')->all();
 $products->select('id', 'name')->orderBy('name', 'DESC')->orderBy('id', 'DESC')->all();
 ```
 
+> **Tip:** You can also use `asc()` and `desc()` shortcuts. See [Ordering Shortcuts](#ordering-shortcuts) in the Date & Time Filters section.
+
 ## Group By
 
 You can group rows together.
@@ -528,7 +530,9 @@ You can quickly filter on boolean columns:
 
 ```php
 $products->whereTrue('is_active')->all();
-$products->orWhereFalse('is_deleted')->all();
+$products->whereFalse('is_deleted')->all();
+$products->orWhereTrue('is_featured')->all();
+$products->orWhereFalse('is_archived')->all();
 ```
 
 ---
@@ -595,6 +599,193 @@ $products->avg('rating');
 $products->min('created_at');
 $products->max('updated_at');
 $products->countBy('category'); // returns an array of objects with counts for each group
+```
+
+---
+
+## Date & Time Filters
+
+### Date Part Filtering
+
+Filter records by specific parts of date/time columns:
+
+```php
+// Filter by date (ignores time)
+$orders->whereDate('created_at', '2024-01-15')->all();
+$orders->whereDate('created_at', '>=', '2024-01-01')->all();
+
+// Filter by year
+$reports->whereYear('created_at', 2024)->all();
+$archives->whereYear('created_at', '<', 2020)->all();
+
+// Filter by month (1-12 or month name)
+$sales->whereMonth('created_at', 12)->all();  // December
+$sales->whereMonth('created_at', 'dec')->all();  // Short name
+$sales->whereMonth('created_at', 'december')->all();  // Full name
+$sales->whereMonth('created_at', '>=', 6)->all();
+
+// Filter by day of month (1-31)
+$payroll->whereDay('pay_date', 15)->all();
+$reminders->whereDay('due_date', '<=', 5)->all();
+
+// Filter by time
+$appointments->whereTime('scheduled_at', '>=', '09:00:00')->all();
+$appointments->whereTime('scheduled_at', '<=', '17:00:00')->all();
+```
+
+> **Note:** Month names are case-insensitive and support both short (jan, feb, mar) and full names (january, february, march).
+
+All date/time methods have OR variants:
+
+```php
+$records->whereYear('created_at', 2023)->orWhereYear('created_at', 2024)->all();
+$logs->whereDate('created_at', today())->orWhereDate('created_at', yesterday())->all();
+```
+
+### Relative Date Filters
+
+Filter records using relative time periods:
+
+```php
+// Today's records
+$orders->today()->all();
+$orders->today('order_date')->all();  // Custom column
+
+// Yesterday's records
+$logs->yesterday()->all();
+
+// This week (Monday-Sunday)
+$tasks->thisWeek()->all();
+
+// Last week
+$reports->lastWeek()->all();
+
+// This month
+$sales->thisMonth()->all();
+
+// Last month
+$invoices->lastMonth()->all();
+
+// This year
+$users->thisYear()->all();
+
+// Last year
+$analytics->lastYear()->all();
+```
+
+### Last N Periods
+
+Filter records from the last N days, weeks, or months:
+
+```php
+// Last N days
+$orders->lastDays(7)->all();   // Last 7 days
+$orders->lastDays(30)->all();  // Last 30 days
+$orders->lastDays(90)->all();  // Last 90 days
+
+// Last N weeks
+$reports->lastWeeks(4)->all();  // Last 4 weeks
+
+// Last N months
+$sales->lastMonths(3)->all();   // Last 3 months
+$sales->lastMonths(6)->all();   // Last 6 months
+$sales->lastMonths(12)->all();  // Last 12 months
+```
+
+### Age-Based Filtering
+
+Filter records based on how old they are:
+
+```php
+// Records older than specified time
+$tickets->olderThan(7, 'days')->all();
+$tickets->olderThan(48, 'hours')->all();
+$leads->olderThan(30, 'days')->all();
+$cache->olderThan(1, 'hour')->all();
+
+// Records newer than specified time
+$activities->newerThan(24, 'hours')->all();
+$posts->newerThan(7, 'days')->all();
+
+// Supported units: 'minutes', 'hours', 'days', 'weeks', 'months', 'years'
+```
+
+### Before/After Shortcuts
+
+Filter records before or after a specific date:
+
+```php
+// Before a specific date
+$orders->before('2024-01-01')->all();
+$orders->before('2024-01-01', 'shipped_at')->all();
+
+// After a specific date
+$orders->after('2024-01-01')->all();
+$orders->after('2024-01-01', 'shipped_at')->all();
+```
+
+### Weekday/Weekend Filtering
+
+Filter records by day of week:
+
+```php
+// Weekdays only (Monday-Friday)
+$orders->weekdays()->all();
+
+// Weekends only (Saturday-Sunday)
+$orders->weekends()->all();
+```
+
+### Ordering Shortcuts
+
+Quick methods for ascending/descending order:
+
+```php
+// Descending order (highest/newest first)
+$products->desc()->all();              // ORDER BY id DESC
+$products->desc('price')->all();       // ORDER BY price DESC
+$posts->desc('created_at')->all();     // ORDER BY created_at DESC
+
+// Ascending order (lowest/oldest first)
+$products->asc()->all();               // ORDER BY id ASC
+$products->asc('name')->all();         // ORDER BY name ASC
+$posts->asc('created_at')->all();      // ORDER BY created_at ASC
+
+// Multiple ordering
+$products->desc('price')->asc('name')->all();
+```
+
+### Real-World Examples
+
+```php
+// Dashboard: Today's sales
+$todaySales = db()->table('orders')->today()->sum('amount');
+
+// Report: This month's signups
+$signups = db()->table('users')->thisMonth()->count();
+
+// Analytics: Last 30 days revenue
+$revenue = db()->table('orders')
+    ->lastDays(30)
+    ->where('status', 'completed')
+    ->sum('amount');
+
+// CRM: Stale leads (no contact in 30 days)
+$staleLeads = db()->table('leads')
+    ->olderThan(30, 'days', 'last_contact_at')
+    ->where('status', 'active')
+    ->all();
+
+// Support: Overdue tickets
+$overdue = db()->table('tickets')
+    ->where('status', 'open')
+    ->olderThan(48, 'hours')
+    ->desc('created_at')
+    ->all();
+
+// Weekend vs weekday sales
+$weekendSales = db()->table('orders')->thisMonth()->weekends()->sum('amount');
+$weekdaySales = db()->table('orders')->thisMonth()->weekdays()->sum('amount');
 ```
 
 ---

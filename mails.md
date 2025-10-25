@@ -54,16 +54,47 @@ public function dispatch(array $payload = [])
 
 ## Sending Mail
 
-To send the mail, simply instantiate the mail class and call its `dispatch()` method:
+To send the mail, use the `app()` helper to instantiate the mail class and call its `dispatch()` method:
 
 ```php
-(new TestMail)->dispatch();
+app(TestMail::class)->dispatch();
 ```
 
-You can optionally pass it an array as data payload which you can use inside the `dispatch()` method:
+### Why Use `app()`?
+
+The `app()` helper resolves classes from Lightpack's dependency injection container.
 
 ```php
-(new TestMail)->dispatch([
+app(TestMail::class);
+```
+
+### Using in Controllers
+
+You can also type-hint mail classes directly in controller methods, and Lightpack will auto-inject them:
+
+```php
+class UserController
+{
+    public function sendWelcome(WelcomeMail $mail)
+    {
+        $mail->dispatch([
+            'to' => 'user@example.com',
+            'name' => 'John Doe'
+        ]);
+        
+        return response()->json(['message' => 'Email sent!']);
+    }
+}
+```
+
+The container automatically resolves `WelcomeMail` with all its dependencies when the controller method is called.
+
+### Passing Data
+
+You can optionally pass an array as data payload which you can use inside the `dispatch()` method:
+
+```php
+app(TestMail::class)->dispatch([
     'to' => 'devs@example.com',
     'from' => 'lightpack@example.com',
 ]);
@@ -203,7 +234,7 @@ Note that the name is optional. For example:
 
 ```php
 $this->cc([
-    'rob@example.com'
+    'rob@example.com',
     'john@example.com'
 ]);
 ```
@@ -230,7 +261,7 @@ Note that the name is optional. For example:
 
 ```php
 $this->bcc([
-    'rob@example.com'
+    'rob@example.com',
     'john@example.com'
 ]);
 ```
@@ -360,7 +391,11 @@ class MyTest extends TestCase
     public function testWelcomeEmailIsSent()
     {
         // Send email
-        (new WelcomeMail)->dispatch(['to' => 'user@example.com']);
+        app(WelcomeMail::class)->dispatch([
+            'to' => 'user@example.com',
+            'subject' => 'Welcome',
+            'body' => '<h1>Hello!</h1>',
+        ]);
 
         // Assert email was sent
         $this->assertMailSent()
@@ -371,22 +406,7 @@ class MyTest extends TestCase
 }
 ```
 
-### Available Assertions
-
-- `assertMailSent()` - Assert at least one email was sent
-- `assertMailNotSent()` - Assert no emails were sent
-- `assertMailCount(int $count)` - Assert exact number of emails sent
-- `assertMailSentTo(string $email)` - Assert email sent to recipient
-- `assertMailSentFrom(string $email)` - Assert email sent from address
-- `assertMailSubject(string $subject)` - Assert email has subject
-- `assertMailContains(string $text)` - Assert email body contains text
-- `assertMailCc(string $email)` - Assert email CC'd to address
-- `assertMailBcc(string $email)` - Assert email BCC'd to address
-- `assertMailReplyTo(string $email)` - Assert reply-to address
-- `assertMailHasAttachment(string $filename)` - Assert has attachment
-- `assertMailHasNoAttachments()` - Assert no attachments
-
-All assertions support fluent chaining.
+You can view all the available assertions in the [MailAssertionTrait](/testing?id=asserting-emails).
 
 ## Creating Custom Drivers
 

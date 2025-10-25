@@ -589,6 +589,66 @@ $products->chunk(100, function($chunk) {
 
 ---
 
+## Lazy Loading with Cursor
+
+For memory-efficient processing of large result sets, use `cursor()` which yields one row at a time instead of loading all results into memory:
+
+```php
+foreach ($products->where('status', 'active')->cursor() as $product) {
+    // Process one product at a time
+    // Only one row in memory at any time
+}
+```
+
+### Cursor vs Chunk vs All
+
+```php
+// ❌ all() - Loads ALL rows into memory
+$products = $products->all();
+foreach ($products as $product) {
+    // Process
+}
+
+// ✅ chunk() - Loads N rows at a time (good for batch operations)
+$products->chunk(1000, function($batch) {
+    // Memory: 1000 rows at a time
+    foreach ($batch as $product) {
+        // Process batch
+    }
+});
+
+// ✅ cursor() - Streams one row at a time (best for memory efficiency)
+foreach ($products->cursor() as $product) {
+    // Memory: 1 row at a time
+    // Perfect for exports, migrations, large reports
+}
+```
+
+### When to Use Cursor
+
+**Use `cursor()` for:**
+- ✅ Exporting large datasets (CSV, Excel)
+- ✅ Data migrations and transformations
+- ✅ Processing millions of records
+- ✅ Generating large reports
+- ✅ ETL operations
+- ✅ Any operation where memory is a concern
+
+**Use `chunk()` for:**
+- ✅ Batch updates/deletes
+- ✅ Sending bulk emails
+- ✅ Rate-limited API calls
+- ✅ Operations that benefit from batching
+
+**Use `all()` for:**
+- ✅ Small result sets (< 1000 rows)
+- ✅ When you need the full collection
+- ✅ When you need to count/filter in PHP
+
+> **Note:** `cursor()` returns a PHP Generator, so you can only iterate through it once. If you need to iterate multiple times, call `cursor()` again.
+
+---
+
 ## Aggregates
 
 You can use the following methods for aggregate queries:

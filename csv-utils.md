@@ -50,9 +50,10 @@ $csv->write('users.csv', $data);
 // Write with explicit header order
 $csv->write('users.csv', $data, ['name', 'age']);
 
-// Write from generator or database cursor
-$users = User::query()->cursor();
-$csv->write('users.csv', $users, ['id', 'name', 'email']);
+// Write from database using chunk for memory efficiency
+User::query()->chunk(1000, function($users) use ($csv) {
+    $csv->write('users.csv', $users, ['id', 'name', 'email']);
+});
 ```
 
 ---
@@ -235,7 +236,7 @@ $csv->write('users.csv', $data, [
 
 ## Advanced Usage & Tips
 
-- **Generators and cursors:** Use generators for both reading and writing to handle huge files efficiently.
+- **Generators and chunking:** Use generators for reading and chunk() for database queries to handle huge files efficiently.
 - **Custom delimiter, enclosure, escape:**
 
 ```php

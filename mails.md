@@ -28,7 +28,7 @@ Lightpack includes these built-in drivers:
 
 - **smtp** - Standard SMTP (uses PHPMailer)
 - **array** - For testing (stores emails in memory)
-- **log** - Logs emails to file (for development)
+- **log** - Logs emails to `storage/logs/mails.json` (for development)
 - **resend** - Resend API integration (requires `composer require resend/resend-php`)
 
 ## Creating Mail Class

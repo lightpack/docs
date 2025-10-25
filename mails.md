@@ -60,13 +60,7 @@ To send the mail, use the `app()` helper to instantiate the mail class and call 
 app(TestMail::class)->dispatch();
 ```
 
-### Why Use `app()`?
-
 The `app()` helper resolves classes from Lightpack's dependency injection container.
-
-```php
-app(TestMail::class);
-```
 
 ### Using in Controllers
 

@@ -427,22 +427,20 @@ class MailgunDriver implements DriverInterface
 }
 ```
 
-### 2. Register Driver
-
-In your `MailProvider` or bootstrap file:
+### 2. Use Custom Driver
 
 ```php
-app('mail')->registerDriver('mailgun', new MailgunDriver());
-```
-
-### 3. Use Custom Driver
-
-```php
-// In .env
-MAIL_DRIVER=mailgun
-
-// Or per-mail
-$this->driver('mailgun')->to('user@example.com')->send();
+class WelcomeMail extends Mail
+{
+    public function dispatch(array $payload = [])
+    {
+        $this->driver('mailgun')
+            ->to('user@example.com')
+            ->subject('Welcome')
+            ->body('<h1>Hello</h1>')
+            ->send();
+    }
+}
 ```
 
 ## Data Structure Reference

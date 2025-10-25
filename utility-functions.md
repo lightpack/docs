@@ -122,3 +122,162 @@ if (!$user) {
 // One-liner
 if (!$user) halt(404);
 ```
+
+## once()
+
+`once(callable $callback)`
+
+**What it does:**
+Executes a callback only once and caches the result. Subsequent calls with the same callback return the cached result without re-executing the callback.
+
+**When to use:**
+- Prevent duplicate expensive operations (database queries, API calls, file reads)
+- Lazy loading with automatic caching
+- Ensure idempotent operations within the same request
+
+**Example:**
+```php
+// In a model - expensive query runs only once
+class User
+{
+    public function permissions()
+    {
+        return once(function() {
+            // This query only runs once per request
+            return Permission::where('user_id', $this->id)->all();
+        });
+    }
+}
+
+$user->permissions(); // Executes query
+$user->permissions(); // Returns cached result
+$user->permissions(); // Returns cached result
+```
+
+```php
+// Prevent duplicate API calls
+$callback = function() {
+    return $httpClient->get('https://api.example.com/data');
+};
+
+$data1 = once($callback); // Makes API call
+$data2 = once($callback); // Returns cached response
+$data3 = once($callback); // Returns cached response
+```
+
+```php
+// Expensive computation
+class Report
+{
+    private $calculateStats;
+    
+    public function __construct()
+    {
+        $this->calculateStats = function() {
+            // Heavy computation
+            return $this->processLargeDataset();
+        };
+    }
+    
+    public function getStats()
+    {
+        return once($this->calculateStats);
+    }
+}
+
+$report = new Report();
+$stats = $report->getStats(); // Computes
+$stats = $report->getStats(); // Cached
+```
+
+**Important:**
+- The callback must be the **same instance** to benefit from caching
+- Different callback instances (even with identical code) are treated separately
+- Cache persists only for the current request
+
+## optional()
+
+`optional($value, ?callable $callback = null)`
+
+**What it does:**
+Safely access properties and methods on a potentially null value without causing errors. Returns a null-safe object that allows chaining.
+
+**When to use:**
+- Accessing nested properties that might be null
+- Preventing "Attempt to read property on null" errors
+- Cleaner code without excessive null checks
+- Working with optional relationships or API responses
+
+**Example:**
+```php
+// Basic usage - no error even if $user is null
+$name = optional($user)->name;
+$email = optional($user)->profile->email;
+
+// Without optional (verbose)
+$name = $user !== null ? $user->name : null;
+$email = $user !== null && $user->profile !== null ? $user->profile->email : null;
+
+// With optional (clean)
+$name = optional($user)->name;
+$email = optional($user)->profile->email;
+```
+
+```php
+// Real-world: fetching user from database
+$user = User::find($id); // Might return null
+
+// Safe access
+$userName = optional($user)->name;
+$userCity = optional($user)->address->city;
+$userEmail = optional($user)->getEmail();
+
+// All work without errors, even if $user is null
+```
+
+```php
+// With callback transformation
+$user = User::find($id);
+
+$displayName = optional($user, function($u) {
+    return strtoupper($u->firstName . ' ' . $u->lastName);
+});
+
+// If $user is null, $displayName is the null object
+// If $user exists, $displayName is the transformed string
+```
+
+```php
+// In views - prevent errors from missing data
+<h1><?= optional($post->author)->name ?></h1>
+<p><?= optional($order->customer->address)->city ?></p>
+
+// In controllers
+public function show($id)
+{
+    $user = User::find($id);
+    
+    return response()->json([
+        'name' => optional($user)->name,
+        'email' => optional($user)->profile->email,
+        'city' => optional($user)->address->city,
+    ]);
+}
+```
+
+```php
+// Chaining with method calls
+$user = User::find($id);
+
+// No error even if getProfile() returns null
+$email = optional($user->getProfile())->email;
+$phone = optional($user->getProfile())->getContactInfo()->phone;
+```
+
+**Important:**
+- The null object converts to empty string when cast: `(string)optional(null)->property === ''`
+- For actual null checks, use `is_null()` or strict comparison
+- Works with properties, methods, and deep chaining
+- Callback is only executed if value is not null
+
+---

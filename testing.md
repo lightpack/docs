@@ -259,6 +259,20 @@ $this->assertResponseHeaderEquals();
   $this->assertResponseHeaderEquals('Content-Type', 'application/json');
   ```
 
+## Asserting Signed URLs
+
+```php
+$this->assertInvalidUrlSignature();
+```
+  
+  Asserts that the request will throw an `InvalidUrlSignatureException` with a 403 status code. 
+  
+  Use this before making a request to a signed URL that should fail due to an tampered, invalid, expired, or missing signature.
+
+  ```php
+  $this->assertInvalidUrlSignature();
+  $this->request('GET', '/download/123?signature=bad');
+  ```
 
 ## Asserting Cookies
 

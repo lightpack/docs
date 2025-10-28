@@ -80,7 +80,7 @@ Generate and show codes to user (store only hashes!)
 ```php
 $codes = BackupCodeHelper::generateCodes(); // array of codes
 $hashes = BackupCodeHelper::hashCodes($codes);
-$user->mfa_backup_codes = json_encode($hashes);
+$user->mfa_backup_codes = $hashes;
 $user->save();
 ```
 
@@ -96,12 +96,12 @@ $user->save();
 - On form input, use:  
 
 ```php
-$hashes = json_decode($user->mfa_backup_codes, true);
+$hashes = $user->mfa_backup_codes;
 
 [$ok, $remaining] = BackupCodeHelper::verifyAndRemoveCode($hashes, $input);
 
 if ($ok) {
-    $user->mfa_backup_codes = json_encode($remaining);
+    $user->mfa_backup_codes = $remaining;
     $user->save();
 }
 ```
@@ -150,7 +150,7 @@ if ($user->validateMfa($inputCode)) {
 ```php
 $codes = BackupCodeHelper::generateCodes();
 $hashes = BackupCodeHelper::hashCodes($codes);
-$user->mfa_backup_codes = json_encode($hashes);
+$user->mfa_backup_codes = $hashes;
 $user->save();
 // Show $codes to user (never show hashes)
 ```
@@ -164,7 +164,7 @@ namespace App\Mfa\Factor;
 use Lightpack\Mfa\MfaInterface;
 use Lightpack\Auth\Models\AuthUser;
 
-class MyPushMfa implements MfaInterface {
+class PushMfa implements MfaInterface {
     public function send(AuthUser $user): void {
         // Send push notification
     }
@@ -182,7 +182,7 @@ Register in config:
 
 ```php
 'factors' => [
-    'push' => App\Mfa\Factor\MyPushMfa::class,
+    'push' => App\Mfa\Factor\PushMfa::class,
     // ...other factors
 ]
 ```

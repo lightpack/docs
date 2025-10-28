@@ -87,6 +87,12 @@ You can skip confirmation prompt by passing `--force` flag.
 php console db:seed --force
 ```
 
+> **Note:** If you want to seed a specific seeder, you can run it directly:
+
+```terminal
+php console db:seed ProductsSeeder
+```
+
 ## Model Factory
 
 In any robust application, realistic data is the foundation for meaningful development, testing, and demonstration. But handcrafting this data—or relying on repetitive, hardcoded examples—quickly becomes tedious and brittle as your project grows. This is where model factories come in: they empower you to generate rich, dynamic, and scalable datasets that mirror real-world scenarios with minimal effort.

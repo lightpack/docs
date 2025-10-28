@@ -53,6 +53,120 @@ Outputs a hidden input to spoof HTTP methods (like PUT, PATCH, DELETE) in HTML f
 </form>
 ```
 
+## hidden_input()
+
+`hidden_input(string $name, string $value = '')`
+
+**What it does:**
+Outputs a hidden HTML input field with automatic XSS protection. Both the name and value are automatically escaped using `htmlspecialchars()`.
+
+**When to use:**
+- When you need to include hidden data in forms (user IDs, redirect URLs, etc.).
+- Prefer this over manually writing `<input type="hidden">` for automatic security.
+- Any time you're passing user-generated or dynamic content in hidden fields.
+
+**Example:**
+```php
+<form method="POST" action="/profile/update">
+  <?= csrf_input() ?>
+  <?= hidden_input('user_id', $user->id) ?>
+  <?= hidden_input('redirect_to', '/dashboard') ?>
+  <button type="submit">Update</button>
+</form>
+```
+
+```php
+// Automatically escapes malicious content
+<?= hidden_input('data', '"><script>alert("XSS")</script>') ?>
+// Output: <input type="hidden" name="data" value="&quot;&gt;&lt;script&gt;...">
+```
+
+## form_open()
+
+`form_open(string $action = '', string $method = 'POST', array $attributes = [], bool $csrf = true)`
+
+**What it does:**
+Opens an HTML form tag with automatic CSRF token injection and HTTP method spoofing support. Automatically escapes all attribute values for security.
+
+**When to use:**
+- For all forms in your application—provides CSRF token hidden field by default.
+- When you need PUT, PATCH, or DELETE methods (automatically adds method spoofing).
+- To reduce boilerplate and prevent forgetting CSRF tokens.
+
+**Parameters:**
+- `$action` - Form action URL
+- `$method` - HTTP method (GET, POST, PUT, PATCH, DELETE)
+- `$attributes` - Additional HTML attributes (class, id, data-*, etc.)
+- `$csrf` - Whether to include CSRF token (default: true)
+
+**Example:**
+```php
+// Basic POST form with CSRF
+<?= form_open('/profile/update') ?>
+  <input type="text" name="name" value="<?= _e($user->name) ?>">
+  <button type="submit">Update</button>
+<?= form_close() ?>
+```
+
+```php
+// GET form (no CSRF token)
+<?= form_open('/search', 'GET') ?>
+  <input type="text" name="q" placeholder="Search...">
+  <button type="submit">Search</button>
+<?= form_close() ?>
+```
+
+```php
+// DELETE with method spoofing
+<?= form_open('/posts/123', 'DELETE') ?>
+  <button type="submit">Delete Post</button>
+<?= form_close() ?>
+// Outputs: method="POST" with hidden _method=DELETE and CSRF token
+```
+
+```php
+// With custom attributes
+<?= form_open('/profile', 'POST', [
+    'class' => 'profile-form',
+    'id' => 'user-form',
+    'enctype' => 'multipart/form-data'
+]) ?>
+  <!-- form fields -->
+<?= form_close() ?>
+```
+
+```php
+// Disable CSRF for webhooks or public endpoints
+<?= form_open('/webhook/stripe', 'POST', [], false) ?>
+  <!-- webhook payload -->
+<?= form_close() ?>
+```
+
+**Important:**
+- POST, PUT, PATCH, and DELETE forms automatically include CSRF tokens (unless disabled).
+- PUT, PATCH, and DELETE are automatically converted to POST with method spoofing.
+- GET forms never include CSRF tokens (even if `$csrf = true`).
+- All attribute values are automatically escaped to prevent XSS attacks.
+- Remember to add the `csrf` filter to your route for CSRF-protected forms.
+
+## form_close()
+
+`form_close()`
+
+**What it does:**
+Outputs a closing `</form>` tag.
+
+**When to use:**
+- To close forms opened with `form_open()`.
+- Provides consistency and readability in your view templates.
+
+**Example:**
+```php
+<?= form_open('/profile/update') ?>
+  <!-- form fields -->
+<?= form_close() ?>
+```
+
 ## dd()
 
 `dd(...$args)`

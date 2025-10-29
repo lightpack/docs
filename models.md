@@ -277,7 +277,7 @@ Now, whenever you access `$user->settings`, you’ll get an array. `$user->creat
 - **On retrieval:** The value is converted to the specified type automatically.
 - **On save:** The value is converted back (uncast) to a database-friendly format.
 - **Null values:** Always remain `null`—no conversion is performed.
-- **Unknown types:** The value is returned as-is.
+- **Unknown types:** Will throw `InvalidArgumentException` with a clear error message listing supported types.
 
 ### Common Pitfalls
 - Make sure your database column type matches the cast (e.g., don’t cast a string column as an array unless it stores JSON).

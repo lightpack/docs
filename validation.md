@@ -346,6 +346,93 @@ $validator
     ->field('items.*')->required()->numeric()->min(1);  // Each item validated
 ```
 
+### Error Messages for Nested/Wildcard Fields
+
+**Default Messages:**
+When validation fails for nested fields, the error key includes the full path with correct array indices (0-based):
+
+```php
+$data = [
+    'invoice' => [
+        'items' => [
+            ['product' => 'Item 1', 'quantity' => '5', 'price' => '100'],
+            ['product' => '', 'quantity' => 'abc', 'price' => '200'],
+        ]
+    ]
+];
+
+$validator
+    ->field('invoice.items.*.product')->required()->string()->min(3)
+    ->field('invoice.items.*.quantity')->required()->int()->min(1)
+    ->field('invoice.items.*.price')->required()->numeric()->min(0);
+
+$validator->setInput($data)->validate();
+
+// Error keys will be:
+// 'invoice.items.1.product' => 'This field is required'
+// 'invoice.items.1.quantity' => 'Must be an integer'
+```
+
+**Custom Messages:**
+You can customize messages for wildcard fields just like regular fields:
+
+```php
+$validator
+    ->field('invoice.items.*.product')
+    ->required()
+    ->message('Product name is required')
+    ->string()
+    ->min(3)
+    ->message('Product name must be at least 3 characters')
+    
+    ->field('invoice.items.*.quantity')
+    ->required()
+    ->message('Quantity is required')
+    ->int()
+    ->message('Quantity must be a whole number')
+    ->min(1)
+    ->message('Quantity must be at least 1')
+    
+    ->field('invoice.items.*.price')
+    ->required()
+    ->message('Price is required')
+    ->numeric()
+    ->message('Price must be a number')
+    ->min(0)
+    ->message('Price cannot be negative');
+
+// Errors will use your custom messages:
+// 'invoice.items.1.product' => 'Product name is required'
+// 'invoice.items.1.quantity' => 'Quantity must be a whole number'
+```
+
+**Displaying Errors in Views:**
+```php
+<form method="POST">
+    <?php foreach ($invoice['items'] as $index => $item): ?>
+        <div class="item">
+            <input name="invoice[items][<?= $index ?>][product]" 
+                   value="<?= old("invoice.items.{$index}.product") ?>">
+            <span class="error">
+                <?= error("invoice.items.{$index}.product") ?>
+            </span>
+
+            <input name="invoice[items][<?= $index ?>][quantity]" 
+                   value="<?= old("invoice.items.{$index}.quantity") ?>">
+            <span class="error">
+                <?= error("invoice.items.{$index}.quantity") ?>
+            </span>
+
+            <input name="invoice[items][<?= $index ?>][price]" 
+                   value="<?= old("invoice.items.{$index}.price") ?>">
+            <span class="error">
+                <?= error("invoice.items.{$index}.price") ?>
+            </span>
+        </div>
+    <?php endforeach; ?>
+</form>
+```
+
 ---
 
 ## File & Image Validation

@@ -301,6 +301,12 @@ protected function beforeRedirect()
 - `files($min = null, $max = null)` — Multiple files
 - `image($options)` — Image validation (width, height, ratio)
 
+### Password Strength Rules
+- `hasUppercase()` — Must contain at least one uppercase letter
+- `hasLowercase()` — Must contain at least one lowercase letter
+- `hasNumber()` — Must contain at least one numeric digit
+- `hasSymbol()` — Must contain at least one special character
+
 ### Custom & Advanced Rules
 - `custom($fn, $message)` — Custom closure for validation
 - `transform($fn)` — Preprocess value before validation
@@ -325,6 +331,19 @@ $input = [
 ];
 
 $validator->validate($input);
+```
+
+**Wildcard Behavior:**
+- Wildcards validate each item in an array
+- Supports deeply nested paths: `companies.*.employees.*.email`
+- Empty arrays: If you need to validate that an array has items, validate the parent field with `array($min)` before using wildcards
+- Non-array values: Will fail with "Field must be an array" error
+
+**Example with array validation:**
+```php
+$validator
+    ->field('items')->required()->array(1)  // Must have at least 1 item
+    ->field('items.*')->required()->numeric()->min(1);  // Each item validated
 ```
 
 ---

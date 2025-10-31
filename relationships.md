@@ -623,7 +623,14 @@ You can access a relationship in two ways:
     When you call the relationship as a method, you get the underlying query builder. This allows you to further customize the query before executing it:
 
     ```php
+    // Get all active departments
     $activeDepartments = $org->departments()->where('status', 'active')->all();
+    
+    // Get the first department
+    $firstDept = $org->departments()->one();
+    
+    // Find a specific department by ID
+    $dept = $org->departments()->find(5);
     ```
 
 #### What Happens Behind the Scenes?
@@ -634,8 +641,67 @@ You can access a relationship in two ways:
     - If the relationship returns a single model (like `hasOne` or `belongsTo`), you get a single model instance or `null`.
 
 - **Method Access:**
-    - Calling the relationship as a method (e.g., `$org->departments()`) returns the query builder object. You can chain additional constraints, then call query methods like `all()`, `one()`, `count()`, etc., to execute the query and fetch results.
+    - Calling the relationship as a method (e.g., `$org->departments()`) returns the query builder object. You can chain additional constraints, then call query methods like `all()`, `one()`, `find()`, `count()`, etc., to execute the query and fetch results.
     - This is ideal when you want to apply dynamic scopes or advanced queries on the relationship.
+
+### Finding Specific Related Records
+
+When you need to find a specific related record by its primary key, use the `find()` method on the relationship. This ensures that the record not only exists but also belongs to the parent model.
+
+```php
+$org = new Organization(1);
+
+// Find department with ID 5 that belongs to this organization
+$dept = $org->departments()->find(5);
+```
+
+**Exception Handling:**
+
+By default, `find()` throws a `RecordNotFoundException` if the record is not found. This is consistent with the behavior of `Model::find()`.
+
+```php
+try {
+    $dept = $org->departments()->find(999);
+} catch (RecordNotFoundException $e) {
+    // Handle not found
+}
+```
+
+**Returning Null Instead:**
+
+If you prefer to receive `null` instead of an exception when a record is not found, pass `false` as the second parameter:
+
+```php
+$dept = $org->departments()->find(5, false);
+
+if (!$dept) {
+    // Department not found or doesn't belong to this organization
+}
+```
+
+**Security Benefit:**
+
+Using `find()` on relationships ensures that the record belongs to the parent model. For example:
+
+```php
+// This will only find department 5 if it belongs to organization 1
+$dept = $org->departments()->find(5);
+
+// If department 5 belongs to a different organization, it returns null (or throws exception)
+```
+
+This prevents unauthorized access to records that don't belong to the parent model, making your application more secure.
+
+**Chaining with Other Constraints:**
+
+You can combine `find()` with other query constraints:
+
+```php
+// Find an active department with ID 5
+$dept = $org->departments()
+    ->where('status', 'active')
+    ->find(5);
+```
 
 ### Collections: Working with Multiple Related Models
 
@@ -659,6 +725,7 @@ Collections make it easy to work with groups of related models in a fluent, expr
 
 - **Use property access** for simple, direct retrieval of related data.
 - **Use method access** when you need to customize the query.
+- **Use `find()` on relationships** when you need to ensure a record belongs to the parent model.
 - **Remember caching:** Property access caches the result for the current model instance.
 - **Understand return types:** Relationships that return many models give you a **Collection**; those that return one give you a model instance or `null`.
 - **Be intention-revealing:** Name your relationship methods for clarity and business meaning.

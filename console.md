@@ -1,6 +1,6 @@
 # Console: Lightpack CLI Assistant
 
-Lightpack ships with developer-focused command-line assistant named **console**. It’s simple, powerful, and built for rapid PHP application development, automation, and extension.
+Lightpack ships with a developer-focused command-line assistant named **console**. It's simple, powerful, and built for rapid PHP application development, automation, and extension.
 
 ---
 
@@ -16,19 +16,19 @@ php console create:controller Product
 
 ## Available Commands
 
-console CLI provides a comprehensive set of commands for code generation, database management, job processing, application utilities, and more. Each command is described below with usage examples and options.
+The console CLI provides a comprehensive set of commands for code generation, database management, job processing, application utilities, and more. Each command is described below with usage examples and options.
 
 ### Code Generators
 
 #### create:config
 
-Create a new `config` file in your project's **config** by copying from the example template.
+Create a new `config` file in your project's **config** directory by copying from the example template.
 
 ```cli
 php console create:config hello
 ```
 
-You can force replace existing config file having same name using `--force` flag.
+You can force replace an existing config file with the same name using the `--force` flag.
 
 ```cli
 php console create:config hello --force
@@ -209,13 +209,13 @@ php console app:key
 ```
 
 #### app:serve
-Start the PHP built-in server using `APP_URL` from `.env` as the host.
+Start the PHP built-in server on `127.0.0.1`.
 
 ```cli
 php console app:serve
 ```
 
-**You can specify the port to run:**
+**Specify a custom port** (default: 8000):
 
 ```cli
 php console app:serve 8001
@@ -240,11 +240,11 @@ php console watch --path=app,config --ext=php,json --run="vendor/bin/phpunit"
 
 ## Interactive Prompts & Output
 
-Lightpack console CLI provides a rich set of APIs for interactive command-line UX:
+The Lightpack console CLI provides a rich set of APIs for interactive command-line UX:
 
 ### Output Formatting
 
-Use the `Lightpack\Console\Output()` class for styled output:
+Use the `Lightpack\Console\Output` class for styled output:
 
 ```php
 $output = new Output();
@@ -300,6 +300,65 @@ $choice = $prompt->choice('Pick one:', ['a' => 'Apple', 'b' => 'Banana']);
    php console my:command arg1 --flag=value
    ```
 
-**Note:** All arguments are passed as an array to `run()`.
+---
+
+### Parsing Command Arguments
+
+Lightpack provides the `Args` helper class for clean argument parsing:
+
+```php
+use Lightpack\Console\Args;
+use Lightpack\Console\ICommand;
+use Lightpack\Console\Output;
+
+class MyCommand implements ICommand
+{
+    public function run(array $arguments = [])
+    {
+        $args = new Args($arguments);
+        $output = new Output();
+        
+        // Get positional arguments
+        $name = $args->first();              // First positional arg
+        $all = $args->positional();          // All positional args
+        
+        // Get options with values
+        $table = $args->get('table');        // --table=users
+        $key = $args->get('key', 'id');      // --key=id (with default)
+        
+        // Check for flags
+        if ($args->has('force')) {           // --force
+            $output->warning('Force mode enabled');
+        }
+        
+        // Access raw arguments
+        $raw = $args->all();                 // Original array
+    }
+}
+```
+
+#### Argument Syntax
+
+**Positional arguments** (no dashes):
+```cli
+php console my:command User Product
+```
+
+**Options with values** (double dash with equals):
+```cli
+php console my:command --table=users --key=id
+```
+
+**Flags** (double dash, no value):
+```cli
+php console my:command --force --verbose
+```
+
+**Mixed usage**:
+```cli
+php console create:model User --table=users --key=id
+```
+
+**Note:** Only long options (`--option`) are supported. Short flags (`-o`) are treated as positional arguments.
 
 ---

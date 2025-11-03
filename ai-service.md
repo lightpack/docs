@@ -5,12 +5,12 @@ A unified, explicit, and extensible interface for text generation, summarization
 - **Purpose:** Seamlessly add AI/ML-powered text, content, and structured data generation to any Lightpack project.
 - **Where to Use:** Blog/content generation, summarization, Q&A, code generation, structured data extraction, creative writing, and more.
 
-**Lightpack AI** exposes two super easy to use methods:
+**Lightpack AI** exposes three methods:
 
 ```php
-ai()->ask(); // Simple question-answer
-
-ai()->task(); // Structured text output
+ai()->ask();      // Simple question-answer
+ai()->task();     // Structured data extraction
+ai()->generate(); // Raw API access
 ```
 
 ## Supported Providers
@@ -42,16 +42,32 @@ Below is a brief explanation of **config/ai.php** file.
 | `max_tokens`                 | Max output length                        | `256`                     |
 | `http_timeout`               | Request timeout (seconds)                | `10`                      |
 | `model`                      | Model name (per provider)                | `'gpt-3.5-turbo'`, etc.   |
-| `cache_ttl`                  | Cache lifetime (seconds)                 | `3600`                    |
+| `cache_ttl`                  | Cache TTL when enabled (seconds)         | `3600`                    |
+| `endpoint`                   | Custom API endpoint (optional)           | Per-provider default      |
 | `providers.<driver>.endpoint`| API endpoint (per provider)              |                           |
 | `providers.<driver>.model`   | Default model for driver                 |                           |
 | `providers.<driver>.key`     | API key for driver                       |                           |
 
 ## Usage
 
-Use `ai()` helper as convinience to access the current provider. The document below explains how to use the supported AI features.
+Lightpack AI provides three methods for different use cases:
+
+| Method | Use When | Returns |
+|--------|----------|---------|
+| `ask()` | Simple questions, plain text answers | String |
+| `task()` | Structured data extraction with validation | Array with `success`, `data`, `errors` |
+| `generate()` | Custom endpoints, non-JSON responses, raw API access | Array with `text`, `usage`, `raw` |
+
+**Quick Decision Guide:**
+- Need a quick answer? → `ask()`
+- Need JSON with specific fields? → `task()`
+- Need embeddings/images or custom API? → `generate()`
+
+---
 
 ### ask()
+
+**Use for:** Quick questions that need plain text answers.
 
 For simple, one-off questions, use the `ask()` method:
 
@@ -64,34 +80,40 @@ echo $answer; // "Paris"
 
 ---
 
-
 ### task()
 
-The `TaskBuilder` enables advanced, schema-aware structured AI response:
+**Use for:** Extracting structured data with type validation and required field checks.
 
 ```php
-// Get a structured JSON object with validation
 $result = ai()->task()
     ->prompt('Who created Monalisa and at what age?')
     ->expect(['name' => 'string', 'age' => 'int'])
     ->required('name', 'age')
     ->run();
+
+if ($result['success']) {
+    echo $result['data']['name']; // "Leonardo da Vinci"
+    echo $result['data']['age'];  // 51
+} else {
+    print_r($result['errors']);   // ["Missing required field: name"]
+}
 ```
 
-**It exposes following capabilities:**
-
-- **expect(array $schema):** Specify expected keys/types for JSON output.
-- **required(...$fields):** Mark fields as required (fail if missing/null).
-- **expectArray($key):** Expect an array of objects (e.g., list of movies).
-- **example(array $example):** Provide an example for the model.
-- **messages/system:** Compose multi-turn, role-based conversations.
-- **Robust JSON extraction:** Handles messy LLM output.
+**Key methods:**
+- `prompt(string)` - Set the question
+- `expect(array)` - Define JSON schema with types
+- `required(...fields)` - Mark fields as required
+- `expectArray(key)` - Expect array of objects
+- `system(string)` - Set system prompt
+- `model(string)` - Override model
+- `cache(bool)` - Enable caching
+- `run()` - Execute and return `['success', 'data', 'errors', 'raw']`
 
 ---
 
-**Example Recipes**
+#### Example Recipes
 
-#### 1. Validate Array of Objects
+**1. Validate Array of Objects**
 
 ```php
 $result = ai()->task()
@@ -106,7 +128,7 @@ if (!$result['success']) {
 }
 ```
 
-#### 2. Use Conversation History
+**2. Use Conversation History**
 
 ```php
 $result = ai()->task()
@@ -115,7 +137,39 @@ $result = ai()->task()
     ->run();
 ```
 
-#### 3. Custom Model/Temperature
+### generate()
+
+**Use for:** Raw API access, custom endpoints (embeddings, images), or non-JSON responses.
+
+```php
+// Standard chat completion
+$result = ai()->generate([
+    'prompt' => 'Explain quantum computing',
+    'model' => 'gpt-4',
+    'temperature' => 0.7,
+    'max_tokens' => 500,
+]);
+
+echo $result['text'];      // Generated text
+echo $result['usage'];     // Token usage stats (if available)
+```
+
+**Supported parameters:**
+- `prompt` or `messages`: Input text or conversation history
+- `system`: System prompt/persona
+- `model`: Model name (overrides config)
+- `temperature`: Creativity level (0.0-2.0)
+- `max_tokens`: Max output length
+- `cache`: Enable caching (default: false)
+- `cache_ttl`: Cache TTL in seconds
+- `endpoint`: Custom API endpoint
+- `timeout`: HTTP timeout in seconds
+
+---
+
+#### Example Recipes
+
+**1. Custom Model/Temperature**
 
 ```php
 $result = ai()->generate([
@@ -125,17 +179,37 @@ $result = ai()->generate([
 ]);
 ```
 
-#### 4. Caching
+**2. Custom Endpoint (Multiple APIs)**
 
-- All providers cache results by default (configurable via `cache` and `cache_ttl` keys or your config).
-- You can bypass **cache** or set **TTL** for a task:
+```php
+// Use embeddings API instead of chat
+$result = ai()->generate([
+    'endpoint' => 'https://api.openai.com/v1/embeddings',
+    'input' => 'Text to embed',
+    'model' => 'text-embedding-ada-002'
+]);
+
+// Use image generation API
+$result = ai()->generate([
+    'endpoint' => 'https://api.openai.com/v1/images/generations',
+    'prompt' => 'A sunset over mountains',
+    'model' => 'dall-e-3'
+]);
+```
+
+## Caching
+
+- **Caching is opt-in** (disabled by default) to preserve AI response variability.
+- Enable caching for deterministic tasks (data extraction, classification) or cost optimization:
   ```php
 ai()->task()
-    ->prompt('...')
-    ->cache(false)    // disables cache for this run
-    ->cacheTtl(60)    // sets cache TTL to 60 seconds
+    ->prompt('Extract email from: john@example.com')
+    ->cache(true)     // enables cache for this run
+    ->cacheTtl(3600)  // cache for 1 hour (optional, uses config default)
     ->run();
   ```
+- **When to cache:** Deterministic tasks with `temperature: 0`, expensive structured data extraction, repeated queries.
+- **When NOT to cache:** Creative writing, real-time data, personalized responses.
 
 ## Error Handling
 

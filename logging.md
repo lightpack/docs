@@ -1,6 +1,6 @@
 # Logging
 
-**Lightpack** ships with a PSR-3 compatible logger that is already configured as a service for you. You can access the logger instance as service using `logger()` which gives an instance of `Lightpack\Logger\Logger`. 
+**Lightpack** provides logging functionality that is already configured as a service for you. You can access the logger instance as service using `logger()` which gives an instance of `Lightpack\Logger\Logger`. 
 
 This class exposes following logging methods:
 
@@ -90,7 +90,7 @@ This is useful for testing environments where you don't want log files created.
 
 ## Available Methods
 
-All logging methods follow the PSR-3 standard and accept two parameters:
+All logging methods accept two parameters:
 
 1. **`$message`** (string) - The log message
 2. **`$context`** (array, optional) - Additional structured data

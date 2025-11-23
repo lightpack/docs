@@ -1,6 +1,6 @@
 # URL Utility
 
-Lightpack's **Url** utility class provides a comprehensive set of methods for URL generation, manipulation, and validation. It supports route-based URLs, asset URLs, signed URLs, and various URL manipulation operations.
+Lightpack's **Url** utility class provides a comprehensive set of methods for URL generation, manipulation, and validation.
 
 You can instantiate to **Url** utility:
 
@@ -32,63 +32,6 @@ If you set the environment variable `APP_URL`, then it returns fully qualified U
 // If APP_URL=https://example.com
 // Returns: https://example.com/api/v1
 url()->to('api', 'v1'); 
-```
-
-## Asset URLs
-
-Generate URLs for static assets in the public directory:
-
-```php
-// Basic asset URL
-url()->asset('css/styles.css'); // Returns: /css/styles.css
-```
-
-With `ASSET_URL` environment variable:
-
-```php
-// If ASSET_URL=https://cdn.example.com
-// Returns: https://cdn.example.com/js/app.js
-url()->asset('js/app.js'); 
-```
-
-Fallback to `APP_URL` if `ASSET_URL` not set:
-
-```php
-// If APP_URL=https://example.com
-// Returns: https://example.com/images/logo.png
-url()->asset('images/logo.png'); 
-```
-
-## Route URLs
-
-Generate URLs for named routes:
-
-```php
-
-Basic route URL
-
-```php
-// Returns: /users/123/profile
-url()->route('user.profile', ['id' => 123]); 
-```
-Route with optional parameters
-
-```php
-// Returns: /blog/tech/php-tips
-url()->route('blog.post', [
-    'category' => 'tech',
-    'slug' => 'php-tips'
-]); 
-```
-
-Route with query parameters:
-
-```php
-// Returns: /search?q=php&page=1
-url()->route('search', [
-    'q' => 'php',
-    'page' => 1
-]); 
 ```
 
 ## URL Manipulation
@@ -169,32 +112,6 @@ Join URL segments:
 ```php
 // Returns: https://api.com/v1/users?sort=desc
 url()->join('https://api.com', 'v1/', '/users', '?sort=desc');
-```
-
-## URL Signing
-
-Generate a signed URL for a given route for secure access:
-
-```php
-// Generate signed URL (expires in 1 hour default)
-$signedUrl = url()->sign('download.file', ['id' => 123]);
-
-// Generate signed URL with custom expiration
-$signedUrl = url()->sign('download.file', ['id' => 123], 7200); // 2 hours
-```
-
-Verify signed URL:
-
-```php
-if (url()->verify($signedUrl)) {
-    // URL is valid and not expired
-}
-```
-
-Verify with ignored parameters:
-
-```php
-url()->verify($signedUrl, ['utm_source', 'utm_medium']);
 ```
 
 ## Comprehensive Example Scenarios

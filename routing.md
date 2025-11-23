@@ -107,14 +107,34 @@ Name routes for easy URL generation:
 route()->get('/products/:id', ProductController::class)->name('product.show');
 ```
 
-Generate URLs using the `url()` helper:
+Generate URLs using the `url()` method:
 ```php
-url()->route('product.show', ['id' => 42]); // /products/42
+route()->url('product.show', ['id' => 42]); // /products/42
 ```
 
 > **Important:** The second parameter must be an **associative array** with keys matching the route parameter names.
 
 > **Important:** Route names must be unique. Registering a duplicate name throws an `Exception` with message: `"Duplicate route name: {name}"`.
+
+Route with optional parameters
+
+```php
+// Returns: /blog/tech/php-tips
+url()->route('blog.post', [
+    'category' => 'tech',
+    'slug' => 'php-tips'
+]); 
+```
+
+Route with query parameters:
+
+```php
+// Returns: /search?q=php&page=1
+url()->route('search', [
+    'q' => 'php',
+    'page' => 1
+]); 
+```
 
 ---
 
@@ -178,6 +198,37 @@ route()->any('/status', StatusController::class);
 ```
 
 > **Note:** `any()` registers the route for all supported HTTP verbs: GET, POST, PUT, PATCH, DELETE, OPTIONS.
+
+---
+
+
+## Signed Routes
+
+Generate a signed URL for a given route for secure access:
+
+```php
+// Generate signed URL (expires in 1 hour default)
+$signedUrl = route()->sign('download.file', ['id' => 123]);
+
+// Generate signed URL with custom expiration
+$signedUrl = route()->sign('download.file', ['id' => 123], 7200); // 2 hours
+```
+
+Verify signed URL using `url()` utility helper:
+
+```php
+if (url()->verify($signedUrl)) {
+    // URL is valid and not expired
+}
+```
+
+Verify with ignored parameters:
+
+```php
+url()->verify($signedUrl, ['utm_source', 'utm_medium']);
+```
+
+Read more about `url()` utility helper [here](url.md).
 
 ---
 

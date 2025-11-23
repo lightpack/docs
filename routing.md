@@ -230,6 +230,8 @@ url()->verify($signedUrl, ['utm_source', 'utm_medium']);
 
 Read more about `url()` utility helper [here](url.md).
 
+> **Note:** To easily verify current request URL, see [Request](request?id=url-signature-validation) docs.
+
 ---
 
 ## Subdomain / Host-Based Routing

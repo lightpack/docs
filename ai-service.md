@@ -182,47 +182,9 @@ $options = [
 
 ---
 
-#### Example Recipes
-
-**1. Store Product Embeddings**
-
-```php
-// One-time: Generate and store embeddings
-$products = Product::query()->all();
-$descriptions = $products->column('description');
-
-$embeddings = ai()->embed($descriptions);  // Single API call
-
-foreach ($products as $i => $product) {
-    $product->embedding = json_encode($embeddings[$i]);
-    $product->save();
-}
-```
-
-**2. Semantic Product Search**
-
-```php
-function searchProducts(string $query): array
-{
-    $queryEmbedding = ai()->embed($query);
-    
-    $items = Product::query()
-        ->select('id', 'embedding')
-        ->get()
-        ->map(fn($p) => [
-            'id' => $p->id,
-            'embedding' => json_decode($p->embedding, true)
-        ]);
-    
-    return ai()->similar($queryEmbedding, $items, limit: 10);
-}
-```
-
----
-
 ### similar()
 
-**Use for:** Finding semantically similar items using cosine similarity.
+**Use for:** Finding semantically similar items.
 
 ```php
 $queryEmbedding = ai()->embed('laptop for programming');
@@ -274,7 +236,51 @@ ai()->similar(
 
 ---
 
-#### Example Recipes
+#### Example Recipes 1: Storing Embeddings
+
+**1. Store Product Embeddings**
+
+```php
+// In your model
+class Product extends Model
+{
+    protected $casts = [
+        'embedding' => 'array'
+    ];
+}
+
+// store the embeddings for the product
+$product->embedding = ai()->embed($product->description);
+$product->save();
+```
+
+**2. Semantic Product Search**
+
+```php
+// fetch products with their embeddings
+$items = Product::query()
+    ->select('id', 'embedding')
+    ->whereNotNull('embedding')
+    ->all()
+    ->map(fn($p) => [
+        'id' => $p->id,
+        'embedding' => $p->embedding
+    ]);
+
+// semantic search for similar products
+$query = 'best laptop for programming';
+$queryEmbedding = ai()->embed($query);
+$results = ai()->similar($queryEmbedding, $items, limit: 10);
+
+// process results
+foreach ($results as $result) {
+    // Product ID: $result['id'];
+}
+```
+
+---
+
+#### Example Recipes 2: Filtering and RAG
 
 **1. Filter by Similarity Threshold**
 
@@ -287,6 +293,7 @@ $results = ai()->similar($queryEmbedding, $items, limit: 10, threshold: 0.7);
 
 ```php
 // Find relevant docs
+$userQuestion = 'How do I reset my password?';
 $queryEmbedding = ai()->embed($userQuestion);
 $relevant = ai()->similar($queryEmbedding, $docs, limit: 3);
 
@@ -303,41 +310,30 @@ $answer = ai()->task()
 **3. Content Recommendations**
 
 ```php
+$articles = Article::query()
+    ->select('id', 'embedding')
+    ->whereNotNull('embedding')
+    ->all()
+    ->map(fn($a) => [
+        'id' => $a->id,
+        'embedding' => $a->embedding
+    ]);
+
 // "Users who read this also read..."
-$articleEmbedding = json_decode($article->embedding, true);
-$similar = ai()->similar($articleEmbedding, $allArticles, limit: 5);
+$similar = ai()->similar($article->embedding, $articles, limit: 5);
 ```
 
 ---
 
 ### Embedding Provider Notes
 
-**Gemini (Recommended for most apps):**
-- ✅ FREE embeddings
-- 768 dimensions
-- Model: `text-embedding-004`
-
-**OpenAI:**
-- $0.02 per 1M tokens
-- 1536 dimensions
-- Model: `text-embedding-3-small`
-
-**Mistral:**
-- $0.10 per 1M tokens
-- 1024 dimensions
-- Model: `mistral-embed`
-
-**Important:** Embeddings are NOT cross-compatible. Always use the same provider for indexing and searching.
+**Important:** Embeddings are NOT cross-compatible. Always use the same provider for embedding and searching.
 
 ---
 
 ## Vector Search: Architecture & Extensibility
 
-Lightpack's vector search is designed with a simple principle: **start simple, scale when needed**. The default in-memory implementation handles 95% of real-world applications, but you can seamlessly upgrade to vector databases when you outgrow it.
-
-### How It Works
-
-When you call `ai()->similar()`, Lightpack uses a `VectorSearchInterface` implementation to find matches. By default, this is `InMemoryVectorSearch`, but you can swap it for Qdrant, Meilisearch, or any custom implementation.
+When you call `ai()->similar()`, Lightpack uses a `VectorSearchInterface` implementation to find matches. By default, this is `InMemoryVectorSearch`, but you can swap it for Qdrant, Meilisearch, or any custom implementation. Lightpack's vector search is designed with a simple principle: **start simple, scale when needed**. The default in-memory implementation is good for most of real-world applications, but you can seamlessly upgrade to vector databases when you outgrow it.
 
 ```php
 // Default behavior - uses InMemoryVectorSearch automatically
@@ -354,35 +350,29 @@ $results = ai()->similar($queryEmbedding, 'products_collection');
 
 **What it is:** A brute-force cosine similarity search that compares your query against every item in memory.
 
-**Characteristics:**
-
 | Aspect | Details |
 |--------|---------|
 | **Algorithm** | Brute-force cosine similarity (O(n)) |
 | **Accuracy** | 100% recall (exact, not approximate) |
-| **Performance** | 20-100ms for < 5K items |
+| **Performance** | ~20-250ms for < 5K items |
 | **Memory** | ~3 KB per item (embeddings only) |
-| **Scale** | < 5K documents, < 50 searches/sec |
-| **Auto-warning** | Logs if searching > 5K items |
+| **Scale** | < 5K documents, < 50 concurrent searches/sec |
 
-**Perfect for:**
-- Small to medium datasets (< 5K documents)
-- Low to moderate traffic (< 50 searches/second)
-- Development and testing environments
-- Apps where 100ms search time is acceptable
+**Note:** Above is not a hard benchmark but a good approximation.
 
 **Example:**
 ```php
 // Load only embeddings (not full models!)
 $items = Product::query()
     ->select('id', 'embedding')
-    ->get()
+    ->whereNotNull('embedding')
+    ->all()
     ->map(fn($p) => [
         'id' => $p->id,
-        'embedding' => json_decode($p->embedding, true)
+        'embedding' => $p->embedding
     ]);
 
-// Search - fast for < 5K items
+// Search for similar items
 $results = ai()->similar($queryEmbedding, $items, limit: 10);
 ```
 
@@ -397,11 +387,8 @@ use Lightpack\AI\VectorSearch\VectorSearchInterface;
 
 class QdrantVectorSearch implements VectorSearchInterface
 {
-    public function __construct(
-        private string $host,
-        private string $apiKey
-    ) {}
-    
+    public function __construct(private $client) {}
+
     public function search(array $queryEmbedding, mixed $target, int $limit = 5, array $options = []): array
     {
         // $target is collection name for vector DBs
@@ -426,7 +413,8 @@ class QdrantVectorSearch implements VectorSearchInterface
 }
 
 // Use custom implementation
-ai()->setVectorSearch(new QdrantVectorSearch('localhost:6333', 'api-key'));
+$vectorSearch = app(QdrantVectorSearch::class);
+ai()->setVectorSearch($vectorSearch);
 
 // Now similar() uses Qdrant
 $results = ai()->similar($queryEmbedding, 'products_collection', limit: 10);
@@ -458,75 +446,6 @@ interface VectorSearchInterface
     // ...
 ]
 ```
-
----
-
-### Example: Meilisearch Implementation
-
-```php
-class MeilisearchVectorSearch implements VectorSearchInterface
-{
-    public function __construct(private $client) {}
-    
-    public function search(array $queryEmbedding, mixed $target, int $limit = 5, array $options = []): array
-    {
-        $results = $this->client->index($target)->search('', [
-            'vector' => $queryEmbedding,
-            'limit' => $limit
-        ]);
-        
-        return array_map(fn($hit) => [
-            'id' => $hit['id'],
-            'similarity' => $hit['_semanticScore'],
-            'item' => $hit
-        ], $results['hits']);
-    }
-}
-```
-
----
-
-### When to Upgrade from In-Memory
-
-| Metric | In-Memory OK | Consider Vector DB |
-|--------|--------------|-------------------|
-| **Documents** | < 5K | > 10K |
-| **Search time** | < 200ms | > 300ms |
-| **Searches/sec** | < 50 | > 100 |
-| **Memory usage** | < 50 MB | > 100 MB |
-| **CPU usage** | < 70% | > 80% |
-
-**Signs you need to upgrade:**
-- Search taking > 200ms consistently
-- Server CPU > 70% during searches
-- Memory pressure from loading embeddings
-- Need sub-50ms response times
-- Scaling beyond 10K documents
-
----
-
-### The Upgrade Path
-
-**Lightpack's approach:**
-
-1. **Start:** Use `InMemoryVectorSearch` (zero config, works immediately)
-2. **Monitor:** Watch search times, CPU usage, and dataset size
-3. **Upgrade:** Implement `VectorSearchInterface` when you hit limits
-4. **Deploy:** Call `setVectorSearch()` - no other code changes needed
-
-**Why this works:**
-- No premature optimization
-- Same API regardless of backend
-- Easy to test both implementations
-- Gradual migration (start with one collection)
-
-**The interface ensures:**
-- Consistent return format
-- Drop-in replacement
-- Provider-agnostic code
-- Future-proof architecture
-
-**Bottom line:** Start with in-memory. You'll know when to upgrade. And when you do, it's just one line of code.
 
 ---
 

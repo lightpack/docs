@@ -18,7 +18,7 @@ $faker = new Faker(); // Uses the default 'en' locale
 $name = $faker->name();         // 'John Smith'
 $email = $faker->email();       // 'johnsmith@example.com'
 $city = $faker->city();         // 'London'
-$sentence = $faker->sentence(); // 'Lorem ipsum dolor sit amet.'
+$sentence = $faker->sentence(); // 'People over you have are we you come up.'
 $uuid = $faker->uuid();         // 'e7b8...-...'
 ```
 
@@ -52,7 +52,7 @@ return [
     'jobTitles' => ['Engineer'],
     'productNames' => ['Widget'],
     'phonePrefixes' => ['+33'],
-    'words' => ['lorem', 'ipsum', 'dolor'],
+    'words' => ['the', 'be', 'to', 'of', 'and', ...], // Common English words
     // ...
 ];
 ```
@@ -78,6 +78,8 @@ $faker->setLocaleData([
 All methods are explicit, chainable, and deterministic (with seeding):
 
 ### Identity & Contact
+- `firstName(): string` — First name only
+- `lastName(): string` — Last name only
 - `name(): string` — Full name (first + last)
 - `email(): string` — Email address (derived from name + domain)
 - `username(): string` — Username (format: `firstname.lastname##`)
@@ -94,7 +96,9 @@ All methods are explicit, chainable, and deterministic (with seeding):
 - `price(float $min = 1, float $max = 9999, string $currency = '$'): string` — Formatted price string
 
 ### Internet & Tech
-- `url(): string` — Random URL
+- `domainName(): string` — Domain name
+- `url(): string` — Random URL with domain
+- `userAgent(): string` — Browser user agent string (Chrome, Safari, Firefox, Edge)
 - `ipv4(): string` — Random IPv4 address
 - `ipv6(): string` — Random IPv6 address
 - `hexColor(): string` — Random hex color code (e.g., '#A3F2B1')
@@ -108,11 +112,12 @@ All methods are explicit, chainable, and deterministic (with seeding):
 - `enum(array $values)` — Random value from array
 
 ### Text
-- `sentence(int $words = 8): string` — Random sentence with specified word count
+- `sentence(int $words = 8): string` — Random sentence using common English words
 - `paragraph(int $sentences = 3): string` — Random paragraph (each sentence has 7-15 words)
 
 ### Dates & Time
 - `date(string $format = 'Y-m-d'): string` — Random date (between 10 years ago and now)
+- `datetime(string $format = 'Y-m-d H:i:s'): string` — Random datetime with time (last 1 year)
 - `dob(int $minAge = 18, int $maxAge = 65): string` — Date of birth in 'Y-m-d' format
 - `age(int $min = 0, int $max = 100): int` — Random age
 
@@ -188,6 +193,31 @@ for ($i = 0; $i < 10; $i++) {
     $emails[] = $unique->email();
 }
 // All emails are unique
+```
+
+### Generate User Profile
+```php
+$user = [
+    'first_name' => $faker->firstName(),
+    'last_name' => $faker->lastName(),
+    'email' => $faker->email(),
+    'username' => $faker->username(),
+    'password' => $faker->password(16),
+    'phone' => $faker->phone(),
+    'address' => $faker->address(),
+    'registered_at' => $faker->datetime(),
+];
+```
+
+### Generate Blog Post
+```php
+$post = [
+    'title' => ucwords($faker->sentence(6)),
+    'slug' => $faker->slug(5),
+    'content' => $faker->paragraph(5),
+    'author' => $faker->name(),
+    'published_at' => $faker->datetime('Y-m-d H:i:s'),
+];
 ```
 
 ---

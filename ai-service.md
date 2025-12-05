@@ -5,12 +5,11 @@ A unified, explicit, and extensible interface for text generation, summarization
 - **Purpose:** Seamlessly add AI/ML-powered text generation, embeddings, and semantic search to any Lightpack project.
 - **Where to Use:** Blog/content generation, summarization, Q&A, code generation, structured data extraction, semantic search, RAG applications, content recommendations, and more.
 
-**Lightpack AI** exposes five methods:
+**Lightpack AI** exposes four methods:
 
 ```php
 ai()->ask();      // Simple question-answer
 ai()->task();     // Structured data extraction
-ai()->generate(); // Raw API access
 ai()->embed();    // Text to vector embeddings
 ai()->similar();  // Semantic similarity search
 ```
@@ -38,13 +37,12 @@ php console create:config --support=ai
 
 ## Usage
 
-Lightpack AI provides five methods for different use cases:
+Lightpack AI provides four methods for different use cases:
 
 | Method | Use When | Returns |
 |--------|----------|---------|
 | `ask()` | Simple questions, plain text answers | String |
 | `task()` | Structured data extraction with validation | Array with `success`, `data`, `errors` |
-| `generate()` | Custom endpoints, non-JSON responses, raw API access | Array with `text`, `usage`, `raw` |
 | `embed()` | Convert text to vector embeddings | Array of floats (single) or array of arrays (batch) |
 | `similar()` | Find semantically similar items | Array of matches with similarity scores |
 
@@ -52,7 +50,6 @@ Lightpack AI provides five methods for different use cases:
 - Need a quick answer? → `ask()`
 - Need JSON with specific fields? → `task()`
 - Need semantic search? → `embed()` + `similar()`
-- Need custom API access? → `generate()`
 
 ---
 
@@ -126,62 +123,6 @@ $result = ai()->task()
     ->message('system', 'You are a helpful assistant.')
     ->message('user', 'How do I reset my password?')
     ->run();
-```
-
-### generate()
-
-**Use for:** Raw API access, custom endpoints (embeddings, images), or non-JSON responses.
-
-```php
-// Standard chat completion
-$result = ai()->generate([
-    'prompt' => 'Explain quantum computing',
-    'model' => 'gpt-4',
-    'temperature' => 0.7,
-    'max_tokens' => 500,
-]);
-
-echo $result['text'];      // Generated text
-echo $result['usage'];     // Token usage stats (if available)
-```
-
-**Supported parameters:**
-- `prompt` or `messages`: Input text or conversation history
-- `system`: System prompt/persona
-- `model`: Model name (overrides config)
-- `temperature`: Creativity level (0.0-2.0)
-- `max_tokens`: Max output length
-- `cache`: Enable caching (default: false)
-- `cache_ttl`: Cache TTL in seconds
-- `endpoint`: Custom API endpoint
-- `timeout`: HTTP timeout in seconds
-
----
-
-#### Example Recipes
-
-**1. Custom Model/Temperature**
-
-```php
-$result = ai()->generate([
-    'prompt' => 'Write a creative poem.',
-    'model' => 'gpt-4',
-    'temperature' => 1.2,
-]);
-```
-
-**2. Conversation with History**
-
-```php
-$result = ai()->generate([
-    'messages' => [
-        ['role' => 'system', 'content' => 'You are a helpful assistant.'],
-        ['role' => 'user', 'content' => 'What is PHP?'],
-        ['role' => 'assistant', 'content' => 'PHP is a server-side scripting language.'],
-        ['role' => 'user', 'content' => 'Show me an example.']
-    ],
-    'model' => 'gpt-4'
-]);
 ```
 
 ---

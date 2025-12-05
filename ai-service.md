@@ -21,6 +21,7 @@ ai()->generate(); // Raw API access
 | `anthropic` | `Providers\Anthropic`        | Claude models            |
 | `mistral`   | `Providers\Mistral`          | Mistral models           |
 | `groq`      | `Providers\Groq`             | Groq API                 |
+| `gemini`    | `Providers\Gemini`           | Gemini API               |
 
 **Add your own:** Implement `ProviderInterface` and register in config.
 

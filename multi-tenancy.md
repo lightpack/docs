@@ -137,11 +137,13 @@ class Post extends TenantModel
 
 ### Step 3: Set Tenant Context
 
-Set the tenant context:
+Set the tenant context using `TenantContext`:
 
 ```php
-// e.g. after authenticating user
-TenantModel::setContext($user->tenant_id);
+use Lightpack\Database\Lucid\TenantContext;
+
+// After authenticating user
+TenantContext::set($user->tenant_id);
 ```
 
 ### Step 4: Use Models Normally
@@ -219,7 +221,7 @@ class Article extends TenantModel
 
 ## Tenant Resolution Strategies
 
-You set the tenant context using `TenantModel::setContext()`. Here are common patterns for different application types:
+You set the tenant context using `TenantContext`. Here are common patterns for different application types:
 
 ### Strategy 1: Session-Based
 
@@ -227,13 +229,13 @@ Best for traditional web applications with cookie-based authentication.
 
 ```php
 // In your route filter
-use Lightpack\Database\Lucid\TenantModel;
+use Lightpack\Database\Lucid\TenantContext;
 
 $user = auth()->user();
-TenantModel::setContext(session()->get('tenant.id'));
+TenantContext::set(session()->get('tenant.id'));
 
 // Or get from authenticated user
-TenantModel::setContext($user->tenant_id);
+TenantContext::set($user->tenant_id);
 ```
 
 **When to use:**
@@ -247,10 +249,10 @@ Best for RESTful APIs, mobile apps, and SPAs.
 
 ```php
 // In your API authentication middleware
-use Lightpack\Database\Lucid\TenantModel;
+use Lightpack\Database\Lucid\TenantContext;
 
 $user = auth()->user(); // From JWT token
-TenantModel::setContext($user->tenant_id);
+TenantContext::set($user->tenant_id);
 ```
 
 **When to use:**
@@ -265,13 +267,13 @@ Best for SaaS applications where each tenant has their own domain or subdomain (
 
 ```php
 // In your route filter or middleware
-use Lightpack\Database\Lucid\TenantModel;
+use Lightpack\Database\Lucid\TenantContext;
 
 $domain = request()->host();
 $tenant = Tenant::query()->where('domain', $domain)->one();
 
 if ($tenant) {
-    TenantModel::setContext($tenant->id);
+    TenantContext::set($tenant->id);
 }
 ```
 
@@ -305,12 +307,13 @@ $tenant2Posts = Post::queryWithoutScopes()
 
 ## Summary
 
-Lightpack's `TenantModel` provides:
+Lightpack's multi-tenancy system provides:
 
 ✅ **Built-in multi-tenancy** - No packages needed  
-✅ **Automatic isolation** - Queries filtered automatically  
-✅ **Flexible tenant context** - Set via `setContext()` from any source  
-✅ **Simple API** - `setContext()`, `getContext()`, `clearContext()`  
+✅ **Automatic isolation** - Queries filtered automatically via `TenantModel`  
+✅ **Flexible tenant context** - Set via `TenantContext` from any source  
+✅ **Simple API** - `TenantContext::set()`, `get()`, `clear()`, `has()`  
+✅ **Clean separation** - Context management separate from model logic  
 ✅ **Production-ready** - Comprehensive test coverage  
 
 This makes it ideal for building SaaS applications and multi-tenant systems with minimal complexity and maximum flexibility.

@@ -1,7 +1,5 @@
 # Multi-Tenancy
 
-## Introduction
-
 Lightpack provides built-in support for **row-level multi-tenancy** through the `TenantModel` class—making it simple to build SaaS applications and multi-tenant systems.
 
 ---
@@ -97,7 +95,7 @@ Lightpack chose **Approach 3 (Row-Level Tenancy)** because it provides the best 
 
 ### Step 1: Create Tenant-Aware Schema
 
-Add a tenant identifier column to your tables:
+Add a tenant identifier column `tenant_id` to your tables:
 
 ```sql
 CREATE TABLE posts (
@@ -140,15 +138,16 @@ class Post extends TenantModel
 
 ### Step 3: Set Tenant Context
 
-You can create a tenant-aware route filter, that set's the current tenant:
+Set the tenant context:
 
 ```php
-session()->set('tenant.id', $tenantId);
+// e.g. after authenticating user
+TenantModel::setContext($user->tenant_id);
 ```
 
 ### Step 4: Use Models Normally
 
-That's it! All queries are now automatically tenant-scoped:
+Once tenant context is set, all queries are automatically scoped:
 
 ```php
 // Only returns posts for current tenant
@@ -226,21 +225,21 @@ php console create:model Article --tenant --tenant-column=site_id
 
 ## Tenant Resolution Strategies
 
-The `getTenantId()` method determines which tenant is currently active. Lightpack provides a flexible system that supports multiple resolution strategies.
+You set the tenant context using `TenantModel::setContext()`. Here are common patterns for different application types:
 
-### Strategy 1: Session-Based (Default)
+### Strategy 1: Session-Based
 
 Best for traditional web applications with cookie-based authentication.
 
 ```php
 // In your route filter
-session()->set('tenant.id', $tenantId);
+use Lightpack\Database\Lucid\TenantModel;
 
-// Models use default implementation
-class Post extends TenantModel
-{
-    protected $table = 'posts';
-}
+$user = auth()->user();
+TenantModel::setContext(session()->get('tenant.id'));
+
+// Or get from authenticated user
+TenantModel::setContext($user->tenant_id);
 ```
 
 **When to use:**
@@ -252,32 +251,12 @@ class Post extends TenantModel
 
 Best for RESTful APIs, mobile apps, and SPAs.
 
-Create a custom base model:
-
 ```php
-<?php
-
-namespace App\Models;
-
+// In your API authentication middleware
 use Lightpack\Database\Lucid\TenantModel;
 
-class ApiTenantModel extends TenantModel
-{
-    protected function getTenantId(): ?int
-    {
-        // Get tenant from authenticated user's JWT claims
-        return auth()->user()?->tenant_id;
-    }
-}
-```
-
-Then extend from your custom base:
-
-```php
-class Post extends ApiTenantModel
-{
-    protected $table = 'posts';
-}
+$user = auth()->user(); // From JWT token
+TenantModel::setContext($user->tenant_id);
 ```
 
 **When to use:**
@@ -291,21 +270,14 @@ class Post extends ApiTenantModel
 Best for SaaS applications where each tenant has their own domain or subdomain (e.g., `acme.yourapp.com`).
 
 ```php
-<?php
-
-namespace App\Models;
-
+// In your route filter or middleware
 use Lightpack\Database\Lucid\TenantModel;
 
-class DomainTenantModel extends TenantModel
-{
-    protected function getTenantId(): ?int
-    {
-        $domain = request()->host();
-        $tenant = Tenant::query()->where('domain', $domain)->one();
+$domain = request()->host();
+$tenant = Tenant::query()->where('domain', $domain)->one();
 
-        return $tenant?->id;
-    }
+if ($tenant) {
+    TenantModel::setContext($tenant->id);
 }
 ```
 
@@ -314,7 +286,7 @@ class DomainTenantModel extends TenantModel
 - Subdomain-based tenancy
 - Public-facing tenant pages
 
-<p class="tip"><b>Performance Tip:</b> You should cache domain-to-tenant lookups to avoid database queries on every request.</p>
+<p class="tip"><b>Performance Tip:</b> Cache domain-to-tenant lookups to avoid database queries on every request.</p>
 
 ## Bypassing Tenant Isolation
 
@@ -337,135 +309,14 @@ $tenant2Posts = Post::queryWithoutScopes()
 
 ---
 
-## CLI and Background Jobs
-
-### CLI Commands
-
-In CLI context (artisan commands, cron jobs), there's no session, so `getTenantId()` returns `null` by default. This means:
-
-- Queries return **all** records (no tenant filtering)
-- Inserts require manual tenant assignment
-
-**Option 1: Process All Tenants**
-
-```php
-// In your CLI command
-$tenants = Tenant::query()->all();
-
-foreach ($tenants as $tenant) {
-    session()->set('tenant.id', $tenant->id);
-    
-    // Now all queries are scoped to this tenant
-    $posts = Post::query()->where('status', 'draft')->all();
-    
-    // Process posts...
-}
-```
-
-**Option 2: Specify Tenant via Command Argument**
-
-```php
-// php console process:posts --tenant=1
-$tenantId = $args->get('tenant');
-session()->set('tenant.id', $tenantId);
-
-$posts = Post::query()->all(); // Scoped to specified tenant
-```
-
-### Queue Jobs
-
-For background jobs, store the tenant ID with the job and restore it when processing:
-
-```php
-// When dispatching the job
-$job = new ProcessPostJob($post->id, session()->get('tenant.id'));
-queue()->push($job);
-
-// In the job handler
-class ProcessPostJob
-{
-    private $postId;
-    private $tenantId;
-    
-    public function __construct($postId, $tenantId)
-    {
-        $this->postId = $postId;
-        $this->tenantId = $tenantId;
-    }
-    
-    public function handle()
-    {
-        // Restore tenant context
-        session()->set('tenant.id', $this->tenantId);
-        
-        // Now queries are tenant-scoped
-        $post = new Post($this->postId);
-        // Process post...
-    }
-}
-```
-
----
-
-## Testing Tenant Isolation
-
-Always test that tenant isolation works correctly:
-
-```php
-public function testCannotAccessOtherTenantData()
-{
-    // Create post in tenant 1
-    session()->set('tenant.id', 1);
-    $post1 = new Post();
-    $post1->title = 'Tenant 1 Post';
-    $post1->save();
-    
-    // Switch to tenant 2
-    session()->set('tenant.id', 2);
-    
-    // Should not see tenant 1's posts
-    $posts = Post::query()->all();
-    $this->assertCount(0, $posts);
-}
-
-public function testCannotUpdateOtherTenantData()
-{
-    // Create post in tenant 1
-    session()->set('tenant.id', 1);
-    $post = new Post();
-    $post->title = 'Original';
-    $post->save();
-    $postId = $post->id;
-    
-    // Switch to tenant 2
-    session()->set('tenant.id', 2);
-    
-    // Try to update tenant 1's post
-    $post = new Post($postId); // Throws RecordNotFoundException
-}
-
-public function testAutoAssignsTenant()
-{
-    session()->set('tenant.id', 5);
-    
-    $post = new Post();
-    $post->title = 'Test';
-    $post->save();
-    
-    $this->assertEquals(5, $post->tenant_id);
-}
-```
-
----
-
 ## Summary
 
 Lightpack's `TenantModel` provides:
 
 ✅ **Built-in multi-tenancy** - No packages needed  
 ✅ **Automatic isolation** - Queries filtered automatically  
-✅ **CUstomizable tenant resolution** - Session, JWT, domain, or custom  
-✅ **Simple to use** - Just extend `TenantModel`  
+✅ **Flexible tenant context** - Set via `setContext()` from any source  
+✅ **Simple API** - `setContext()`, `getContext()`, `clearContext()`  
 ✅ **Production-ready** - Comprehensive test coverage  
 
 This makes it ideal for building SaaS applications and multi-tenant systems with minimal complexity and maximum flexibility.

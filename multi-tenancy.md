@@ -132,7 +132,6 @@ use Lightpack\Database\Lucid\TenantModel;
 class Post extends TenantModel
 {
     protected $table = 'posts';
-    protected $tenantColumn = 'tenant_id';
 }
 ```
 
@@ -215,11 +214,6 @@ class Article extends TenantModel
 }
 ```
 
-You can also specify this when generating the model:
-
-```terminal
-php console create:model Article --tenant --tenant-column=site_id
-```
 
 ---
 

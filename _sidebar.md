@@ -34,6 +34,7 @@
   * [Eager Loading](eager-loading.md)
   * [Collections](collections.md)
   * [Transformers](transformers.md)
+  * [Multi-Tenancy](multi-tenancy.md)
 
 <!-- * Security -->
 

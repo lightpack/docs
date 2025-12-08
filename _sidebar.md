@@ -22,7 +22,6 @@
 
   * [Connection](db-connection.md)
   * [Query Builder](db-query-builder.md)
-  <!-- * [Pagination](db-pagination.md) -->
   * [Migrations](migrations.md)
   * [Seeder](seeder.md)
   * [Factory](factory.md)

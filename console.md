@@ -56,6 +56,7 @@ php console create:model Product
 ```
 - `--table=products` : Set the table name.
 - `--key=product_id` : Set the primary key name.
+- `--tenant` : Generate a tenant-aware model extending `TenantModel`.
 
 #### create:filter
 Generate a new filter class in `app/Filters`.

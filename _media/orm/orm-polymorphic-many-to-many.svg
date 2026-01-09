@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650">
+  <!-- Background -->
+  <rect width="1000" height="650" fill="#f8f9fa" rx="20"/>
+  
+  <!-- Tags table (left) -->
+  <g transform="translate(60, 240)">
+    <text x="0" y="-15" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#2c3e50">tags</text>
+    <rect width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <line x1="0" y1="40" x2="200" y2="40" stroke="#cbd5e0" stroke-width="1"/>
+    <text x="10" y="25" font-family="monospace" font-size="13" fill="#718096">int</text>
+    <text x="110" y="25" font-family="monospace" font-size="13" fill="#2d3748" font-weight="600">id</text>
+    
+    <rect y="40" width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <line x1="0" y1="80" x2="200" y2="80" stroke="#cbd5e0" stroke-width="1"/>
+    <text x="10" y="65" font-family="monospace" font-size="13" fill="#718096">string</text>
+    <text x="110" y="65" font-family="monospace" font-size="13" fill="#2d3748">name</text>
+    
+    <rect y="80" width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <text x="10" y="105" font-family="monospace" font-size="13" fill="#718096">string</text>
+    <text x="110" y="105" font-family="monospace" font-size="13" fill="#2d3748">slug</text>
+  </g>
+  
+  <!-- tag_morphs pivot table (center) -->
+  <g transform="translate(400, 240)">
+    <text x="0" y="-15" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#2c3e50">tag_morphs</text>
+    <rect width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <line x1="0" y1="40" x2="200" y2="40" stroke="#cbd5e0" stroke-width="1"/>
+    <text x="10" y="25" font-family="monospace" font-size="13" fill="#718096">int</text>
+    <text x="110" y="25" font-family="monospace" font-size="13" fill="#e53e3e" font-weight="600">tag_id</text>
+    
+    <rect y="40" width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <line x1="0" y1="80" x2="200" y2="80" stroke="#cbd5e0" stroke-width="1"/>
+    <text x="10" y="65" font-family="monospace" font-size="13" fill="#718096">int</text>
+    <text x="110" y="65" font-family="monospace" font-size="13" fill="#e53e3e" font-weight="600">morph_id</text>
+    
+    <rect y="80" width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <text x="10" y="105" font-family="monospace" font-size="13" fill="#718096">string</text>
+    <text x="110" y="105" font-family="monospace" font-size="13" fill="#e53e3e" font-weight="600">morph_type</text>
+  </g>
+  
+  <!-- Posts table (top right) -->
+  <g transform="translate(740, 80)">
+    <text x="0" y="-15" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#2c3e50">posts</text>
+    <rect width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <line x1="0" y1="40" x2="200" y2="40" stroke="#cbd5e0" stroke-width="1"/>
+    <text x="10" y="25" font-family="monospace" font-size="13" fill="#718096">int</text>
+    <text x="110" y="25" font-family="monospace" font-size="13" fill="#2d3748" font-weight="600">id</text>
+    
+    <rect y="40" width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <line x1="0" y1="80" x2="200" y2="80" stroke="#cbd5e0" stroke-width="1"/>
+    <text x="10" y="65" font-family="monospace" font-size="13" fill="#718096">string</text>
+    <text x="110" y="65" font-family="monospace" font-size="13" fill="#2d3748">title</text>
+    
+    <rect y="80" width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <text x="10" y="105" font-family="monospace" font-size="13" fill="#718096">text</text>
+    <text x="110" y="105" font-family="monospace" font-size="13" fill="#2d3748">content</text>
+  </g>
+  
+  <!-- Videos table (bottom right) -->
+  <g transform="translate(740, 400)">
+    <text x="0" y="-15" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#2c3e50">videos</text>
+    <rect width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <line x1="0" y1="40" x2="200" y2="40" stroke="#cbd5e0" stroke-width="1"/>
+    <text x="10" y="25" font-family="monospace" font-size="13" fill="#718096">int</text>
+    <text x="110" y="25" font-family="monospace" font-size="13" fill="#2d3748" font-weight="600">id</text>
+    
+    <rect y="40" width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <line x1="0" y1="80" x2="200" y2="80" stroke="#cbd5e0" stroke-width="1"/>
+    <text x="10" y="65" font-family="monospace" font-size="13" fill="#718096">string</text>
+    <text x="110" y="65" font-family="monospace" font-size="13" fill="#2d3748">title</text>
+    
+    <rect y="80" width="200" height="40" fill="#fff" stroke="#cbd5e0" stroke-width="2"/>
+    <text x="10" y="105" font-family="monospace" font-size="13" fill="#718096">string</text>
+    <text x="110" y="105" font-family="monospace" font-size="13" fill="#2d3748">url</text>
+  </g>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#4a5568"/>
+    </marker>
+  </defs>
+  
+  <!-- Connection lines -->
+  <!-- Tags to tag_morphs -->
+  <path d="M 260 280 L 400 280" stroke="#4a5568" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- tag_morphs to Posts -->
+  <path d="M 600 260 L 740 140" stroke="#4a5568" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- tag_morphs to Videos -->
+  <path d="M 600 300 L 740 420" stroke="#4a5568" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Labels on connection lines (positioned away from arrows) -->
+  <text x="310" y="270" font-family="Arial, sans-serif" font-size="12" fill="#718096" font-style="italic">tag_id</text>
+  
+  <text x="650" y="190" font-family="Arial, sans-serif" font-size="12" fill="#718096" font-style="italic">morph_id</text>
+  <text x="630" y="205" font-family="Arial, sans-serif" font-size="12" fill="#718096" font-style="italic">morph_type='posts'</text>
+  
+  <text x="650" y="370" font-family="Arial, sans-serif" font-size="12" fill="#718096" font-style="italic">morph_id</text>
+  <text x="620" y="385" font-family="Arial, sans-serif" font-size="12" fill="#718096" font-style="italic">morph_type='videos'</text>
+</svg>

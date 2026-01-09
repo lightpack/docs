@@ -8,7 +8,7 @@ Lightpack’s Tags system provides framework-native way to add tagging support t
 
 The Tags system uses two tables:
 - `tags`: Stores tag definitions (`id`, `name`, `slug`, timestamps).
-- `tag_models`: Pivot table connecting tags to models (`tag_id`, `model_id`, `model_type`).
+- `tag_morphs`: Pivot table connecting tags to models (`tag_id`, `morph_id`, `morph_type`).
 
 Create schema migration file:
 
@@ -40,39 +40,27 @@ class Post extends Model {
 
 ## TagsTrait API
 
-### tags
+### tags()
 
-Returns a pivot query for the model’s tags.
+Returns the model's tags. Can be accessed as a property or method.
 
 ```php
-// Get all Tag objects for this post
-$post->tags()->all(); 
+$tags = $post->tags;
 ```
 
-### attachTags
+### Pivot Operations
 
-Attach one or more tags to the model.
+Use the pivot methods to manage tag associations:
 
 ```php
 // Attach tags by ID
-$post->attachTags([1, 2, 3]); 
-```
+$post->tags()->attach([1, 2, 3]);
 
-### detachTags
+// Detach tags by ID
+$post->tags()->detach([2]);
 
-Detach one or more tags from the model.
-
-```php
-// Remove tag with ID 2
-$post->detachTags([2]); 
-```
-
-### syncTags
-
-Replace all tags on the model with the given IDs.
-
-```php
-$post->syncTags([3]); // Only tag 3 remains
+// Sync tags (replace all with given IDs)
+$post->tags()->sync([1, 3]);
 ```
 
 ### filters()
@@ -89,7 +77,7 @@ $posts = Post::filters(['tags' => [1, 2]])->all();
 ## Edge Cases & Behavior
 - **Duplicate attaches:** Attaching a tag already present is safe and has no effect.
 - **Detaching non-existent tags:** Detaching a tag not present does nothing (no error).
-- **Type isolation:** Only tags for the correct model type are returned (see `model_type` in pivot).
+- **Type isolation:** Only tags for the correct model type are returned (see `morph_type` in pivot).
 - **Syncing:** Removes all tags not in the new list, attaches any new ones.
 - **Filtering:** `scopeTags` matches any of the provided tag IDs (logical OR).
 

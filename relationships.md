@@ -526,7 +526,7 @@ $avatar = $user->avatar;
 
 #### Morph Many
 
-If you want each **Post**, **Photo**, or **Video** to have many comments, use the `morphMany()` method to fetch related comments model collection.
+For a polymorphic one-to-many relationship, such as each **Post**, **Photo**, or **Video** having many **Comments**, use the `morphMany()` method to fetch related comments model collection.
 
 ```php
 class Post extends Model
@@ -587,6 +587,104 @@ Now, given a comment, you can access its parent—no matter the type:
 ```php
 $comment = new Comment(101);
 $parent = $comment->parent; // Could be a Post, Photo, or Video instance
+```
+
+---
+
+#### Morph To Many
+
+![Polymorphic Many-to-Many Relationship](_media/orm/orm-polymorphic-many-to-many.svg)
+
+A polymorphic many-to-many relationship lets you share a single pivot table across multiple parent models. For example, both **Posts** and **Videos** can have **Tags**, but instead of creating separate `post_tag` and `video_tag` tables, you use one `tag_morphs` table that works for both.
+
+**Why use this?**
+
+When multiple models need the same many-to-many relationship (like tagging, categorization, or permissions), a polymorphic pivot table keeps your schema clean and your code DRY.
+
+**Schema Requirements:**
+
+The pivot table must have three columns:
+- `morph_id` - stores the parent model's ID (post ID or video ID)
+- `morph_type` - stores the parent model's table name (`'posts'` or `'videos'`)
+- Related model's foreign key (e.g., `tag_id`)
+
+Example `tag_morphs` table:
+```sql
+CREATE TABLE tag_morphs (
+    tag_id BIGINT UNSIGNED,
+    morph_id BIGINT UNSIGNED,
+    morph_type VARCHAR(255),
+    PRIMARY KEY (tag_id, morph_id, morph_type)
+);
+```
+
+**Usage:**
+
+Use `morphToMany()` to define the relationship from the parent models (Post, Video) to the related model (Tag).
+
+```php
+class Post extends Model
+{
+    public function tags()
+    {
+        return $this->morphToMany(Tag::class, 'tag_morphs', 'tag_id');
+    }
+}
+
+class Video extends Model
+{
+    public function tags()
+    {
+        return $this->morphToMany(Tag::class, 'tag_morphs', 'tag_id');
+    }
+}
+```
+
+Usage:
+```php
+$post = new Post(12);
+$tags = $post->tags; // All tags for this post
+```
+
+**Pivot Operations:**
+
+```php
+// Attach tags
+$post->tags()->attach([1, 2, 3]);
+
+// Detach tags
+$post->tags()->detach([2]);
+
+// Sync tags (removes old, adds new)
+$post->tags()->sync([1, 3, 4]);
+```
+
+---
+
+#### Morphed By Many
+
+Use `morphedByMany()` to define the inverse polymorphic many-to-many relationship. For example, a **Tag** can belong to many **Posts** and many **Videos**.
+
+```php
+class Tag extends Model
+{
+    public function posts()
+    {
+        return $this->morphedByMany(Post::class, 'tag_morphs', 'tag_id');
+    }
+
+    public function videos()
+    {
+        return $this->morphedByMany(Video::class, 'tag_morphs', 'tag_id');
+    }
+}
+```
+
+Usage:
+```php
+$tag = new Tag(5);
+$posts = $tag->posts;   // All posts with this tag
+$videos = $tag->videos; // All videos with this tag
 ```
 
 ---

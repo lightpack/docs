@@ -588,6 +588,97 @@ class SendMail extends Job {
 
 The framework will call these methods automatically if they exist.
 
+## Handling Permanent Failures
+
+When integrating with 3rd party APIs, you may encounter **business logic failures** that shouldn't be retried. For example, insufficient balance, invalid data, or resource not found. For these cases, use the `failPermanently()` method to fail the job immediately without consuming retry attempts.
+
+### Basic Usage
+
+```php
+class SendSmsJob extends Job
+{
+    protected $attempts = 3;
+    
+    public function run()
+    {
+        $response = $this->smsProvider->send(
+            $this->payload['phone'],
+            $this->payload['message']
+        );
+        
+        // Permanent failure - don't retry
+        if ($response['status'] === 'insufficient_balance') {
+            $this->failPermanently('SMS Provider: Insufficient balance');
+        }
+        
+        // Temporary failure - will retry up to max attempts
+        if ($response['status'] === 'network_timeout') {
+            throw new \RuntimeException('Network timeout, will retry');
+        }
+    }
+}
+```
+
+### When to Use Permanent Failures
+
+Use `failPermanently()` for business logic failures where retrying won't help:
+
+- **Invalid data:** Phone number format is wrong, email address invalid
+- **Insufficient credits:** API balance too low, quota exceeded
+- **Resource not found:** User deleted, product removed
+- **Permission denied:** API key revoked, unauthorized access
+- **Business rules:** Order already processed, duplicate transaction
+
+### Permanent vs Temporary Failures
+
+| Failure Type | Method | Behavior | Use Case |
+|---|---|---|---|
+| **Permanent** | `$this->failPermanently()` | Fails immediately, no retries | Invalid data, insufficient credits, permission denied |
+| **Temporary** | `throw new Exception()` | Retries up to `max attempts` | Network errors, timeouts, rate limits |
+
+### Real-World Example
+
+```php
+class ProcessPaymentJob extends Job
+{
+    protected $attempts = 3;
+    protected $retryAfter = '+30 seconds';
+    
+    public function run()
+    {
+        $payment = $this->paymentGateway->charge($this->payload);
+        
+        // Permanent failures - business logic issues
+        if ($payment['error'] === 'card_declined') {
+            $this->failPermanently('Payment declined: ' . $payment['message']);
+        }
+        
+        if ($payment['error'] === 'invalid_card') {
+            $this->failPermanently('Invalid card number');
+        }
+        
+        if ($payment['error'] === 'duplicate_transaction') {
+            $this->failPermanently('Transaction already processed');
+        }
+        
+        // Temporary failures - infrastructure issues
+        if ($payment['error'] === 'gateway_timeout') {
+            throw new \RuntimeException('Gateway timeout, will retry');
+        }
+        
+        if ($payment['error'] === 'rate_limited') {
+            throw new \RuntimeException('Rate limited, will retry');
+        }
+    }
+}
+```
+
+**Benefits:**
+- ✅ Saves retry attempts for recoverable failures
+- ✅ Fails fast on permanent issues
+- ✅ Clear intent in code
+- ✅ Proper error tracking in failed jobs
+
 ## Retrying Failed Jobs
 
 When jobs fail after exhausting all retry attempts, they are marked as **failed** in the queue. You can retry these failed jobs using the `jobs:retry` command.

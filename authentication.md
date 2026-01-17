@@ -2,47 +2,25 @@
 
 > Session-cookie or token based authentication made easy.
 
-**Lightpack** supports authentication in a very friendly manner. It exposes a couple of authentication methods using `auth()` function.
+**Lightpack** provides a simple to use authentication system for authenticating web and api requests. The `auth()` helper exposes authentication methods:
 
 ```php
-// Returns logged in user id
-auth()->id();
+// Check authentication status
+auth()->isLoggedIn();  // Returns true if user is logged in
+auth()->isGuest();     // Returns true if user is not logged in
 
-// Returns logged in user 
-auth()->user();
+// Get authenticated user
+auth()->id();          // Returns logged in user ID
+auth()->user();        // Returns logged in user object
 
-// Returns true if user is logged in
-auth()->isLoggedIn();
+// Authenticate users
+auth()->attempt();     // Verify credentials and persist session
+auth()->loginAs($user); // Login as specific user (testing/impersonation)
+auth()->viaToken();    // Authenticate via Bearer token (API)
+auth()->recall();      // Auto-login via remember-me cookie
 
-// Returns true if a user is not logged in
-auth()->isGuest();
-
-// Attempt login and start session
-auth()->login();
-
-// Login as a specific user without credentials (useful for testing/impersonation)
-auth()->loginAs($user);
-
-// Attempt login once without starting session
-auth()->attempt();
-
-// Logout the user 
-auth()->logout();
-
-// Attempts to automatically login based on remember me cookie
-auth()->recall();
-
-// Verify incoming request bearer token
-auth()->viaToken();
-
-// Redirect URL post successful login
-auth()->redirectLogin();
-
-// Redirect URL post logout
-auth()->redirectLogout();
-
-// Redirect to login URL
-auth()->redirectLoginUrl();
+// Logout
+auth()->logout();      // Clear session and cookies
 ```
 
 ## Installation
@@ -81,62 +59,177 @@ Different login methods serve different purposes. Choose the right one for your 
 
 | Method | Returns | Sets Session | Sets Cookie | Use Case |
 |--------|---------|--------------|-------------|----------|
-| `login()` | `Redirect` | ✅ Yes | ✅ Yes (if remember me) | Traditional web forms |
-| `attempt()` | `Identity\|null` | ❌ No | ❌ No | API/AJAX requests |
+| `attempt()` | `Identity\|null` | ✅ Yes | ✅ Yes (if remember me) | Web form login |
 | `loginAs($user)` | `Auth` | ✅ Yes | ❌ No | Testing/Admin impersonation |
 | `viaToken()` | `Identity\|null` | ❌ No | ❌ No | Bearer token authentication |
+| `recall()` | `Identity\|null` | ✅ Yes (if valid) | ❌ No | Auto-login from cookie |
 
-### Web Based Login
-To login a user via **session-cookie** mechanism, call the `login()` method on **auth** object.
+### Web Form Login
 
-```php
-auth()->login();
-```
-
-Behind the scenes, this method performs following actions:
-
-* Check if `email/password` credentials match in **users** table.
-* On **success**, start a new session and redirect to **post-login** url.
-* On **failure**, redirect to the login page again with **error** message in session.
-
-### API Based Login
-
-To authenticate a user without maintaining **session-cookie**, use `attempt()` method.
+To authenticate a user via **session-cookie** mechanism, use `attempt()` in your controller:
 
 ```php
-$user = auth()->attempt();
+public function login(LoginRequest $request)
+{
+    $user = auth()->attempt();
 
-if ($user) {
-    // Authentication successful - create token
-    $token = $user->createToken('api');
-    return response()->json(['token' => $token->plainTextToken]);
+    if (!$user) {
+        session()->flash('error', 'Invalid account credentials.');
+        return redirect()->to('login');
+    }
+
+    // Redirect to intended URL, or 'dashboard' route if none
+    return redirect()->intendedRoute('dashboard');
 }
-
-return response()->json(['error' => 'Invalid credentials'], 401);
 ```
 
-This is useful when authenticating user via API requests based on **username/password** credentials. Behind the scenes, this method performs following actions:
+#### Login Request Validation
 
-* Check if `email/password` credentials match in **users** table.
-* On **success**, returns the authenticated **user** object (or `null` on failure).
-* Does NOT start a session or set cookies.
-* You must manually create an API token and return it to the client.
-
-#### Bearer Token
-
-To authenticate an API request containing **Bearer** token in authorization header, use:
+The `LoginRequest` class extends `FormRequest` to validate login credentials before attempting authentication:
 
 ```php
-auth()->viaToken();
+class LoginRequest extends FormRequest
+{
+    protected function rules()
+    {
+        $this->validator
+            ->field('email')
+            ->required()
+            ->email();
+
+        $this->validator
+            ->field('password')
+            ->required();
+    }
+}
 ```
+
+**How it works:**
+
+1. When the `login()` method is called, the `LoginRequest` is automatically validated
+2. If validation **fails**: The user is redirected back with error messages
+3. If validation **passes**: The controller method executes
+
+This ensures that:
+- The `email` field is present and contains a valid email address
+- The `password` field is present
+
+You can customize validation rules based on your requirements. See [Validation](validation.md) for more details on available rules.
+
+#### Authentication Flow
+
+Behind the scenes, `attempt()` performs the following:
+
+1. Retrieves `email` and `password` from request input
+2. Verifies credentials against the **users** table
+3. On **success**:
+   - Returns the authenticated user (`Identity` object)
+   - Creates a session with `_logged_in` and `_auth_id`
+   - Updates `last_login_at` timestamp
+   - Sets remember-me cookie (if `remember` input is checked)
+4. On **failure**: Returns `null`
+
+**Your controller** is responsible for:
+- Handling redirects
+- Setting flash messages
+- Deciding where to send the user
+
+### Remember Me
+
+To enable "remember me" functionality, include a checkbox in your login form:
+
+```html
+<input type="checkbox" name="remember">
+<label>Remember me</label>
+```
+
+When checked, `attempt()` will set a long-lived cookie that allows automatic login on future visits.
+
+### API Login
+
+For API authentication, use `attempt()` to verify credentials, then create an access token:
+
+```php
+public function login()
+{
+    $identity = auth()->attempt();
+
+    if (!$identity) {
+        return response()->json(['error' => 'Invalid credentials'], 401);
+    }
+
+    // Create API token
+    $token = $identity->createToken('api-token');
+    
+    return response()->json([
+        'token' => $token->plainTextToken,
+        'user' => $identity,
+    ]);
+}
+```
+
+**Note:** While `attempt()` creates a session, API clients typically ignore cookies and use the returned token for subsequent requests.
+
+### Bearer Token Authentication
+
+To authenticate API requests with a **Bearer** token, use `viaToken()`:
+
+```php
+public function getProfile()
+{
+    $user = auth()->viaToken();
+
+    if (!$user) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    return response()->json(['user' => $user]);
+}
+```
+
+This method:
+1. Extracts the Bearer token from the `Authorization` header
+2. Verifies the token against the `access_tokens` table
+3. Returns the authenticated user or `null`
+4. Updates `last_used_at` timestamp on the token
+5. Updates `last_login_at` on the user
+
+### Direct Login (Testing/Impersonation)
+
+To log in as a specific user ID without credentials:
+
+```php
+$user = new User(1);
+auth()->loginAs($user);
+```
+
+This is useful for:
+- **Testing**: Quickly authenticate as different users
+- **Admin impersonation**: Allow admins to view the app as a specific user
+
+This method:
+- Creates a session immediately
+- Updates `last_login_at` timestamp
+- Does NOT set remember-me cookie
+- Returns the `Auth` instance for chaining
 
 ## Logging Out
 
-To logout, simply call `logout()` method.
+To logout a user, call `logout()` in your controller:
 
 ```php
-auth()->logout();
+public function logout()
+{
+    auth()->logout();
+    return redirect()->route('login');
+}
 ```
+
+The `logout()` method:
+- Clears the user identity
+- Deletes the remember-me cookie
+- Destroys the session
+- Returns `void` (your controller handles the redirect)
 
 ## Authenticated User
 
@@ -154,24 +247,41 @@ auth()->user();
 
 > **Note:** The `user()` method works for both session-based and token-based authentication.
 
-## Remember Me
+## Auto-Login (Recall)
 
-If the user checks the **remember** functionality while logging in, you can use `recall()` method.
+The `recall()` method attempts to automatically log in a user from a remember-me cookie:
 
 ```php
-auth()->recall();
+public function dashboard()
+{
+    // Try to auto-login from remember-me cookie
+    auth()->recall();
+
+    if (auth()->isGuest()) {
+        return redirect()->route('login');
+    }
+
+    return view('dashboard');
+}
 ```
 
-Behind the scenes, this method performs the following actions:
+Behind the scenes, `recall()`:
+1. Checks if user is already logged in via session
+   - If **yes**: Returns the user (no action needed)
+2. If **no**: Checks for a valid `remember_token` cookie
+   - If **valid**: Logs the user in and returns the user
+   - If **invalid/missing**: Returns `null`
 
-* Checks if the user is already logged in via session.
-* If **yes**, redirects to the **post-login** URL.
-* If **no**, checks if a `remember_me` cookie is present and valid.
-* If the **cookie is valid**, the user is automatically logged in (a new session is started) and redirected to the **post-login** URL.
-* If the **cookie is missing or invalid**, the user is redirected to the **login** page.
+**Note:** The `AuthFilter` automatically calls `recall()`, so you typically don't need to call it manually if the filter applied on route.
 
 ### Cookie Duration
 
-By default, remember me cookies last for **30 days**. You can configure the duration in `config/auth.php` using the `remember_duration` key. See [Configuration](auth-configuration.md#remember_duration) for details.
+By default, remember-me cookies last for **30 days**. Configure the duration in `config/auth.php`:
+
+```php
+'remember_duration' => 60 * 24 * 30, // 30 days in minutes
+```
+
+See [Configuration](auth-configuration.md#remember_duration) for more details.
 
 ---

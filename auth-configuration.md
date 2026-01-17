@@ -2,57 +2,99 @@
 
 Here is a brief explanation for **config/auth.php** configuration file.
 
-## identifier
+## Configuration Structure
 
-This key is the class name that represents a user identifier. This class implements `Lightpack\Auth\Identifier` interface and acts as a user data service provider.  You can also [implement your own custom](custom-auth) auth identifers.
+The auth configuration file contains two main sections:
 
-## login.url
+```php
+return [
+    'auth' => [
+        'drivers' => [
+            'default' => [
+                'model' => App\Models\User::class,
+                'identifier' => Lightpack\Auth\Identifiers\EmailPasswordIdentifier::class,
+                'remember_duration' => 60 * 24 * 30,
+            ],
+        ],
 
-This key represents the **login** page route for session-cookie based authentication. 
+        'routes' => [
+            'guest' => 'login',
+            'authenticated' => 'dashboard',
+        ],
+    ],
+];
+```
 
-## logout.url
+## Driver Configuration
 
-This key represents the **logout** route for session-cookie based authentication. 
+### model
 
-## login.redirect
+The fully qualified class name of your user model. This model should implement the `Lightpack\Auth\Identity` interface.
 
-This is the route where the client is **redirected** post successful login.
+```php
+'model' => App\Models\User::class,
+```
 
-## logout.redirect
+### identifier
 
-This is the page where the client is **redirected** post successful logout.
+The class name that handles user authentication logic. This class implements `Lightpack\Auth\Identifier` interface and is responsible for:
 
-## fields.id
+- Finding users by ID
+- Finding users by credentials (email/password)
+- Finding users by remember token
+- Updating login timestamps
 
-This key is the name for **user id** which by default, it is set to `id`.
+Lightpack ships with `EmailPasswordIdentifier` which authenticates users via email and password. You can [implement your own custom identifier](custom-auth) for different authentication methods (username/password, phone/OTP, etc.).
 
-## fields.username
+```php
+'identifier' => Lightpack\Auth\Identifiers\EmailPasswordIdentifier::class,
+```
 
-This key is the form-field name for **username** input which by default, it is set to `email`.
+### remember_duration
 
-## fields.password
-
-This key is the form-field name for **password** input.
-
-## fields.remember_token
-
-This key is the name of the column in the users table that stores the remember-me token.
-
-## remember_duration
-
-This key sets the duration (in minutes) for how long the remember-me cookie remains valid. Default is **30 days** (`60 * 24 * 30`).
+Sets the duration (in minutes) for how long the remember-me cookie remains valid. Default is **30 days** (`60 * 24 * 30`).
 
 ```php
 'remember_duration' => 60 * 24 * 30, // 30 days
 ```
 
-Examples:
+**Examples:**
 - 7 days: `60 * 24 * 7`
 - 90 days: `60 * 24 * 90`
-- Never expire: omit this key (not recommended for security)
+- 1 year: `60 * 24 * 365`
 
-## flash_error
+> **Note:** This is optional. If omitted, it defaults to 30 days.
 
-This key contains the default error message for **failed** login attempts.
+## Routes Configuration
+
+The `routes` section configures which named routes the auth filters should redirect to. This allows you to customize redirect behavior without modifying framework code.
+
+### routes.guest
+
+The **named route** for your login page. The `AuthFilter` redirects unauthenticated users here.
+
+```php
+'guest' => 'login', // Route name, not URL
+```
+
+Make sure you have a corresponding route defined:
+
+```php
+route()->get('/login', [AuthController::class, 'showLogin'])->name('login');
+```
+
+### routes.authenticated
+
+The **named route** where authenticated users are redirected. The `GuestFilter` uses this when logged-in users try to access guest-only pages (like login or registration).
+
+```php
+'authenticated' => 'dashboard', // Route name, not URL
+```
+
+Make sure you have a corresponding route defined:
+
+```php
+route()->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+```
 
 ---

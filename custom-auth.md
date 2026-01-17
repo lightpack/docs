@@ -20,8 +20,9 @@ Understanding how these work together will help you confidently customize authen
 - This separation allows you to mix and match authentication strategies and user sources
 
 **When do you need a custom Identifier?**
-- Only if your user-fetching logic is different from the default (e.g., you want to look up by email instead of ID, or fetch from an API)
-- Most of the time, the default identifier is sufficient—even for JWT authentication
+- If your authentication method differs from email/password (e.g., username/password, phone/OTP, LDAP).
+- If you need to fetch users from a different source (API, external database, etc.)
+- If you need different database column names than the framework conventions.
 
 **Why this separation?**
 - Encourages single responsibility and testability
@@ -55,10 +56,17 @@ class LoginController
 {
     public function authenticate()
     {
-        // specify authenticator to use
+        // Register custom authenticator
         auth()->extend('jwt', JwtAuthenticator::class);
 
-        return auth()->login();
+        // Use it
+        $user = auth()->attempt();
+        
+        if (!$user) {
+            return redirect()->to('login');
+        }
+        
+        return redirect()->intendedRoute('dashboard');
     }
 }
 ```
@@ -96,45 +104,61 @@ class CustomIdentifier implements Identifier
 
 ### Configuration
 
-Now the final step is to configure your custom identifier. Add a new key in your `config/auth.php` file with a value that identifies your authentication provider:
+Configure your custom identifier in `config/auth.php`:
 
 ```php
-<?php
-
 return [
     'auth' => [
-        'default' => [
-            // ...
+        'drivers' => [
+            'default' => [
+                // ...
+            ],
+            'custom' => [
+                'model' => App\Models\User::class,
+                'identifier' => CustomIdentifier::class,
+                'remember_duration' => 60 * 24 * 30,
+            ],
         ],
-        'custom' => [
-            'identifier' => CustomIdentifier::class,
+        'routes' => [
+            'login' => 'login',
+            'home' => 'dashboard',
         ],
-    ]
+    ],
 ];
 ```
 
-To use your custom provider in a controller or any part of your app, simply call `auth('custom')` to switch to your provider for that call chain:
+To use your custom driver, call `setDriver()` before authentication:
 
 ```php
-<?php
-
 namespace App\Controllers;
 
 class LoginController
 {
     public function authenticate()
     {
-        return auth('custom')->login();
+        $user = auth('custom')->attempt();
+        
+        if (!$user) {
+            session()->flash('error', 'Invalid credentials.');
+            return redirect()->to('login');
+        }
+        
+        return redirect()->intendedRoute('dashboard');
     }
 }
 ```
 
-## Quick Summary Table
+## Quick Summary
 
-| Task                    | How to do it                                           |
-|-------------------------|--------------------------------------------------------|
-| Register authenticator  | `auth()->extend('jwt', JwtAuthenticator::class);`      |
-| Use custom provider     | `auth('custom')->login();`                             |
-| Register identifier     | Add to `config/auth.php` under `'custom'`              |
+| Component | Purpose | How to Customize |
+|-----------|---------|------------------|
+| **Authenticator** | Verifies requests (JWT, OAuth, etc.) | Extend `AbstractAuthenticator`, register with `extend()` |
+| **Identifier** | Fetches users from data source | Implement `Identifier` interface, add to config |
+| **Driver** | Combines model + identifier + config | Add new driver in `config/auth.php` |
+
+**Default Setup:**
+- Authenticators: `FormAuthenticator`, `CookieAuthenticator`, `BearerAuthenticator`
+- Identifier: `EmailPasswordIdentifier`
+- Conventions: `email`, `password`, `remember_token`, `last_login_at` columns
 
 ---

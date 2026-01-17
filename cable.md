@@ -10,6 +10,8 @@ You can build live dashboards, notifications, presence channels, chat messages a
 - **DOM updates**: Directly update page elements
 - **Driver architecture**: Support for database and Redis backends
 
+> Most app don't need sub-second updates and hence not worth the infrastructure complexity of Websocket implementation. Real-time doesn't always mean WebSockets!
+
 ## Cable Event Flow (Lifecycle)
 
 ```

@@ -359,19 +359,36 @@ public function save()
 - Uses session to remember the last visited URL.
 - Essential for post/redirect/get patterns.
 
-#### **redirect()->intended()**
-Redirect to the “intended” URL stored in session (commonly used after login), or `/` if not set.
+#### **redirect()->intended($default = '/')**
+Redirect to the "intended" URL stored in session (commonly used after login), with a fallback URL if not set.
 
-**Example: After login, send user to originally requested page**
+**How it works:**
+1. Checks session for `_intended_url` (set by `AuthFilter` before redirecting to login)
+2. If found: Redirects to that URL and clears it from session
+3. If not found: Redirects to the `$default` URL (default: `/`)
+
+**When to use:**
+- After successful login
+- After any authentication checkpoint
+- When you want to preserve the user's original destination
+
+#### **redirect()->intendedRoute($routeName, ...$params)**
+Redirect to the intended URL, or fall back to a **named route** instead of a URL.
+
 ```php
-public function login()
-{
-    // ... authentication logic ...
-    return redirect()->intended();
-}
+// Redirect to intended URL, or user's profile named route
+return redirect()->intendedRoute('profile');
 ```
-- Stores the intended URL before redirecting unauthenticated users.
-- After login, users are returned to where they originally wanted to go.
+
+**How it works:**
+1. Checks session for `_intended_url`
+2. If found: Uses `intended()` to redirect there
+3. If not found: Uses `route()` to redirect to the named route
+
+**Why use this over `intended()`?**
+- Named routes are more maintainable than hardcoded URLs
+- Route parameters are automatically resolved
+- Your redirects stay in sync with route changes
 
 #### **redirect()->refresh()**
 Redirect to the current URL (refresh the page).
@@ -392,19 +409,78 @@ public function post()
 
 ---
 
-### Common Patterns and Pitfalls
-- **Always return the redirect from your controller:**
-  ```php
-  return redirect()->to('/login');
-  ```
-- **Chain additional headers or configuration:**
-  ```php
-  return redirect()->to('/login')->setHeader('X-Reason', 'auth-required');
-  ```
-- **Flash messages:** Set flash data before redirecting to show messages after redirect.
-- **Session integration:** `back()` and `intended()` rely on session data—ensure sessions are enabled.
-- **Prefer `redirect()` over manual Location headers:** It’s safer, more expressive, and integrates with Lightpack’s routing/session system.
-- **Advanced:** For custom needs, use `setRedirectUrl()` and `getRedirectUrl()` on any response, but the `Redirect` class covers all standard use cases.
+### Session Integration
+
+Several redirect methods rely on session data:
+
+**`back()`** - Uses `_previous_url` from session
+```php
+// Stored automatically by framework
+session()->set('_previous_url', request()->fullUrl());
+```
+
+**`intended()` and `intendedRoute()`** - Use `_intended_url` from session
+```php
+// Set by AuthFilter or manually
+session()->setIntendedUrl('/admin/settings');
+
+// Retrieved and cleared by redirect helpers
+$url = session()->getIntendedUrl();
+session()->forgetIntendedUrl();
+```
+
+See [Sessions](sessions.md#intended-url-helpers) for more details on intended URL helpers.
+
+---
+
+### Common Patterns and Best Practices
+
+**Always return the redirect from your controller:**
+```php
+return redirect()->to('/login');
+```
+
+**Chain additional headers or configuration:**
+```php
+return redirect()->to('/login')->setHeader('X-Reason', 'auth-required');
+```
+
+**Set flash messages before redirecting:**
+```php
+session()->flash('success', 'Profile updated!');
+return redirect()->back();
+```
+
+**Use named routes for maintainability:**
+```php
+// Good - survives route changes
+return redirect()->route('dashboard');
+
+// Less ideal - breaks if URL changes
+return redirect()->to('/dashboard');
+```
+
+**Prefer `intendedRoute()` over `intended()` for authentication:**
+```php
+// Good - uses named route fallback
+return redirect()->intendedRoute('dashboard');
+
+// Less ideal - hardcoded URL fallback
+return redirect()->intended('/dashboard');
+```
+
+**Session requirement:**
+- `back()`, `intended()`, and `intendedRoute()` require sessions to be enabled
+- Ensure session middleware is active for these features
+
+**Prefer `redirect()` over manual headers:**
+```php
+// Good
+return redirect()->to('/login');
+
+// Avoid - manual header management
+response()->setStatus(302)->setHeader('Location', '/login');
+```
 
 ---
 
@@ -502,5 +578,16 @@ public function post()
 | setLastModified(time)        | Set Last-Modified header                     |
 | setRedirectUrl(url)          | Set a logical redirect URL                   |
 | getRedirectUrl()             | Get the logical redirect URL                 |
+
+### Redirect Methods (via `redirect()` helper)
+
+| Method                       | Purpose                                      |
+|------------------------------|----------------------------------------------|
+| to(url)                      | Redirect to any URL                          |
+| route(name, ...params)       | Redirect to named route                      |
+| back()                       | Redirect to previous page                    |
+| intended(default)            | Redirect to intended URL or fallback         |
+| intendedRoute(name, ...params) | Redirect to intended URL or named route    |
+| refresh()                    | Redirect to current URL (refresh)            |
 
 ---

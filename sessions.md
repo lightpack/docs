@@ -187,8 +187,55 @@ You can configure the driver in your app’s config.
 
 ---
 
+## Intended URL Helpers
+
+Lightpack provides convenient helpers for managing "intended URLs" - URLs that users were trying to access before being redirected (typically to login). This is commonly used in authentication flows.
+
+### Setting Intended URL
+
+Store the URL a user was trying to access:
+
+```php
+session()->setIntendedUrl('/admin/settings');
+```
+
+Typically, the `AuthFilter` does this automatically for GET requests when redirecting unauthenticated users to login.
+
+### Getting Intended URL
+
+Retrieve the stored intended URL:
+
+```php
+$url = session()->getIntendedUrl();
+```
+
+With a default fallback:
+
+```php
+$url = session()->getIntendedUrl('/dashboard');
+```
+
+### Checking for Intended URL
+
+Check if an intended URL exists:
+
+```php
+if (session()->hasIntendedUrl()) {
+    $url = session()->getIntendedUrl();
+    // redirect to $url
+}
+```
+
+### Clearing Intended URL
+
+Remove the stored intended URL:
+
+```php
+session()->forgetIntendedUrl();
+```
+
 ## Configuration
 
-Session settings (driver, name, lifetime, security, etc.) are controlled in your app’s config file, typically <code>config/session.php</code>.
+Session settings (driver, name, lifetime, security, etc.) are controlled in your app's config file, typically <code>config/session.php</code>.
 
 ---

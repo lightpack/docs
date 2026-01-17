@@ -1,30 +1,33 @@
 # Auth Filters
 
-You might want to protect a **route** or a group of **routes** defined in your application. These routes should only execute for successfully authenticated users.
+Protect routes or groups of routes so they only execute for authenticated users. **Lightpack** provides two built-in filters: `AuthFilter` for protected routes and `GuestFilter` for guest-only routes.
 
-**Lightpack** ships with `auth` filter for **web** and **api** routes. You can use this filter to authenticate per route definition or on a group of routes.
+## AuthFilter
 
-## Web Filter
+The `AuthFilter` protects routes by ensuring users are authenticated. It supports both **web** (session-based) and **API** (token-based) authentication.
 
-Used as `auth:web` alias, this filter will check if the current session has been authenticated else will redirect to login page.
+### Web Authentication
 
-For example:
+For session-based routes, use `auth:web`:
 
 ```php
-route()->group(['filters' => ['auth:web']], function() {
+route()->group(['filters' => 'auth:web'], function() {
     // protected routes list here
 });
 ```
 
-Use `auth:web` filter for **session-cookie** based routes authentication.
+**How it works:**
 
-## Api Filter
+1. Checks if user is logged in via session
+2. If **not logged in**:
+   - Stores the current URL as "intended" (for GET requests)
+   - Attempts auto-login via remember-me cookie (`recall()`)
+   - If recall fails, redirects to login page
+3. If **logged in**: Allows the request to proceed
 
-Used as `auth:api` alias, this filter should be used to protect API routes. This filter will look for **Bearer** token in authorization header and attempt to authenticate the validity of the token.
+### API Authentication
 
-If authentication fails, it will abort the request and return a `401` unauthorized JSON response. 
-
-For example:
+For API routes, use `auth:api`:
 
 ```php
 route()->group(['filters' => 'auth:api'], function() {
@@ -32,18 +35,84 @@ route()->group(['filters' => 'auth:api'], function() {
 });
 ```
 
-## Guest Filter
+**How it works:**
 
-The `guest` filter ensures that only unauthenticated users (guests) can access certain routes. If an authenticated user tries to access a route protected by this filter, they will be redirected to the login landing page (or wherever your `auth()->redirectLogin()` is configured to go).
+1. Extracts Bearer token from `Authorization` header
+2. Validates token via `auth()->viaToken()`
+3. If **invalid**: Returns `401 Unauthorized` JSON response
+4. If **valid**: Allows the request to proceed
 
-Use this filter for routes like login, registration, or password reset—pages that should not be accessible to already logged-in users.
+### Configuring Redirect Routes
 
-For example:
+The `AuthFilter` uses named routes from your `config/auth.php` to determine where to redirect unauthenticated users:
+
+```php
+'routes' => [
+    'login' => 'login',  // Redirect here when not authenticated
+],
+```
+
+Make sure you have a corresponding named route:
+
+```php
+route()->get('/login', AuthController::class, 'showLogin')->name('login');
+```
+
+See [Configuration](auth-configuration.md#routes-configuration) for more details.
+
+## GuestFilter
+
+The `GuestFilter` ensures only **unauthenticated** users can access certain routes. This is useful for login, registration, and password reset pages.
 
 ```php
 route()->group(['filters' => 'guest'], function() {
     // routes only for guests (not logged-in users)
 });
 ```
+
+**How it works:**
+
+1. Checks if user is logged in
+2. If **logged in**: Redirects to the home page
+3. If **not logged in**: Allows the request to proceed
+
+### Configuring Authenticated Route
+
+The `GuestFilter` uses the `routes.authenticated` config to determine where to redirect authenticated users:
+
+```php
+'routes' => [
+    'authenticated' => 'dashboard',  // Redirect here when already authenticated
+],
+```
+
+Make sure you have a corresponding named route:
+
+```php
+route()->get('/dashboard', DashboardController::class, 'index')->name('dashboard');
+```
+
+## Per-Route Filters
+
+You can apply filters to individual routes:
+
+```php
+$router->get('/admin', [AdminController::class, 'index'])
+    ->filter('auth:web');
+
+$router->get('/login', [AuthController::class, 'showLogin'])
+    ->filter('guest');
+```
+## Remember Me Behavior
+
+The `AuthFilter` automatically attempts to log in users via their remember-me cookie. This means:
+
+1. User visits a protected route
+2. No active session found
+3. Valid remember-me cookie exists
+4. User is automatically logged in
+5. Request proceeds normally
+
+This provides a seamless experience for users who checked "Remember me" during login.
 
 ---

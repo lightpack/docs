@@ -28,10 +28,13 @@ Lightpack provide a lightweight **HTTP client** for making API requests.
 | `options([$opt=>$v])`  | Set custom cURL options                               |
 | `form()`               | Send data as form-urlencoded                          |
 | `download($url, $path)`| Download file to disk                                 |
+| `stream($method, $url, $data, $callback)` | Stream response in real-time with callback |
 | `json()`               | Get response as array (assumes JSON)                  |
 | `body()`               | Get raw response body                                 |
 | `status()`             | Get HTTP status code                                  |
 | `error()`              | Get transport error message, if any                   |
+| `responseHeaders()`    | Get all response headers as array                     |
+| `responseHeader($name)`| Get specific response header (case-insensitive)       |
 | `ok()`                 | 2xx status                                            |
 | `failed()`             | Transport or HTTP error                               |
 | `clientError()`        | 4xx status                                            |
@@ -171,6 +174,31 @@ $text = $response->body();  // Raw body
 $status = $response->status(); // HTTP status code
 ```
 
+### Accessing Response Headers
+```php
+// Get all headers
+$headers = $response->responseHeaders();
+
+// Get specific header (case-insensitive)
+$contentType = $response->responseHeader('Content-Type');
+$rateLimit = $response->responseHeader('X-RateLimit-Remaining');
+$server = $response->responseHeader('server');
+```
+
+**Common use cases:**
+```php
+// Check rate limiting
+if ($response->responseHeader('X-RateLimit-Remaining') < 10) {
+    // Slow down requests
+}
+
+// Get pagination info
+$nextPage = $response->responseHeader('X-Next-Page');
+
+// Check cache headers
+$cacheControl = $response->responseHeader('Cache-Control');
+```
+
 ---
 
 ## Downloading Files
@@ -184,6 +212,93 @@ if ($success) {
 ```
 
 ---
+
+## Streaming Requests
+
+The `stream()` method allows you to process HTTP responses in real-time as chunks arrive, rather than waiting for the entire response to be buffered. This is useful for:
+
+- **Long-running AI completions** (OpenAI, Anthropic, etc.)
+- **Large file downloads** with progress tracking
+- **Server-Sent Events (SSE)** endpoints
+- **Real-time data feeds**
+
+### Basic Streaming
+
+```php
+$http->stream('GET', 'https://api.example.com/stream', null, function($chunk) {
+    echo $chunk;
+    flush();
+});
+```
+
+### Streaming POST Request
+
+```php
+$http->stream('POST', 'https://api.example.com/generate', [
+    'prompt' => 'Write a story',
+    'temperature' => 0.7
+], function($chunk) {
+    // Process each chunk as it arrives
+    file_put_contents('output.txt', $chunk, FILE_APPEND);
+});
+```
+
+### Streaming with Headers and Timeout
+
+```php
+$http
+    ->headers(['Authorization' => 'Bearer token123'])
+    ->timeout(30)
+    ->stream('GET', 'https://api.example.com/events', null, function($chunk) {
+        processChunk($chunk);
+    });
+```
+
+### Collecting Streamed Data
+
+```php
+$chunks = [];
+$fullContent = '';
+
+$http->stream('GET', 'https://api.example.com/stream', null, function($chunk) use (&$chunks, &$fullContent) {
+    $chunks[] = $chunk;
+    $fullContent .= $chunk;
+});
+
+echo "Received " . count($chunks) . " chunks\n";
+echo "Total content: " . $fullContent;
+```
+
+### Streaming with Different HTTP Methods
+
+```php
+// GET request
+$http->stream('GET', $url, null, $callback);
+
+// POST request
+$http->stream('POST', $url, ['key' => 'value'], $callback);
+
+// PUT request
+$http->stream('PUT', $url, ['data' => 'update'], $callback);
+
+// DELETE request
+$http->stream('DELETE', $url, null, $callback);
+```
+
+### Error Handling with Streaming
+
+Streaming requests throw exceptions on HTTP errors (4xx, 5xx) or transport errors:
+
+```php
+try {
+    $http->stream('GET', 'https://api.example.com/stream', null, function($chunk) {
+        echo $chunk;
+    });
+} catch (\Exception $e) {
+    // Handle streaming error
+    echo "Streaming failed: " . $e->getMessage();
+}
+```
 
 ## Error Handling Explained
 
@@ -213,6 +328,10 @@ $response = $http
 
 if ($response->ok()) {
     $profile = $response->json();
+    
+    // Check response headers
+    $rateLimit = $response->responseHeader('X-RateLimit-Remaining');
+    $contentType = $response->responseHeader('Content-Type');
 } elseif ($response->failed()) {
     // Handle error
     $error = $response->error();

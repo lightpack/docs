@@ -23,8 +23,12 @@ Your **users** table already contains required fields to support **MFA** feature
 
 ### 2. Install Dependencies
 
-- For TOTP:  
+- For TOTP (required):  
   `composer require robthree/twofactorauth`
+- For TOTP QR Codes (optional):  
+  `composer require bacon/bacon-qr-code`  
+  **Only needed if generating QR codes server-side (PDFs, emails, reports)**  
+  **Not needed for web pages** - use client-side JavaScript QR generation instead
 - For SMS:  
   See [Lightpack SMS](sms.md) documentation (Twilio, etc.)
 
@@ -65,8 +69,9 @@ This extends your User model capabilities with methods:
 
 1. **TOTP:**  
    - Generate secret: `TotpSetupHelper::generateSecret()`
-   - Show QR: `TotpSetupHelper::getQrUri($secret, $user->email)`
+   - Get URI: `TotpSetupHelper::getOtpAuthUri($secret, $user->email)`
    - Save secret to user: `$user->mfa_totp_secret = $secret; $user->save();`
+   - Show QR code to user (client-side or server-side)
    - User scans QR with authenticator app.
 
 2. **SMS/Email:**  
@@ -121,7 +126,7 @@ if ($ok) {
 ## Example using TOTP
 
 
-### 1. Enrolling TOTP
+### 1. Enrolling TOTP (Client-Side QR)
 
 ```php
 $secret = TotpSetupHelper::generateSecret();
@@ -129,11 +134,44 @@ $user->mfa_totp_secret = $secret;
 $user->mfa_method = 'totp';
 $user->save();
 
-$qr = TotpSetupHelper::getQrUri($secret, $user->email);
-// Show $qr in frontend for scanning
+$otpAuthUri = TotpSetupHelper::getOtpAuthUri($secret, $user->email);
+// Pass $otpAuthUri to view for client-side QR generation
 ```
 
-### 2. Sending and Validating MFA
+**View (HTML + JavaScript):**
+
+```html
+<div id="qrcode"></div>
+<p>Secret: <code><?= $secret ?></code></p>
+
+<script src="/js/qrcode.min.js"></script>
+<script>
+    new QRCode(document.getElementById("qrcode"), {
+        text: "<?= $otpAuthUri ?>",
+        width: 256,
+        height: 256
+    });
+</script>
+```
+
+### 2. Enrolling TOTP (Server-Side QR for PDFs/Emails)
+
+This is useful for generating QR codes for PDFs, emails, reports, etc on server side.
+
+```php
+$secret = TotpSetupHelper::generateSecret();
+$user->mfa_totp_secret = $secret;
+$user->mfa_method = 'totp';
+$user->save();
+
+// For PDFs (SVG)
+$qrSvg = TotpSetupHelper::getQrCodeSvg($secret, $user->email, 256);
+
+// For Emails (Data URI)
+$qrDataUri = TotpSetupHelper::getQrCodeDataUri($secret, $user->email, 256);
+```
+
+### 3. Sending and Validating MFA
 
 ```php
 $user->sendMfa(); // Sends challenge via chosen factor
@@ -145,7 +183,7 @@ if ($user->validateMfa($inputCode)) {
 }
 ```
 
-### 3. Generating and Using Backup Codes
+### 4. Generating and Using Backup Codes
 
 ```php
 $codes = BackupCodeHelper::generateCodes();

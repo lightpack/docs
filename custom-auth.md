@@ -33,21 +33,21 @@ Below we document in detail how to define your own custom authenticators and ide
 
 ## Authenticators
 
-Authenticators are classes that extend `Lightpack\Auth\AbstractAuthenticator` class. 
+Authenticators are classes that extend `Lightpack\Auth\Authenticator` class. 
 
 These classes are responsible for authenticating a request. You can create your own authenticator by extending this class. For example:
 
 ```php
-class JwtAuthenticator extends AbstractAuthenticator
+class JwtAuthenticator extends Authenticator
 {
-    public function verify(): ?Identity
+    public function verify(): ?IdentityInterface
     {
         // custom auth logic goes here
     }
 }
 ```
 
-The `verify()` method should return an instance of **\Lightpack\Auth\Identity** (or `null` if authentication fails). 
+The `verify()` method should return an instance of **\Lightpack\Auth\IdentityInterface** (or `null` if authentication fails). 
 
 To use your custom authenticator, you should register it using the `extend()` method. For example, in your login controller:
 
@@ -73,24 +73,24 @@ class LoginController
 
 ## Identifiers
 
-Identifiers are classes that implement `Lightpack\Auth\Identifier` interface.
+Identifiers are classes that implement `Lightpack\Auth\IdentifierInterface` interface.
 
 These classes are responsible for **fetching** users and they act as user repository or user data service providers. You can create your own identifier by implementing this interface. For example:
 
 ```php
-class CustomIdentifier implements Identifier
+class CustomIdentifier implements IdentifierInterface
 {
-    public function findById($id): ?Identity
+    public function findById($id): ?IdentityInterface
     {
         // custom logic to fetch user by id
     }
 
-    public function findByRememberToken($id, string $token): ?Identity
+    public function findByRememberToken($id, string $token): ?IdentityInterface
     {
         // fetch user with matching remember_me token
     }
 
-    public function findByCredentials(array $credentials): ?Identity
+    public function findByCredentials(array $credentials): ?IdentityInterface
     {
         // fetch user by username/password credentials
     }
@@ -152,8 +152,8 @@ class LoginController
 
 | Component | Purpose | How to Customize |
 |-----------|---------|------------------|
-| **Authenticator** | Verifies requests (JWT, OAuth, etc.) | Extend `AbstractAuthenticator`, register with `extend()` |
-| **Identifier** | Fetches users from data source | Implement `Identifier` interface, add to config |
+| **Authenticator** | Verifies requests (JWT, OAuth, etc.) | Extend `Authenticator`, register with `extend()` |
+| **Identifier** | Fetches users from data source | Implement `IdentifierInterface` interface, add to config |
 | **Driver** | Combines model + identifier + config | Add new driver in `config/auth.php` |
 
 **Default Setup:**

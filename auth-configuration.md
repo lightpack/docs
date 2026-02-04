@@ -29,7 +29,7 @@ return [
 
 ### model
 
-The fully qualified class name of your user model. This model should implement the `Lightpack\Auth\Identity` interface.
+The fully qualified class name of your user model. This model should implement the `Lightpack\Auth\IdentityInterface` interface.
 
 ```php
 'model' => App\Models\User::class,
@@ -37,7 +37,7 @@ The fully qualified class name of your user model. This model should implement t
 
 ### identifier
 
-The class name that handles user authentication logic. This class implements `Lightpack\Auth\Identifier` interface and is responsible for:
+The class name that handles user authentication logic. This class implements `Lightpack\Auth\IdentifierInterface` interface and is responsible for:
 
 - Finding users by ID
 - Finding users by credentials (email/password)

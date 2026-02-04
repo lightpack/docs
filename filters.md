@@ -41,10 +41,10 @@ route()->group(['filter' => ['csrf', 'auth']], function() {
 php console create:filter TrimFilter
 ```
 
-A filter is a class implementing the `Lightpack\Filters\IFilter` interface:
+A filter is a class implementing the `Lightpack\Filters\FilterInterface` interface:
 
 ```php
-class TrimFilter implements IFilter
+class TrimFilter implements FilterInterface
 {
     public function before(Request $request, array $params = [])
     {

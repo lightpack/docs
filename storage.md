@@ -25,7 +25,7 @@ php console create:config --support=s3
 All drivers implement:
 
 ```php
-interface Storage {
+interface StorageInterface {
     public function read(string $path): ?string;
     public function write(string $path, string $contents): bool;
     public function delete(string $path): bool;
@@ -43,7 +43,7 @@ interface Storage {
 
 ## Usage Patterns
 
-You can resolve an instance of `Lightpack\Storage\Storage` class from the dependency container or simply call the `storage()` function.
+You can resolve an instance of `Lightpack\Storage\StorageInterface` class from the dependency container or simply call the `storage()` function.
 
 ### Reading & Writing Files
 

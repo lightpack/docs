@@ -59,10 +59,10 @@ Different login methods serve different purposes. Choose the right one for your 
 
 | Method | Returns | Sets Session | Sets Cookie | Use Case |
 |--------|---------|--------------|-------------|----------|
-| `attempt()` | `Identity\|null` | ✅ Yes | ✅ Yes (if remember me) | Web form login |
+| `attempt()` | `IdentityInterface\|null` | ✅ Yes | ✅ Yes (if remember me) | Web form login |
 | `loginAs($user)` | `Auth` | ✅ Yes | ❌ No | Testing/Admin impersonation |
-| `viaToken()` | `Identity\|null` | ❌ No | ❌ No | Bearer token authentication |
-| `recall()` | `Identity\|null` | ✅ Yes (if valid) | ❌ No | Auto-login from cookie |
+| `viaToken()` | `IdentityInterface\|null` | ❌ No | ❌ No | Bearer token authentication |
+| `recall()` | `IdentityInterface\|null` | ✅ Yes (if valid) | ❌ No | Auto-login from cookie |
 
 ### Web Form Login
 
@@ -123,7 +123,7 @@ Behind the scenes, `attempt()` performs the following:
 1. Retrieves `email` and `password` from request input
 2. Verifies credentials against the **users** table
 3. On **success**:
-   - Returns the authenticated user (`Identity` object)
+   - Returns the authenticated user (`IdentityInterface` object)
    - Creates a session with `_logged_in` and `_auth_id`
    - Updates `last_login_at` timestamp
    - Sets remember-me cookie (if `remember` input is checked)

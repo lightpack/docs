@@ -71,14 +71,14 @@ The `SocialAuthController` is already shipped with this feature. It handles both
 
 ## Adding a Custom Provider
 
-Create a new provider class implementing `SocialAuth`:
+Create a new provider class implementing `SocialAuthInterface`:
    
 ```php
 namespace App\SocialAuth\Providers;
 
-use Lightpack\SocialAuth\SocialAuth;
+use Lightpack\SocialAuth\SocialAuthInterface;
 
-class MyProvider implements SocialAuth {
+class MyProvider implements SocialAuthInterface {
     // Implement the interface methods
 }
 ```

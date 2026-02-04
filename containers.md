@@ -62,12 +62,33 @@ This is useful when you need to configure an object before registering it in the
 
 ## Accessing Service
 
-To access a registered service through the container, use <code>app()</code>
-utility function passing it the **alias** of the service you want to access from the container. 
+### app() Helper
+
+The `app()` helper function provides convenient access to the container and its services.
+
+**Get the container instance:**
 
 ```php
-app('service');
+$container = app();
 ```
+
+**Get a registered service:**
+
+```php
+$mailer = app('mailer');
+```
+
+**Auto-resolve a class:**
+
+```php
+// Automatically resolves dependencies
+$service = app(UserService::class);
+```
+
+The `app()` function intelligently handles three scenarios:
+- **No argument** → Returns the container instance
+- **Registered service** → Returns the service via `get()`
+- **Unregistered class** → Auto-resolves via `resolve()`
 
 ## Other Methods
 
@@ -138,6 +159,88 @@ $container->alias(Auth::class, 'auth');
 app('auth');           // Via alias
 app(Auth::class);      // Via class name
 ```
+
+### call()
+
+Resolve and call a method with automatic dependency injection:
+
+```php
+class UserService
+{
+    public function sendEmail(Mailer $mailer, string $to, string $subject)
+    {
+        // $mailer auto-injected, $to and $subject from args
+    }
+}
+
+// Call method with dependency injection
+$container->call(UserService::class, 'sendEmail', [
+    'to' => 'user@example.com',
+    'subject' => 'Welcome'
+]);
+
+// Or with an instance
+$service = new UserService();
+$container->call($service, 'sendEmail', ['to' => 'user@example.com', 'subject' => 'Welcome']);
+```
+
+The container resolves type-hinted dependencies and merges them with provided scalar arguments.
+
+### callIf()
+
+Safely call a method only if it exists:
+
+```php
+// Won't throw exception if method doesn't exist
+$container->callIf($service, 'boot');
+```
+
+Useful for optional lifecycle hooks or conditional method calls.
+
+### reset()
+
+Clear all registered services, bindings, and aliases:
+
+```php
+$container->reset();
+```
+
+Useful for testing when you need a clean container state.
+
+---
+
+## Lifecycle Hooks
+
+### __boot()
+
+The container automatically calls `__boot()` method on resolved services if it exists:
+
+```php
+class DatabaseService
+{
+    public function __construct(Config $config)
+    {
+        // Constructor runs first
+    }
+
+    public function __boot()
+    {
+        // Called automatically after construction
+        // Useful for initialization that needs the service fully constructed
+    }
+}
+
+// Container automatically calls __boot() after construction
+$db = $container->resolve(DatabaseService::class);
+```
+
+This hook is called for:
+- Services resolved via `resolve()`
+- Services registered via `register()` (on first access)
+
+The hook is **optional** - only implement it if you need post-construction initialization.
+
+---
 
 ### getInstance()
 

@@ -1,28 +1,28 @@
 # Lightpack AI System
 
-A unified, explicit, and extensible interface for text generation, summarization, structured AI tasks, and semantic search in your Lightpack apps. Supports multiple providers, robust schema validation, and a fluent builder for advanced use cases.
+A unified, explicit, and extensible interface for text generation, multimodal AI (vision and document analysis), structured AI tasks, and semantic search in your Lightpack apps. Supports multiple providers, robust schema validation, and a fluent builder for advanced use cases.
 
-- **Purpose:** Seamlessly add AI/ML-powered text generation, embeddings, and semantic search to any Lightpack project.
-- **Where to Use:** Blog/content generation, summarization, Q&A, code generation, structured data extraction, semantic search, RAG applications, content recommendations, and more.
+- **Purpose:** Seamlessly add AI/ML-powered text generation, vision, document analysis, embeddings, and semantic search to any Lightpack project.
+- **Where to Use:** Blog/content generation, summarization, Q&A, code generation, structured data extraction, image analysis, document processing, semantic search, RAG applications, content recommendations, and more.
 
 **Lightpack AI** exposes four core methods:
 
 ```php
 ai()->ask();      // Simple question-answer
-ai()->task();     // Structured data extraction with tools
+ai()->task();     // Structured data extraction, multimodal AI, tools
 ai()->embed();    // Text to vector embeddings
 ai()->similar();  // Semantic similarity search
 ```
 
 ## Supported Providers
 
-| Driver      | Class                        | Text Generation | Embeddings |
-|-------------|------------------------------|-----------------|------------|
-| `openai`    | `Providers\OpenAI`           | ✅ GPT-3.5, GPT-4 | ✅ text-embedding-3-small |
-| `gemini`    | `Providers\Gemini`           | ✅ Gemini models  | ✅ text-embedding-004 (FREE) |
-| `mistral`   | `Providers\Mistral`          | ✅ Mistral models | ✅ mistral-embed |
-| `anthropic` | `Providers\Anthropic`        | ✅ Claude models  | ❌ Not supported |
-| `groq`      | `Providers\Groq`             | ✅ Llama, Mixtral | ❌ Not supported |
+| Driver      | Class                        | Text Generation | Vision | Documents | Embeddings |
+|-------------|------------------------------|-----------------|--------|-----------|------------|
+| `openai`    | `Providers\OpenAI`           | ✅ GPT-4o | ✅ GPT-4o | ✅ PDFs | ✅ text-embedding-3-small |
+| `gemini`    | `Providers\Gemini`           | ✅ Gemini 2.0  | ✅ Gemini 2.0 | ✅ All formats | ✅ text-embedding-004 (FREE) |
+| `anthropic` | `Providers\Anthropic`        | ✅ Claude Sonnet  | ✅ Claude Sonnet | ✅ PDFs | ❌ Not supported |
+| `groq`      | `Providers\Groq`             | ✅ Llama 3.2 Vision | ✅ Llama 3.2 Vision | ❌ Not supported | ❌ Not supported |
+| `mistral`   | `Providers\Mistral`          | ✅ Mistral models | ❌ Not supported | ❌ Not supported | ✅ mistral-embed |
 
 **Add your own:** Implement `ProviderInterface` and register in config.
 
@@ -33,6 +33,30 @@ Please run following command to create `config/ai.php` configuration file.
 ```cli
 php console create:config --support=ai
 ```
+
+### Recommended Models
+
+**For text-only tasks:**
+```php
+'providers' => [
+    'openai' => ['model' => 'gpt-4o-mini'],      // Fast, cost-effective
+    'anthropic' => ['model' => 'claude-sonnet-4-5'],
+    'gemini' => ['model' => 'gemini-2.0-flash'],  // FREE tier available
+    'groq' => ['model' => 'llama-3.1-8b-instant'], // Ultra-fast
+]
+```
+
+**For vision/multimodal tasks:**
+```php
+'providers' => [
+    'openai' => ['model' => 'gpt-4o'],           // Best for PDFs
+    'anthropic' => ['model' => 'claude-sonnet-4-5'], // Native PDF support
+    'gemini' => ['model' => 'gemini-2.0-flash'], // All document formats
+    'groq' => ['model' => 'llama-3.2-11b-vision-preview'], // Fast vision
+]
+```
+
+**Note:** Vision models work for both text and multimodal tasks. Use text-only models when you don't need vision capabilities to save costs.
 
 
 ## Usage
@@ -46,6 +70,8 @@ php console create:config --support=ai
 
 **Quick Decision Guide:**
 - Need a quick answer? → `ask()`
+- Need to analyze an image? → `task()` with `image()`
+- Need to analyze a PDF/document? → `task()` with `document()`
 - Need JSON with specific fields? → `task()` with `expect()`
 - Need real-time streaming output? → `task()` with `stream()`
 - Need to call ONE function/API? → `task()` with `tool()`
@@ -91,6 +117,10 @@ if ($result['success']) {
 
 **Key methods:**
 - `prompt(string)` - Set the question
+- `text(string)` - Add text content (alias for prompt)
+- `image(base64, mimeType)` - Add image for vision analysis
+- `imageUrl(url)` - Add image from URL
+- `document(base64, mimeType)` - Add document (PDF, etc.) for analysis
 - `expect(array)` - Define JSON schema with types
 - `required(...fields)` - Mark fields as required
 - `expectArray(key)` - Expect array of objects
@@ -459,6 +489,7 @@ $options = [
 - Dimensions vary by provider (768 for Gemini, 1536 for OpenAI)
 - Not all providers support embeddings (see provider table above)
 - Options parameter allows model override and provider-specific settings
+- Embeddings are NOT cross-compatible. Always use the same provider for embedding and searching.
 
 ---
 
@@ -605,9 +636,124 @@ $similar = ai()->similar($article->embedding, $articles, limit: 5);
 
 ---
 
-### Embedding Provider Notes
 
-**Important:** Embeddings are NOT cross-compatible. Always use the same provider for embedding and searching.
+### Multimodal AI (Vision & Documents)
+
+**Use for:** Analyzing images, PDFs, and documents with AI vision capabilities.
+
+Lightpack AI supports multimodal inputs, allowing you to combine text prompts with images and documents. The framework automatically handles provider-specific formats.
+
+#### Image Analysis
+
+**Analyze an image from file path (recommended):**
+
+```php
+$result = ai()->task()
+    ->text('What items are in this receipt and what is the total?')
+    ->attachImage('receipt.jpg')  // Auto-detects MIME type and encodes
+    ->run();
+
+echo $result['raw'];  // "The receipt contains: Coffee $4.50, Sandwich $8.99. Total: $13.49"
+```
+
+**Analyze an image from base64:**
+
+```php
+// Manual encoding (use attachImage() instead for convenience)
+$imageData = base64_encode(file_get_contents('receipt.jpg'));
+
+$result = ai()->task()
+    ->text('What items are in this receipt and what is the total?')
+    ->image($imageData, 'image/jpeg')
+    ->run();
+```
+
+**Analyze an image from URL:**
+
+```php
+$result = ai()->task()
+    ->text('Describe this image in detail')
+    ->imageUrl('https://example.com/photo.jpg')
+    ->run();
+```
+
+**Extract structured data from images:**
+
+```php
+$result = ai()->task()
+    ->text('Extract the business card information')
+    ->attachImage('business-card.png')
+    ->expect(['name' => 'string', 'email' => 'string', 'phone' => 'string', 'company' => 'string'])
+    ->required('name', 'email')
+    ->run();
+
+if ($result['success']) {
+    echo $result['data']['name'];     // "John Smith"
+    echo $result['data']['email'];    // "john@example.com"
+    echo $result['data']['company'];  // "Acme Corp"
+}
+```
+
+#### Document Analysis
+
+**Analyze a PDF document from file path (recommended):**
+
+```php
+$result = ai()->task()
+    ->text('Summarize this invoice and extract key details')
+    ->attachDocument('invoice.pdf')  // Auto-detects MIME type and encodes
+    ->run();
+
+echo $result['raw'];
+```
+
+**Analyze a PDF from base64:**
+
+```php
+// Manual encoding (use attachDocument() instead for convenience)
+$pdfData = base64_encode(file_get_contents('invoice.pdf'));
+
+$result = ai()->task()
+    ->text('Summarize this invoice and extract key details')
+    ->document($pdfData, 'application/pdf')
+    ->run();
+```
+
+**Extract structured data from documents:**
+
+```php
+$result = ai()->task()
+    ->text('Extract invoice details')
+    ->attachDocument('invoice.pdf')
+    ->expect([
+        'invoice_number' => 'string',
+        'date' => 'string',
+        'vendor' => 'string',
+        'total' => 'number',
+        'items' => 'array'
+    ])
+    ->required('invoice_number', 'total')
+    ->run();
+
+if ($result['success']) {
+    echo $result['data']['invoice_number'];  // "INV-2024-001"
+    echo $result['data']['total'];           // 1250.00
+}
+```
+
+**Combine multiple images:**
+
+```php
+$result = ai()->task()
+    ->text('Compare these two product images and list the differences')
+    ->attachImage('product-v1.jpg')
+    ->attachImage('product-v2.jpg')
+    ->run();
+```
+
+**Supported MIME types:**
+- **Images:** `image/jpeg`, `image/png`, `image/gif`, `image/webp`
+- **Documents:** `application/pdf` (OpenAI, Anthropic, Gemini)
 
 ---
 

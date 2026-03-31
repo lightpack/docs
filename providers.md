@@ -43,11 +43,11 @@ php console create:provider MailerProvider
 
 This should have generated `MailerProvider` class in `app/Providers` directory. 
 
-Inside that class you will find a `register()` method. Note that all providers must implement `Lightpack\Providers\ProviderInterface`:
+Inside that class you will find a `register()` method. Note that all providers must implement `Lightpack\Support\ProviderInterface`:
 
 ```php
 use Lightpack\Container\Container;
-use Lightpack\Providers\ProviderInterface;
+use Lightpack\Support\ProviderInterface;
 
 class MailerProvider implements ProviderInterface
 {

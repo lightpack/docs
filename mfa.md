@@ -198,11 +198,11 @@ $user->save();
 Create a new factor:
 
 ```php
-namespace App\Mfa\Factor;
+namespace App\Mfa\Drivers;
 use Lightpack\Mfa\MfaInterface;
 use Lightpack\Auth\Models\AuthUser;
 
-class PushMfa implements MfaInterface {
+class PushDriver implements MfaInterface {
     public function send(AuthUser $user): void {
         // Send push notification
     }
@@ -220,7 +220,7 @@ Register in config:
 
 ```php
 'factors' => [
-    'push' => App\Mfa\Factor\PushMfa::class,
+    'push' => App\Mfa\Drivers\PushDriver::class,
     // ...other factors
 ]
 ```

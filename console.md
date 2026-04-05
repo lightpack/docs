@@ -346,6 +346,8 @@ class MyCommand implements CommandInterface
         
         // Get positional arguments
         $name = $args->first();              // First positional arg
+        $second = $args->argument(0);        // First positional arg (0-indexed)
+        $second = $args->argument(1);        // Second positional arg (0-indexed)
         $all = $args->positional();          // All positional args
         
         // Get options with values

@@ -244,7 +244,7 @@ php console app:serve
 **Specify a custom port** (default: 8000):
 
 ```cli
-php console app:serve 8001
+php console app:serve --port=3000
 ```
 
 ---
@@ -346,6 +346,8 @@ class MyCommand implements CommandInterface
         
         // Get positional arguments
         $name = $args->first();              // First positional arg
+        $second = $args->argument(0);        // First positional arg (0-indexed)
+        $second = $args->argument(1);        // Second positional arg (0-indexed)
         $all = $args->positional();          // All positional args
         
         // Get options with values

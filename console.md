@@ -244,7 +244,7 @@ php console app:serve
 **Specify a custom port** (default: 8000):
 
 ```cli
-php console app:serve 8001
+php console app:serve --port=3000
 ```
 
 ---

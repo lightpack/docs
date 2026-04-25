@@ -270,32 +270,46 @@ The Lightpack console CLI provides a rich set of APIs for interactive command-li
 
 ### Output Formatting
 
-Use the `Lightpack\Console\Output` class for styled output:
+When extending `Command`, the `Output` utility is available via `$this->output`:
 
 ```php
-$output = new Output();
+$this->output->info('Information');
+$this->output->success('Success!');
+$this->output->error('An error occurred');
+$this->output->warning('This is a warning');
+$this->output->line('Plain text');
+$this->output->pad('Left', 'Right', 30, '.'); // Left................. Right
+$this->output->infoLabel('INFO'); // Colored label
+```
 
-$output->info('Information');
-$output->success('Success!');
-$output->error('An error occurred');
-$output->warning('This is a warning');
-$output->line('Plain text');
-$output->pad('Left', 'Right', 30, '.'); // Left................. Right
-$output->infoLabel('INFO'); // Colored label
+You can also instantiate `Output` directly when needed outside a command:
+
+```php
+use Lightpack\Console\Output;
+
+$output = new Output();
+$output->success('Done!');
 ```
 
 ### Interactive Prompts
 
-Use the `Lightpack\Console\Prompt` class for user input:
+When extending `Command`, the `Prompt` utility is available via `$this->prompt`:
 
 ```php
-$prompt = new Prompt();
+$name = $this->prompt->ask('What is your name?');
+$password = $this->prompt->secret('Enter password:');
+$agree = $this->prompt->confirm('Do you agree?', true); // [Y/n]
+$email = $this->prompt->askWithValidation('Email:', fn($v) => filter_var($v, FILTER_VALIDATE_EMAIL));
+$choice = $this->prompt->choice('Pick one:', ['a' => 'Apple', 'b' => 'Banana']);
+```
 
+You can also instantiate `Prompt` directly when needed outside a command:
+
+```php
+use Lightpack\Console\Prompt;
+
+$prompt = new Prompt();
 $name = $prompt->ask('What is your name?');
-$password = $prompt->secret('Enter password:');
-$agree = $prompt->confirm('Do you agree?', true); // [Y/n]
-$email = $prompt->askWithValidation('Email:', fn($v) => filter_var($v, FILTER_VALIDATE_EMAIL));
-$choice = $prompt->choice('Pick one:', ['a' => 'Apple', 'b' => 'Banana']);
 ```
 
 ---
@@ -310,7 +324,7 @@ $choice = $prompt->choice('Pick one:', ['a' => 'Apple', 'b' => 'Banana']);
    php console create:command MyCommand
    ```
 
-2. Implement the `run(array $arguments = [])` method in your class.
+2. Implement the `run()` method in your class.
 
 3. Register your command in `boot/commands.php`:
 
@@ -333,34 +347,29 @@ $choice = $prompt->choice('Pick one:', ['a' => 'Apple', 'b' => 'Banana']);
 Lightpack provides the `Args` helper class for clean argument parsing:
 
 ```php
-use Lightpack\Console\Args;
-use Lightpack\Console\CommandInterface;
-use Lightpack\Console\Output;
+use Lightpack\Console\Command;
 
-class MyCommand implements CommandInterface
+class MyCommand extends Command
 {
-    public function run(array $arguments = [])
+    public function run()
     {
-        $args = new Args($arguments);
-        $output = new Output();
-        
         // Get positional arguments
-        $name = $args->first();              // First positional arg
-        $second = $args->argument(0);        // First positional arg (0-indexed)
-        $second = $args->argument(1);        // Second positional arg (0-indexed)
-        $all = $args->positional();          // All positional args
-        
+        $name = $this->args->first();              // First positional arg
+        $first = $this->args->argument(0);         // First positional arg (0-indexed)
+        $second = $this->args->argument(1);        // Second positional arg (0-indexed)
+        $all = $this->args->positional();          // All positional args
+
         // Get options with values
-        $table = $args->get('table');        // --table=users
-        $key = $args->get('key', 'id');      // --key=id (with default)
-        
+        $table = $this->args->get('table');        // --table=users
+        $key = $this->args->get('key', 'id');      // --key=id (with default)
+
         // Check for flags
-        if ($args->has('force')) {           // --force
-            $output->warning('Force mode enabled');
+        if ($this->args->has('force')) {           // --force
+            $this->output->warning('Force mode enabled');
         }
-        
+
         // Access raw arguments
-        $raw = $args->all();                 // Original array
+        $raw = $this->args->all();                 // Original array
     }
 }
 ```

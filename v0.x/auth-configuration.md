@@ -44,7 +44,7 @@ The class name that handles user authentication logic. This class implements `Li
 - Finding users by remember token
 - Updating login timestamps
 
-Lightpack ships with `EmailPasswordIdentifier` which authenticates users via email and password. You can [implement your own custom identifier](custom-auth) for different authentication methods (username/password, phone/OTP, etc.).
+Lightpack ships with `EmailPasswordIdentifier` which authenticates users via email and password. You can [implement your own custom identifier](/docs/v0.x/custom-auth) for different authentication methods (username/password, phone/OTP, etc.).
 
 ```php
 'identifier' => Lightpack\Auth\Identifiers\EmailPasswordIdentifier::class,

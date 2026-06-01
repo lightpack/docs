@@ -55,7 +55,7 @@ public function seed()
 }
 ```
 
-Here in each loop, we populate a new product using the `Product` [model class](models).
+Here in each loop, we populate a new product using the `Product` [model class](/docs/v0.x/models).
 
 ## Specifying Seeders
 

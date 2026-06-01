@@ -150,7 +150,7 @@ route()->post('/users', UserController::class)->filter(['auth', 'csrf']);
 
 - Filters can be strings or arrays.
 - Filters execute in the order they are defined.
-- See [filters docs](filters) for details on creating and using filters.
+- See [filters docs](/docs/v0.x/filters) for details on creating and using filters.
 
 ---
 
@@ -228,9 +228,9 @@ Verify with ignored parameters:
 url()->verify($signedUrl, ['utm_source', 'utm_medium']);
 ```
 
-Read more about `url()` utility helper [here](url).
+Read more about `url()` utility helper [here](/docs/v0.x/url).
 
-> **Note:** To easily verify current request URL, see [Request](request?id=url-signature-validation) docs.
+> **Note:** To easily verify current request URL, see [Request](/docs/v0.x/request?id=url-signature-validation) docs.
 
 ---
 

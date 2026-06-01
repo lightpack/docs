@@ -363,7 +363,7 @@ Each `UploadedFile` instance provides:
 
 ### Storing Uploaded Files
 
-Lightpack abstracts the storage of uploaded files to utilize the configured [Storage](storage) service.
+Lightpack abstracts the storage of uploaded files to utilize the configured [Storage](/docs/v0.x/storage) service.
 
 #### Store in Arbitrary Location
 

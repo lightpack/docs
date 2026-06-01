@@ -740,7 +740,7 @@ $users = User::query()
     ->all();
 ```
 
-For a complete reference on `withCount()`, `withSum()`, and all other aggregate facilities including defaults, callbacks, and deferred loading, see the [Eager Loading documentation](eager-loading).
+For a complete reference on `withCount()`, `withSum()`, and all other aggregate facilities including defaults, callbacks, and deferred loading, see the [Eager Loading documentation](/docs/v0.x/eager-loading).
 
 ---
 
@@ -885,7 +885,7 @@ Collections make it easy to work with groups of related models in a fluent, expr
 
 ---
 
-By understanding the difference between property and method access, and how collections work, you’ll write more expressive, efficient, and maintainable code with Lightpack ORM. For a deep dive into collections and their powerful capabilities, see the [Collections documentation](collections).
+By understanding the difference between property and method access, and how collections work, you’ll write more expressive, efficient, and maintainable code with Lightpack ORM. For a deep dive into collections and their powerful capabilities, see the [Collections documentation](/docs/v0.x/collections).
 
 ---
 

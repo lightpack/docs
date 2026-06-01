@@ -209,7 +209,7 @@ $payload = $users->transform([
 
 **Returns:** An array of transformed data (not a Collection).
 
-> **See also:** For advanced transformation options, custom field selection, relation includes, and best practices for API responses, refer to the [Transformers documentation](transformers).
+> **See also:** For advanced transformation options, custom field selection, relation includes, and best practices for API responses, refer to the [Transformers documentation](/docs/v0.x/transformers).
 
 ## Array-like and JSON Behavior
 

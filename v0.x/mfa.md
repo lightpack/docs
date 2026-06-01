@@ -30,7 +30,7 @@ Your **users** table already contains required fields to support **MFA** feature
   **Only needed if generating QR codes server-side (PDFs, emails, reports)**  
   **Not needed for web pages** - use client-side JavaScript QR generation instead
 - For SMS:  
-  See [Lightpack SMS](sms) documentation (Twilio, etc.)
+  See [Lightpack SMS](/docs/v0.x/sms) documentation (Twilio, etc.)
 
 ---
 

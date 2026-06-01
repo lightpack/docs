@@ -115,7 +115,7 @@ This ensures that:
 - The `email` field is present and contains a valid email address
 - The `password` field is present
 
-You can customize validation rules based on your requirements. See [Validation](validation) for more details on available rules.
+You can customize validation rules based on your requirements. See [Validation](/docs/v0.x/validation) for more details on available rules.
 
 #### Authentication Flow
 

@@ -169,7 +169,7 @@ Rate limiting controls how many jobs can execute within a time window. Use this 
 
 Lightpack supports rate limiting out of the box. Implement the `rateLimit()` method in your job class to enable rate limiting.
 
-> Rate limiting depends on Lightpack's Cache system. You should configure your cache driver in `.env`. Learn more about cache drivers in the [Caching](caching) section.
+> Rate limiting depends on Lightpack's Cache system. You should configure your cache driver in `.env`. Learn more about cache drivers in the [Caching](/docs/v0.x/caching) section.
 
 ### Setting Rate Limit
 

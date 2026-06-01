@@ -80,7 +80,7 @@ Now you can access the view data array by key names as variables within your vie
 Title: <?= $title ?>
 ```
 
-Read more about [view templating](views) support in Lightpack.
+Read more about [view templating](/docs/v0.x/views) support in Lightpack.
 
 ## JSON Response
 

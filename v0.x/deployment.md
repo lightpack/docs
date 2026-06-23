@@ -10,7 +10,7 @@
 - Manage database backups and restores
 - Manage scheduled cron jobs and commands
 - Manage backround queue processes and workers
-- View and stream processes/applications logs
+- View and stream processes and applications logs
 - Run arbitrary commands on the server
 
 These tools require a Unix-like environment because they use SSH and other Unix commands. If you are on `macOS/Linux`, you are already set up. If you are on `Windows`, you can use *WSL2*, or a VM to run these commands. Before getting started, you'll need:
@@ -26,27 +26,39 @@ So go ahead and provision a new Ubuntu machine and make sure you have SSH access
 
 ### 1. Create Deploy Configuration
 
+Run this command to publish the deploy configuration file:
+
 ```bash
 php console create:config --support=deploy
 ```
 
 This creates `config/deploy.php` with a sample **production** environment.
 
-Each environment supports these options:
+Each environment supports these options which you need to configure as per your setup:
 
 | Option | Description |
 |---|---|
-| `host` | Server IP |
+| `host` | Ubuntu server IP |
 | `key` | Local SSH private key path |
 | `path` | App deployment path on the server |
 | `repo` | Git repository URL |
 | `branch` | Git branch to deploy |
 
-The key name — `production` in this example — is what you pass to every deploy command as the `<env>` argument. You can define multiple environments (e.g., `staging`, `production`) in the same file.
+You can define multiple environments (e.g., `staging`, `production`) in the same file. Every command documented below takes an environment as an argument, and defaults to `production` if you leave it out.
 
-**Omitting `<env>`:** Every command that takes an environment defaults to `production` if you leave it out.
+### 2. Provision the Server
 
-### 2. Prepare Environment File
+Provisioning is a one-time setup that configures the server with all necessary dependencies and configurations like Nginx, PHP, MySQL, etc. To provision the `production` server, run:
+
+```bash
+php console server:provision production
+```
+
+This will prompt you with required default information like root username, PHP version, database, timezone, etc which you can accept or modify as per your setup. Once you confirm, it will start provisioning the server which usually takes a few minutes. When done, root SSH is disabled and a new `deploy` user is created to access the server.
+
+It will also print the security credentials like the deploy user's password, SSH public key, created database username and password, etc. which you should save securely.
+
+### 3. Prepare Environment File
 
 Create `.env.<env>` in your project root (e.g. `.env.production` for the `production` environment):
 
@@ -58,14 +70,6 @@ DB_NAME=lightpack
 DB_USER=lightpack
 DB_PSWD=your-db-password
 ```
-
-### 3. Provision the Server
-
-```bash
-php console server:provision production
-```
-
-Type `yes` to confirm. When done, root SSH is disabled. Only the `deploy` user can access the server.
 
 ### 4. Add Deploy Key to GitHub
 

@@ -51,7 +51,7 @@ You can define multiple environments (e.g., `staging`, `production`) in the same
 Provisioning is a one-time setup that configures the server with all necessary dependencies and configurations like Nginx, PHP, MySQL, etc. To provision the `production` server, run:
 
 ```bash
-php console server:provision production
+php console server:provision
 ```
 
 This will prompt you with required default information like root username, PHP version, database, timezone, etc which you can accept or modify as per your setup. Once you confirm, it will start provisioning the server which usually takes a few minutes. When done, root SSH is disabled and a new `deploy` user is created to access the server.
@@ -60,7 +60,7 @@ It will also print the security credentials like the deploy user's password, SSH
 
 ### 3. Prepare Environment File
 
-Create `.env.<env>` in your project root (e.g. `.env.production` for the `production` environment). You can simply copy your existing `.env` file and rename it to `.env.production` and update the values as per your setup.
+Create `.env.production` for the `production` environment. You can simply copy your existing `.env` file and rename it to `.env.production` and update the values as per your setup.
 
 ### 4. SSH Deploy Key
 

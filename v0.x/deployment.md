@@ -244,36 +244,6 @@ After provisioning:
 
 ---
 
-## Troubleshooting
-
-### "Permission denied (publickey)"
-
-Your SSH key is not on the server. Ensure you can log in:
-
-```bash
-ssh root@your-server-ip
-```
-
-If not, copy your key first:
-
-```bash
-ssh-copy-id root@YOUR_SERVER_IP
-```
-
-### "sudo: a password is required"
-
-The deploy user is intentionally restricted. For system-level changes, log in as a user with full sudo access.
-
-### OPcache not refreshing
-
-```bash
-ssh deploy@your-server-ip "sudo systemctl reload php8.3-fpm"
-```
-
-Replace `8.3` with your PHP version.
-
----
-
 ## Multiple Apps on One Server
 
 Provision once, then add separate environments in `config/deploy.php`:

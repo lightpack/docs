@@ -165,7 +165,7 @@ php console server:queue:restart production --name=emails
 ```bash
 php console server:queue:logs:view production          # last 50 lines
 php console server:queue:logs:view production --lines=200
-php console server:queue:logs:tail production         # live stream (Ctrl+C to stop)
+php console server:queue:logs:tail production         # live stream
 ```
 
 ### Restart Workers After Deploy
@@ -175,20 +175,6 @@ Queue workers are **not** restarted automatically. After each deploy, run:
 ```bash
 php console server:queue:restart production
 ```
-
-For named worker groups:
-
-```bash
-php console server:queue:restart production --name=emails
-```
-
-### Local Development
-
-```bash
-php console jobs:run
-```
-
-Press `Ctrl+C` to stop.
 
 ---
 
@@ -262,12 +248,14 @@ Provision once, then add separate environments in `config/deploy.php`:
 'deploy' => [
     'blog' => [
         'host' => '1.2.3.4',
+        'key'    => '~/.ssh/id_rsa',
         'path' => '/var/www/blog',
         'repo' => 'git@github.com:you/blog.git',
         'branch' => 'main',
     ],
     'shop' => [
         'host' => '1.2.3.4',
+        'key'    => '~/.ssh/id_rsa',
         'path' => '/var/www/shop',
         'repo' => 'git@github.com:you/shop.git',
         'branch' => 'main',

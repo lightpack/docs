@@ -24,7 +24,7 @@ So go ahead and provision a new Ubuntu machine and make sure you have SSH access
 
 ## Quick Start
 
-### 1. Create Deploy Configuration
+### 1. Create Deploy Config
 
 Run this command to publish the deploy configuration file:
 
@@ -60,28 +60,27 @@ It will also print the security credentials like the deploy user's password, SSH
 
 ### 3. Prepare Environment File
 
-Create `.env.<env>` in your project root (e.g. `.env.production` for the `production` environment):
+Create `.env.<env>` in your project root (e.g. `.env.production` for the `production` environment). You can simply copy your existing `.env` file and rename it to `.env.production` and update the values as per your setup.
+
+### 4. SSH Deploy Key
+
+After provisioning, the deploy user's SSH public key is printed in the terminal. Copy it in your Git repository's deploy keys settings. For GitHub, go to: **Settings > Deploy keys > Add deploy key**. Do **not** allow write access.
+
+### 5. Deploy Application
+
+To deploy your application to the default `production` server, run:
 
 ```bash
-APP_ENV=production
-APP_URL=https://yourdomain.com
-DB_HOST=127.0.0.1
-DB_NAME=lightpack
-DB_USER=lightpack
-DB_PSWD=your-db-password
-```
-
-### 4. Add Deploy Key to GitHub
-
-After provisioning, the deploy user's SSH public key is printed in the terminal. Copy it in your GitHub repo: **Settings > Deploy keys > Add deploy key**. Do **not** allow write access.
-
-### 5. Deploy
-
-```bash
-php console app:deploy production
+php console app:deploy
 ```
 
 Copies your `.env.production` to the server, pulls code, installs dependencies, symlinks storage, runs migrations, and reloads PHP-FPM.
+
+To deploy to a different environment, specify it as an argument:
+
+```bash
+php console app:deploy staging
+```
 
 ### 6. Add Domain
 
@@ -93,9 +92,15 @@ php console server:site:add production
 
 ### 7. Enable HTTPS
 
+After adding the domain, enable a secure HTTPS connection using Let's Encrypt certificate:
+
 ```bash
-php console server:site:ssl production
+php console server:site:ssl
 ```
+
+**That's it! Your application is now live with HTTPS.**
+
+If everything goes well, you should be able to access your application at the domain you added. Usually DNS propagation takes a few minutes. So if your browser doesn't load the domain immediately, try refreshing the page after a few minutes.
 
 ---
 

@@ -13,9 +13,7 @@
 - View and stream processes/applications logs
 - Run arbitrary commands on the server
 
-**Note:** These tools require a Unix-like environment because they use SSH and other Unix commands. If you are on `macOS/Linux`, you are already set up. If you are on `Windows`, you can use *WSL2*, or a VM to run these commands.
-
-Before getting started, you'll need:
+These tools require a Unix-like environment because they use SSH and other Unix commands. If you are on `macOS/Linux`, you are already set up. If you are on `Windows`, you can use *WSL2*, or a VM to run these commands. Before getting started, you'll need:
 
 - A fresh Ubuntu 22.04 or 24.04 LTS server
 - and SSH access to the server with root user privileges

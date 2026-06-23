@@ -2,7 +2,16 @@
 
 > *From your local dev-machine to production in minutes, not hours.*
 
-Deploy and manage Lightpack applications on a remote Ubuntu server. Provision once, deploy daily.
+Lightpack PHP ships with a complete deployment suite that makes it painless to provision fresh Ubuntu servers and deploy your applications right from your local machine. This makes deploying and maintaining your applications a breeze. The deployment suite includes commands to:
+
+- Provision custom Ubuntu VPS
+- Deploy applications per environment
+- Manage domains and SSL certificates
+- Manage database backups and restores
+- Manage scheduled cron jobs and commands
+- Manage backround queue processes and workers
+- View and stream processes/applications logs
+- Run arbitrary commands on the server
 
 ---
 

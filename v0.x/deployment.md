@@ -1,8 +1,8 @@
-# Lightpack Deploy
+# Lightpack Deployment Suite
 
 > *From your local dev-machine to production in minutes, not hours.*
 
-Lightpack PHP ships with a complete deployment suite that makes it painless to provision fresh Ubuntu servers and deploy your applications right from your local machine. This makes deploying and maintaining your applications a breeze. The deployment suite includes commands to:
+**Lightpack PHP** ships with a complete deployment suite that makes it painless to provision fresh Ubuntu servers and deploy your applications right from your local machine. This makes deploying and maintaining your applications a breeze. The deployment suite includes commands to:
 
 - Provision custom Ubuntu VPS
 - Deploy applications per environment
@@ -13,14 +13,14 @@ Lightpack PHP ships with a complete deployment suite that makes it painless to p
 - View and stream processes/applications logs
 - Run arbitrary commands on the server
 
----
+**Note:** These tools require a Unix-like environment because they use SSH and other Unix commands. If you are on `macOS/Linux`, you are already set up. If you are on `Windows`, you can use *WSL2*, or a VM to run these commands.
 
-## What You Need
+Before getting started, you'll need:
 
-- A fresh Ubuntu 22.04 or 24.04 server (any VPS provider)
-- Root or sudo SSH access for the initial provision
+- A fresh Ubuntu 22.04 or 24.04 LTS server
+- and SSH access to the server with root user privileges
 
-**Note:** These tools require a Unix-like environment (macOS, Linux, or WSL2/VM/Docker on Windows).
+So go ahead and provision a new Ubuntu machine and make sure you have SSH access to it with root user privileges. You can use any VPS provider including AWS, DigitalOcean, Linode, Vultr, Google Cloud, Azure, etc.
 
 ---
 

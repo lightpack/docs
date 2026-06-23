@@ -76,18 +76,12 @@ php console app:deploy
 
 Copies your `.env.production` to the server, pulls code, installs dependencies, symlinks storage, runs migrations, and reloads PHP-FPM.
 
-To deploy to a different environment, specify it as an argument:
-
-```bash
-php console app:deploy staging
-```
-
 ### 6. Add Domain
 
 Point your DNS A record to the server IP, then:
 
 ```bash
-php console server:site:add production
+php console server:site:add
 ```
 
 ### 7. Enable HTTPS
@@ -98,7 +92,7 @@ After adding the domain, enable a secure HTTPS connection using Let's Encrypt ce
 php console server:site:ssl
 ```
 
-**That's it! Your application is now live with HTTPS.**
+**Congratulations! Your application is now live with HTTPS.**
 
 If everything goes well, you should be able to access your application at the domain you added. Usually DNS propagation takes a few minutes. So if your browser doesn't load the domain immediately, try refreshing the page after a few minutes.
 

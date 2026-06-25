@@ -206,13 +206,30 @@ Saved to `storage/env/production.env`.
 
 ## Database
 
+All database operations are performed remotely — you never need MySQL credentials on your local machine.
+
 ```bash
-php console db:backup production     # download timestamped dump
-php console db:restore production    # upload and restore
-php console db:create production     # new DB + user
+php console db:backup production
+php console db:backup production --file=pre-deploy.sql
+php console db:restore production --file=backup.sql
+
+php console db:drop production --db=shopdb
+php console db:create production --db=shopdb --user=shopuser
 ```
 
-Use `db:create` when deploying a second application to the same server.
+- `db:backup` uses `mysqldump` and saves to `storage/backups/` locally.
+- `db:restore` uploads an SQL file and imports it.
+- `db:create` generates a secure password automatically. Save the credentials shown — they are printed once.
+- `db:drop` removes the database and/or user. You must type `yes` to confirm.
+
+### Direct MySQL Access
+
+If you need to run SQL queries with full privileges, SSH into the server and connect as root:
+
+```bash
+ssh deploy@your-server
+sudo mysql -u root
+```
 
 ---
 
@@ -317,9 +334,12 @@ php console server:queue:setup shop --name=shop-worker
 
 | Command | Description |
 |---|---|
-| `php console db:backup <env>` | Backup database |
-| `php console db:restore <env>` | Restore from backup |
+| `php console db:backup <env> [--file=]` | Backup database (saved to `storage/backups/`) |
+| `php console db:restore <env> --file=` | Restore from backup |
 | `php console db:create <env> [--db=] [--user=]` | Create new database + user |
+| `php console db:drop <env> [--db=] [--user=]` | Drop database and/or user |
+
+**Note:** For direct SQL access, SSH into the server and run `sudo mysql -u root`. See the **Database** section above for full details.
 
 ### Logs
 

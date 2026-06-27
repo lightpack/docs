@@ -58,6 +58,15 @@ php console create:model Product
 - `--key=product_id` : Set the primary key name.
 - `--tenant` : Generate a tenant-aware model extending `TenantModel`.
 
+#### create:factory
+Generate a new factory class in `database/factories`.
+
+```cli
+php console create:factory UserFactory
+```
+- `--model=User` : Generate a model factory that extends `ModelFactory` for the given model.
+- `--force` : Overwrite an existing factory file.
+
 #### create:filter
 Generate a new filter class in `app/Filters`.
 

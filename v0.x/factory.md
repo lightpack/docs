@@ -18,6 +18,24 @@ Factories are one of the most powerful tools for building reliable, maintainable
 
 ---
 
+## Creating Factories
+
+Use the console command to quickly scaffold a new factory.
+
+```cli
+php console create:factory UserFactory
+```
+
+Generate a `ModelFactory` for a specific model using the `--model` flag:
+
+```cli
+php console create:factory UserFactory --model=User
+```
+
+This creates the factory class in `database/factories/` with the correct base class and namespace already wired in.
+
+---
+
 ## Factory Base Class
 
 You define a new factory class by extending `Factory` and implementing the `template()` method:

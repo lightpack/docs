@@ -1,6 +1,14 @@
 # HTML Forms
 
-<p class="tip">Lightpack provides a <code>Form</code> class for generating HTML form elements programmatically. Every method returns a raw HTML string — no wrappers, no divs, no extra markup — giving you complete control over layout and styling.</p>
+<p class="tip">Lightpack provides a <code>Form</code> class for generating HTML form elements programmatically. Every method returns a raw HTML string — no wrappers, no divs, no extra markup — giving you complete control over layout and styling. It facilitates creating:</p>
+
+- Sticky forms based on previous request input.
+- CSRF token field automatically included.
+- Pre-rendered error messages for validation.
+- Type-specific inputs (email, password, number, etc.).
+- Custom attributes for any input type.
+- Handling multiple radio buttons and checkboxes.
+- Flexible form structure for custom layouts.
 
 ---
 

@@ -554,6 +554,42 @@ $user->attach('product_image', [
    ]);
    ```
 
+## Multi-Tenancy
+
+The Uploads module is fully multi-tenancy aware. When used with `Lightpack\Database\Lucid\TenantModel` for your parent models, uploads are automatically scoped by `tenant_id`.
+
+### How It Works
+
+- The `uploads` table includes a `tenant_id` column (defaults to `0` for non-tenant apps).
+- When a file is attached to a tenant-aware model, `tenant_id` is auto-injected from the model's `tenant_id` property.
+- If the parent model is not tenant-aware, `tenant_id` falls back to `TenantContext::get()` or defaults to `0`.
+- The `uploads()` relationship on the model automatically scopes by `tenant_id`.
+- The `deleteAllUploadsForModel()` method in `UploadHandler` also scopes by `tenant_id`.
+
+### Preparing Your Model
+
+For tenant-aware uploads, extend `TenantModel`:
+
+```php
+use Lightpack\Database\Lucid\TenantModel;
+use Lightpack\Uploads\UploadTrait;
+
+class Product extends TenantModel
+{
+    use UploadTrait;
+    // ...
+}
+```
+
+### What You Don't Need To Do
+
+- No manual `tenant_id` assignment required when attaching files.
+- No extra query scoping needed; the framework handles isolation automatically.
+
+### Backward Compatibility
+
+Non-tenant apps continue to work seamlessly. `tenant_id` defaults to `0`, ensuring no breaking changes.
+
 ## Error Handling
 
 The upload methods can throw exceptions in case of errors:

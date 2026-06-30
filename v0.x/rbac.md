@@ -17,8 +17,8 @@ A minimal, efficient, and modular Role-Based Access Control (RBAC) implementatio
 ## Database Schema
 
 Tables created by the included migration:
-- `roles`: Stores all roles.
-- `permissions`: Stores all permissions.
+- `roles`: Stores all roles (id, tenant_id, name, description, timestamps). `tenant_id` defaults to `0` for non-tenant apps.
+- `permissions`: Stores all permissions (id, tenant_id, name, description, timestamps). `tenant_id` defaults to `0`.
 - `user_role`: Pivot table linking users and roles.
 - `role_permission`: Pivot table linking roles and permissions.
 
@@ -97,6 +97,28 @@ $canDelete = User::filters(['permission' => 11])->all();
 // By role and permission both
 $filtered = User::filters(['role' => 'admin', 'permission' => 'edit_post'])->all();
 ```
+
+## Multi-Tenancy
+
+If your user model extends `TenantModel`, roles and permissions are automatically scoped to the current tenant.
+
+### Basic Usage
+
+```php
+class User extends TenantModel {
+    use RbacTrait;
+}
+```
+
+```php
+$user = new User(23);
+
+$user->assignRole('editor');
+$user->hasRole('editor');     // true for this tenant only
+$user->can('edit_post');      // true for this tenant only
+```
+
+Role names and permission names are scoped per tenant, so different tenants can define their own "admin" roles with different permissions.
 
 ### Fetch Role Permissions
 

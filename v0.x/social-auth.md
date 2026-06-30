@@ -96,6 +96,40 @@ The `SocialAuthController` is already shipped with this feature. It handles both
 
 ---
 
+## Multi-Tenancy
+
+The SocialAuth module is fully multi-tenancy aware. When used in a multi-tenant application, social accounts are automatically scoped by `tenant_id`.
+
+### How It Works
+
+- The `social_accounts` table includes a `tenant_id` column (defaults to `0` for non-tenant apps).
+- The unique constraint is scoped to `(tenant_id, provider, provider_id)`, allowing the same social account to be linked across different tenants.
+- During redirect, the current `tenant_id` is stored in session (web) or encoded in the OAuth `state` (API).
+- During callback, the `tenant_id` is restored from session or state, and `TenantContext` is set.
+- The `findOrCreateUser()` method scopes social account lookups by `tenant_id` and assigns `tenant_id` to new social accounts and users.
+
+### Preparing Your User Model
+
+For tenant-aware social authentication, extend `TenantModel`:
+
+```php
+use Lightpack\Database\Lucid\TenantModel;
+
+class User extends TenantModel
+{
+    // ...
+}
+```
+
+### What You Don't Need To Do
+
+- No manual `tenant_id` assignment in routes or controllers.
+- No extra query scoping needed; the framework handles isolation automatically.
+
+### Backward Compatibility
+
+Non-tenant apps continue to work seamlessly. `tenant_id` defaults to `0`, ensuring no breaking changes.
+
 ## Adding a Custom Provider
 
 Create a new provider class implementing `SocialAuthInterface`:

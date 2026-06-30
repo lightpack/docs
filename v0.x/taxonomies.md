@@ -7,7 +7,7 @@ Lightpack’s Taxonomies system provides a robust, hierarchical, and framework-n
 ## Migration
 
 The Taxonomies system requires two tables:
-- `taxonomies`: Stores taxonomy nodes (id, name, slug, type, parent_id, sort_order, meta, timestamps).
+- `taxonomies`: Stores taxonomy nodes (id, tenant_id, name, slug, type, parent_id, sort_order, meta, timestamps). `tenant_id` defaults to `0` for non-tenant apps.
 - `taxonomy_morphs`: Pivot table connecting taxonomies to any model (taxonomy_id, morph_id, morph_type).
 
 Create schema migration file:
@@ -233,6 +233,52 @@ Taxonomy::bulkMove([3, 4], 5); // Move nodes 3 and 4 under node 5
 ```
 
 - **Notes:** Throws if any move would create a cycle.
+
+---
+
+## Multi-Tenancy
+
+If your model extends `TenantModel`, taxonomies are automatically scoped to the current tenant.
+
+### Basic Usage
+
+```php
+use Lightpack\Taxonomies\TaxonomyTrait;
+
+class Post extends TenantModel {
+    use TaxonomyTrait;
+}
+```
+
+```php
+TenantContext::set($tenantId);
+
+// Creates taxonomy with tenant_id automatically set
+$taxonomy = new TenantTaxonomy([
+    'name' => 'News',
+    'slug' => 'news',
+    'type' => 'category'
+]);
+$taxonomy->save();
+
+// Only returns this tenant's taxonomies
+$taxonomies = $post->taxonomies;
+```
+
+### Custom Taxonomy Model
+
+Override `getTaxonomyModel()` if you need a custom taxonomy model with additional methods:
+
+```php
+class Post extends TenantModel {
+    use TaxonomyTrait;
+
+    protected function getTaxonomyModel(): string
+    {
+        return AppTaxonomy::class;
+    }
+}
+```
 
 ---
 

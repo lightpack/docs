@@ -59,6 +59,7 @@ The `audit_logs` table has the following fields:
 | Column         | Type      | Description                        |
 | -------------- | --------- | ---------------------------------- |
 | id             | bigint    | Primary key                        |
+| tenant_id      | bigint    | Tenant ID (default 0)              |
 | user_id        | bigint    | Acting user ID (nullable)          |
 | action         | varchar   | Action performed                   |
 | audit_type | varchar   | Class/model/table                  |
@@ -159,6 +160,30 @@ $user->audit([
     'new_values' => $user->toArray(),
     'message'    => 'User details updated.',
 ]);
+```
+
+## Multi-Tenancy
+
+If your model extends `TenantModel`, audit logs are automatically scoped to the current tenant.
+
+### Basic Usage
+
+```php
+class User extends TenantModel {
+    use AuditTrait;
+}
+```
+
+```php
+$user = new User(23);
+
+$user->audit([
+    'action'     => 'update',
+    'new_values' => $user->toArray(),
+    'message'    => 'User details updated.',
+]);
+
+// tenant_id auto-read from $user->tenant_id
 ```
 
 ## Logging Multi-Entity Actions
@@ -264,6 +289,9 @@ $logs = AuditLog::filters(['action' => 'update'])->all();
 
 // By audit type
 $logs = AuditLog::filters(['auditType' => 'User'])->all();
+
+// By tenant
+$logs = AuditLog::filters(['tenant' => 5])->all();
 
 // Combine filters
 $logs = AuditLog::filters([

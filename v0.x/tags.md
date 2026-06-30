@@ -1,13 +1,13 @@
 # Tags System
 
-Lightpack’s Tags system provides framework-native way to add tagging support to any Lucid model. It is designed for many-to-many polymorphic tagging (e.g., posts, products, users can all be tagged).
+Lightpack's Tags system provides framework-native way to add tagging support to any Lucid model. It is designed for many-to-many polymorphic tagging (e.g., posts, products, users can all be tagged).
 
 ---
 
 ## Migration
 
 The Tags system uses two tables:
-- `tags`: Stores tag definitions (`id`, `name`, `slug`, timestamps).
+- `tags`: Stores tag definitions (`id`, `tenant_id`, `name`, `slug`, timestamps). `tenant_id` defaults to `0` for non-tenant apps.
 - `tag_morphs`: Pivot table connecting tags to models (`tag_id`, `morph_id`, `morph_type`).
 
 Create schema migration file:
@@ -69,7 +69,49 @@ Query scope to filter models by tag IDs.
 
 ```php
 // All posts with tag 1 or 2
-$posts = Post::filters(['tags' => [1, 2]])->all(); 
+$posts = Post::filters(['tags' => [1, 2]])->all();
+```
+
+---
+
+## Multi-Tenancy
+
+If your model extends `TenantModel`, tags are automatically scoped to the current tenant.
+
+### Basic Usage
+
+```php
+use Lightpack\Tags\TagsTrait;
+
+class Post extends TenantModel {
+    use TagsTrait;
+}
+```
+
+```php
+TenantContext::set($tenantId);
+
+// Creates tag with tenant_id automatically set
+$tag = new TenantTag(['name' => 'News', 'slug' => 'news']);
+$tag->save();
+
+// Only returns this tenant's tags
+$tags = $post->tags;
+```
+
+### Custom Tag Model
+
+Override `getTagModel()` if you need a custom tag model with additional methods:
+
+```php
+class Post extends TenantModel {
+    use TagsTrait;
+
+    protected function getTagModel(): string
+    {
+        return AppTag::class;
+    }
+}
 ```
 
 ---

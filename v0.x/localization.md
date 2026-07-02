@@ -2,11 +2,11 @@
 
 Build multilingual applications with ease using Lightpack's built-in localization system.
 
-- **File-based translations** — PHP array files, no external formats
+- **File-based translations** — Plain PHP array files.
 - **Dot notation** — `messages.hello` maps to `lang/en/messages.php` → `hello`.
 - **Placeholders** — `:name`, `:count` replacement.
 - **Pluralization** — `choice('messages.items', 5)` with pipe syntax.
-- **Fallback** — missing keys fall back to default locale automatically.
+- **Fallback** — missing keys fall back to the app fallback locale.
 - **Validation messages** — override validation error messages with your own translations.
 
 ## Quick Start
@@ -21,6 +21,16 @@ php console create:lang
 
 It will prompt you to enter the language locale (e.g., `en`, `hi`, `es`) and translation file name to be created.
 
+Below is an example of the translation file structure `lang/en/messages.php`:
+
+```php
+return [
+    'hello' => 'Hello',
+    'welcome' => 'Welcome, :name!',
+    'items' => ':count item|:count items',
+];
+```
+
 ### Use in views or controllers
 
 ```php
@@ -33,9 +43,11 @@ lang('messages.welcome', ['name' => 'John']);  // 'Welcome, John!'
 // Pluralization
 lang()->choice('messages.items', 5);  // '5 items'
 
-// Nested arrays
-lang('forms.signup.title');   // 'Sign Up' — reads lang/en/forms.php → ['signup']['title']
 ```
+
+> **No-dot keys:** `lang('hello')` (without a dot) defaults to `messages.php`: `lang/en/messages.php → 'hello'`.
+
+> **Missing keys:** If a key is missing in both the current locale and the fallback locale, the key string itself is returned (e.g., `'messages.hello'`).
 
 ## Configuration
 
@@ -54,18 +66,17 @@ return [
 ];
 ```
 
-## API
+## Locale Management
 
-| Method | Description |
-|--------|-------------|
-| `lang('key')` | Get translation string |
-| `lang('key', ['name' => 'John'])` | Get with placeholder replacement |
-| `lang()->choice('key', 5)` | Pluralized translation |
-| `lang()->choice('key', 5, [], 'fr')` | Pluralized with locale override |
-| `lang()->has('key')` | Check if translation exists |
-| `lang()->setLocale('hi')` | Change locale manually |
-| `lang()->getLocale()` | Get current locale |
-| `lang()->setLocaleRule('xx', fn($n) => ...)` | Register custom plural rule |
+You can check or change the active locale at runtime:
+
+```php
+// Get the current locale
+$lang = lang()->getLocale(); // 'en'
+
+// Set a new locale for the current request
+lang()->setLocale('hi');
+```
 
 ## Validation Messages
 
@@ -93,3 +104,10 @@ For languages with more than two plural forms, prefix each form with `{index}`:
 ```php
 // Russian — 3 forms
 'articles' => '{0} :count статей|{1} :count статья|{2} :count статьи',
+```
+
+- `choice('articles', 1)` → `1 статья` (form 1)
+- `choice('articles', 2)` → `2 статьи` (form 2)
+- `choice('articles', 5)` → `5 статей` (form 0)
+
+---

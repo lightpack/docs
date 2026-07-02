@@ -145,6 +145,18 @@ Generate a new AI tool class in `app/Tools`.
 php console create:tool SearchProducts
 ```
 
+#### create:lang
+Create a new language translation file in `lang` directory.
+
+```cli
+php console create:lang
+```
+
+- `--locale` : Set the locale (default: `en`).
+- `--file` : Set the translation file name (default: `messages`).
+- `--support=validation` : Create a validation translation file.
+- `--force` : Overwrite an existing file.
+
 ---
 
 ### File Storage

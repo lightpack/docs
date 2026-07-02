@@ -13,7 +13,7 @@ Build multilingual applications with ease using Lightpack's built-in localizatio
 
 ### Create translation files
 
-Run the following command to create the default language directory:
+Run the following command to create a new language translation file:
 
 ```bash
 php console create:lang

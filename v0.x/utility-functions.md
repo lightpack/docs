@@ -172,7 +172,7 @@ Outputs a closing `</form>` tag.
 `dd(...$args)`
 
 **What it does:**
-“Dump and Die”—outputs the contents of variables in a styled, collapsible HTML dump and stops the script. It is aware of the CLI and web environments and formats the output accordingly.
+“Dump and Die”—outputs the contents of variables and stops the script. It is aware of the CLI and web environments and formats the output accordingly.
 
 **When to use:**
 - For debugging: inspect variables, arrays, or objects at any point in your code.

@@ -1,35 +1,14 @@
 # Resource Query
 
-`Resource Query` solves a specific, recurring problem in API development: every list endpoint in your application ends up writing the same boilerplate — reading filter parameters, applying sort conditions, eager loading relations, handling pagination, and shaping the response. The code works, but it is scattered across controllers and grows inconsistently over time.
+When building resource APIs, every list endpoint in your application ends up writing the same boilerplate — reading filter parameters, applying sort conditions, eager loading relations, handling pagination, and shaping the response. The code works, but it is scattered across controllers and grows inconsistently over time.
 
-`Resource Query` is a single, focused class that reads standardized HTTP query parameters from the current request and translates them into the appropriate ORM operations — all secured behind an explicit allowlist that you define per endpoint.
+Lightpack's `Model::resourceQuery()` makes it easy to handle HTTP query parameters from the current request and translates them into the appropriate ORM operations — all secured behind an explicit allowlist that you define per endpoint.
 
 ---
 
-## The Idea in One Minute
+## Without Resource Query
 
-Without `Resource Query`, a typical list endpoint looks like this:
-
-```php
-public function index()
-{
-    $query = User::query();
-
-    if ($status = request()->query('status')) {
-        $query->where('status', $status);
-    }
-
-    if ($sort = request()->query('sort')) {
-        $query->orderBy($sort, 'ASC');
-    }
-
-    $pagination = $query->paginate();
-
-    return response()->json($pagination->transform());
-}
-```
-
-This works for two parameters. By the fifth it becomes tangled. `Resource Query` replaces the entire pattern:
+A typical list endpoint looks like this:
 
 ```php
 public function index()
@@ -44,7 +23,6 @@ public function index()
     return response()->json($data);
 }
 ```
-
 
 A client can now drive this endpoint entirely through the URL:
 
@@ -61,13 +39,9 @@ GET /api/users
 
 ---
 
-## Security Model: Everything Is Opt-In
+**No query parameter has any effect unless you explicitly allow it.**
 
-This is the single most important principle of `Resource Query`. **No query parameter has any effect unless you explicitly allow it.**
-
-If a client sends `?filter[password]=secret&sort=internal_score`, both parameters are silently ignored because neither appears in the allowlists you defined. There is no way for a client to filter on a column, sort by a column, load a relation, or select a field that you have not explicitly permitted.
-
-This means you can safely expose `Resource Query` on any endpoint without fear that clients can probe your schema or access unintended data.
+If a client sends `?filter[password]=secret&sort=internal_score`, both parameters are silently ignored because neither appears in the allowlists you defined.
 
 ---
 
@@ -112,7 +86,7 @@ class Post extends Model
 }
 ```
 
-**Array-valued filters** are also supported natively. PHP parses `?filter[role][]=admin&filter[role][]=editor` into `['role' => ['admin', 'editor']]`, and `Resource Query` passes the array directly to your scope:
+**Array-valued filters** are also supported natively. So `?filter[role][]=admin&filter[role][]=editor` is parsed into `['role' => ['admin', 'editor']]`, and is passed to the scope method.
 
 ```php
 protected function scopeRole(Builder $query, array|string $value): void
@@ -161,7 +135,7 @@ Post::resourceQuery()
 ?include=author,comments,tags          → with('author', 'comments', 'tags')
 ```
 
-Any relation not in the allowlist is silently dropped. This is important: a client cannot trigger loading of internal or sensitive relations.
+> Any relation not in the allowlist is silently dropped.
 
 **Default includes**: relations to always load regardless of the `?include` parameter:
 
@@ -408,23 +382,6 @@ Sample response for `?filter[status]=published&include=author&fields=title,publi
     }
 }
 ```
-
----
-
-## How It Connects to the ORM
-
-`Resource Query` is not a separate query engine — it is a thin orchestrator over the ORM components Lightpack already provides.
-
-| Query parameter | ORM operation |
-|---|---|
-| `?filter[key]=value` | Calls `scopeKey($builder, $value)` on the model |
-| `?sort=-col,other` | `Builder::orderBy('col', 'DESC')`, `Builder::orderBy('other', 'ASC')` |
-| `?include=a,b.c` | `Builder::with(['a', 'b.c'])` |
-| `?count=a,b` | `Builder::withCount(['a', 'b'])` → adds `a_count`, `b_count` to each model |
-| `?fields=name,email` | `Transformer::fields(['self' => ['name', 'email']])` (optional) |
-| `?page=N&per_page=N` | `Builder::paginate($perPage)` which reads `?page` internally |
-
-The scope method convention (`scope` prefix + camelCase key) is the same convention used by `Model::filters()`. If you already have scope methods defined on your models, they work with `Resource Query` with zero changes.
 
 ---
 

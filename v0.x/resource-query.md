@@ -47,7 +47,7 @@ If a client sends `?filter[password]=secret&sort=internal_score`, both parameter
 
 ## Setting Up the Allowlists
 
-### `allowFilters(array $filters)`
+### `allowFilters()`
 
 Declares which filter keys the client may send. Each key maps to a scope method on the model — the same `scope*()` methods used by `Model::filters()`.
 
@@ -95,7 +95,7 @@ protected function scopeRole(Builder $query, array|string $value): void
 }
 ```
 
-### `allowSorts(array $columns)`
+### `allowSorts()`
 
 Declares which columns the client may sort by. Unrecognised column names are ignored.
 
@@ -120,7 +120,7 @@ Post::resourceQuery()
 
 The default is applied only when `?sort` is absent. A client-provided sort always wins.
 
-### `allowIncludes(array $relations)`
+### `allowIncludes()`
 
 Declares which relations the client may eager load. Dot-notation for nested relations is supported.
 
@@ -145,7 +145,7 @@ Post::resourceQuery()
 
 Request includes are merged with the defaults and deduplicated.
 
-### `allowCounts(array $relations)`
+### `allowCounts()`
 
 Declares which relation row counts the client may request. Counts are loaded via efficient separate queries after the main result set is fetched — no joins, no subqueries in the main SQL.
 
@@ -173,7 +173,7 @@ The client cannot request counts for relations not in `allowedCounts`. Unrecogni
 
 Note: counting and loading are independent. A client can request `?count=comments` (to know how many comments exist) without also requesting `?include=comments` (which would load all the comment rows). Use both together only when you need both the count and the actual data.
 
-### `allowSum(array $relations)`, `allowAvg(array $relations)`, `allowMin(array $relations)`, `allowMax(array $relations)`
+### `aggregates`
 
 Whitelist relation aggregates the client may request. Each maps a relation name to an array of allowed columns.
 
@@ -199,7 +199,7 @@ Only `relation.column` pairs listed in the allowlist are executed. Wrong columns
 
 ---
 
-### `allowFields(array $fields)`
+### `allowFields()`
 
 Declares which root-model fields the client may request. **Only relevant when the model has a Transformer defined.** It controls which fields the transformer outputs — it does NOT limit the SQL query or affect `paginate()`, `all()`, or `one()` when no transformer is involved.
 
@@ -230,7 +230,7 @@ Only root-model fields are validated against `allowedFields`. Relation fields ar
 
 ## Executing the Query
 
-### `paginate(): Pagination`
+### `paginate()`
 
 Executes the query and returns a `Pagination` object. The current page is read from `?page` in the request. The per-page count is read from `?per_page`, falling back to `?limit`, then to the server default of 15 (customisable via `perPage()`). Capped at `maxPerPage` (default 100) to prevent clients from requesting arbitrarily large result sets.
 
@@ -245,7 +245,7 @@ Post::resourceQuery()
     ->paginate();
 ```
 
-### `all(): Collection`
+### `all()`
 
 Executes without pagination and returns a full `Collection`.
 
@@ -258,7 +258,7 @@ $posts = Post::resourceQuery()
 
 Useful for small, bounded result sets (e.g., lookup lists) where pagination is unnecessary.
 
-### `one(): ?Model`
+### `one()`
 
 Executes and returns a single matching model or `null`.
 
@@ -268,7 +268,7 @@ $post = Post::resourceQuery()
     ->one();
 ```
 
-### `getBuilder(): Builder`
+### `getBuilder()`
 
 Returns the fully configured `Builder` without executing. Use this when you need to add constraints beyond what `Resource Query` supports before executing:
 

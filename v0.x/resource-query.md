@@ -6,9 +6,7 @@ Lightpack's `Model::resourceQuery()` makes it easy to handle HTTP query paramete
 
 ---
 
-## resourceQuery method
-
-You can use the `resourceQuery()` method to handle HTTP query parameters from the current request and translates them into the appropriate ORM operations.
+You can use the `Model::resourceQuery()` method to handle HTTP query parameters from the current request and translates them into the appropriate ORM operations.
 
 ```php
 public function index()

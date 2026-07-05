@@ -2,11 +2,7 @@
 
 When building resource APIs, every list endpoint in your application ends up writing the same boilerplate — reading filter parameters, applying sort conditions, eager loading relations, handling pagination, and shaping the response. The code works, but it is scattered across controllers and grows inconsistently over time.
 
-Lightpack's `Model::resourceQuery()` makes it easy to handle HTTP query parameters from the current request and translates them into the appropriate ORM operations — all secured behind an explicit allowlist that you define per endpoint.
-
----
-
-You can use the `Model::resourceQuery()` method to handle HTTP query parameters from the current request and translates them into the appropriate ORM operations.
+Lightpack's `Model::resourceQuery()` makes it easy to handle HTTP query parameters from the current request and translates them into the appropriate ORM operations.
 
 ```php
 public function index()

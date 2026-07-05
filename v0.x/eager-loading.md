@@ -279,9 +279,9 @@ foreach($hotels as $hotel) {
 > | Method | Supported relations |
 > |--------|--------------------|
 > | `withCount()` | `hasMany`, `hasManyThrough`, `morphMany`, `pivot`, `morphToMany`, `morphedByMany` |
-> | `withSum()` / `withAvg()` / `withMin()` / `withMax()` | `hasMany` |
+> | `withSum()` / `withAvg()` / `withMin()` / `withMax()` | `hasMany`, `hasManyThrough` |
 >
-> `withCount()` works across all collection-style relations including polymorphic many-to-many. Numeric aggregates (`withSum` etc.) currently apply to `hasMany` relations only.
+> `withCount()` works across all collection-style relations including polymorphic many-to-many. Numeric aggregates (`withSum` etc.) apply to `hasMany` and `hasManyThrough` relations.
 
 > **Standalone vs. Relation Aggregates**
 >

@@ -172,35 +172,22 @@ Outputs a closing `</form>` tag.
 `dd(...$args)`
 
 **What it does:**
-“Dump and Die”—outputs the contents of variables (like `var_dump`) and stops the script.
+“Dump and Die”—outputs the contents of variables in a styled, collapsible HTML dump and stops the script. It is aware of the CLI and web environments and formats the output accordingly.
 
 **When to use:**
 - For debugging: inspect variables, arrays, or objects at any point in your code.
 - Use in development only; never leave in production code.
 
-**Example:**
+**Examples:**
 ```php
+// Dump multiple variables
 dd($user, $posts);
-```
 
-## pp()
+// Label variables with named arguments
+dd(user: $user, posts: $posts);
 
-`pp(...$args)`
-
-**What it does:**
-“Pretty Print”—outputs variables using `print_r` and stops the script. This function is useful for debugging purposes, especially when working with arrays and objects.
-
-**When to use:**
-- For debugging: best for arrays and objects where structure matters. This provides a clear and readable representation of the data.
-- Use in development only.
-
-**Example:**
-```php
-pp($myArray);
-```
-
-```php
-pp($var1, $var2, $var3)
+// Single-key arrays are also shown with their key as the label
+dd(['user' => $user], ['posts' => $posts]);
 ```
 
 ## halt()

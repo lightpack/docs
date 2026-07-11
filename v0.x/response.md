@@ -548,6 +548,74 @@ response()->setStatus(302)->setHeader('Location', '/login');
 
 ---
 
+## API Responses
+
+Building APIs with `response()->json()` leaves the response shape up to each developer. One endpoint returns `{status: 'ok', result: ...}`, another returns `{success: true, data: ...}`, and errors look different everywhere. `ApiResponseTrait` solves that by giving controllers a single, predictable envelope for every success and error response:
+
+```json
+{
+  "success": true|false,
+  "message": "Optional message",
+  "data": { ... },
+  "errors": { ... }
+}
+```
+
+### Available Methods
+
+| Method | Status | Use for |
+| --- | --- | --- |
+| `respondSuccess()` | 200 | Default success |
+| `respondCreated()` | 201 | After inserts |
+| `respondAccepted()` | 202 | Async / queued work |
+| `respondNoContent()` | 204 | DELETE or PATCH with empty body |
+| `respondBadRequest()` | 400 | Malformed request or business rule |
+| `respondUnauthorized()` | 401 | Authentication required |
+| `respondForbidden()` | 403 | Authenticated but not allowed |
+| `respondNotFound()` | 404 | Missing resource |
+| `respondValidationError()` | 422 | Validation failures |
+| `respondError()` | 500+ | Generic / custom errors |
+
+### Examples
+
+Success:
+
+```php
+return $this->respondCreated($product, 'Product created');
+```
+
+```json
+{
+  "success": true,
+  "message": "Product created",
+  "data": { "id": 1, "name": "Widget" }
+}
+```
+
+Validation error:
+
+```php
+return $this->respondValidationError([
+    'email' => 'Email is invalid.',
+]);
+```
+
+```json
+{
+  "success": false,
+  "message": "Validation failed.",
+  "errors": { "email": "Email is invalid." }
+}
+```
+
+Custom error:
+
+```php
+return $this->respondError('Payment failed', 402, ['card' => 'Declined']);
+```
+
+---
+
 ## View Rendering
 
 - **Render a Template:**

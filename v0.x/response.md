@@ -548,6 +548,76 @@ response()->setStatus(302)->setHeader('Location', '/login');
 
 ---
 
+## API Responses
+
+Building APIs with `response()->json()` leaves the response shape up to each developer. One endpoint returns `{status: 'ok', result: ...}`, another returns `{success: true, data: ...}`, and errors look different everywhere. `ApiResponseTrait` solves that by giving controllers a single, predictable envelope for every success and error response:
+
+```json
+{
+  "success": true|false,
+  "message": "Optional message",
+  "data": { ... },
+  "errors": { ... }
+}
+```
+
+### Available Methods
+
+| Method | Status | Use for |
+| --- | --- | --- |
+| `respondSuccess($data, $message, $status = 200)` | 200 | Default success |
+| `respondCreated($data, $message)` | 201 | After inserts |
+| `respondAccepted($data, $message)` | 202 | Async / queued work |
+| `respondNoContent()` | 204 | DELETE or PATCH with empty body |
+| `respondBadRequest($message, $errors = [])` | 400 | Malformed request or business rule |
+| `respondUnauthorized($message)` | 401 | Authentication required |
+| `respondForbidden($message)` | 403 | Authenticated but not allowed |
+| `respondNotFound($message)` | 404 | Missing resource |
+| `respondValidationError($errors, $message)` | 422 | Validation failures |
+| `respondError($message, $status, $errors)` | 500+ | Generic / custom errors |
+
+`respondNoContent()` is the only helper that does not use the envelope; a 204 response must have an empty body.
+
+### Examples
+
+Success:
+
+```php
+return $this->respondCreated($product, 'Product created');
+```
+
+```json
+{
+  "success": true,
+  "message": "Product created",
+  "data": { "id": 1, "name": "Widget" }
+}
+```
+
+Validation error:
+
+```php
+return $this->respondValidationError([
+    'email' => 'Email is invalid.',
+]);
+```
+
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": { "email": "Email is invalid." }
+}
+```
+
+Custom error:
+
+```php
+return $this->respondError('Payment failed', 402, ['card' => 'Declined']);
+```
+
+---
+
 ## View Rendering
 
 - **Render a Template:**

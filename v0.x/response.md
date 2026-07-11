@@ -565,18 +565,16 @@ Building APIs with `response()->json()` leaves the response shape up to each dev
 
 | Method | Status | Use for |
 | --- | --- | --- |
-| `respondSuccess($data, $message, $status = 200)` | 200 | Default success |
-| `respondCreated($data, $message)` | 201 | After inserts |
-| `respondAccepted($data, $message)` | 202 | Async / queued work |
+| `respondSuccess()` | 200 | Default success |
+| `respondCreated()` | 201 | After inserts |
+| `respondAccepted()` | 202 | Async / queued work |
 | `respondNoContent()` | 204 | DELETE or PATCH with empty body |
-| `respondBadRequest($message, $errors = [])` | 400 | Malformed request or business rule |
-| `respondUnauthorized($message)` | 401 | Authentication required |
-| `respondForbidden($message)` | 403 | Authenticated but not allowed |
-| `respondNotFound($message)` | 404 | Missing resource |
-| `respondValidationError($errors, $message)` | 422 | Validation failures |
-| `respondError($message, $status, $errors)` | 500+ | Generic / custom errors |
-
-`respondNoContent()` is the only helper that does not use the envelope; a 204 response must have an empty body.
+| `respondBadRequest()` | 400 | Malformed request or business rule |
+| `respondUnauthorized()` | 401 | Authentication required |
+| `respondForbidden()` | 403 | Authenticated but not allowed |
+| `respondNotFound()` | 404 | Missing resource |
+| `respondValidationError()` | 422 | Validation failures |
+| `respondError()` | 500+ | Generic / custom errors |
 
 ### Examples
 

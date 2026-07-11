@@ -561,11 +561,9 @@ Building APIs with `response()->json()` leaves the response shape up to each dev
 }
 ```
 
-Just include the trait in your controller and use the methods:
+Just include the trait `\Lightpack\Http\ApiResponseTrait` in your controller and use the methods:
 
 ```php
-use Lightpack\Http\ApiResponseTrait;
-
 class PostController extends Controller
 {
     use ApiResponseTrait;

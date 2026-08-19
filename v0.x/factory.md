@@ -45,13 +45,11 @@ class UserFactory extends Factory
 {
     protected function template(): array
     {
-        $faker = new Faker();
-        
         return [
-            'name' => $faker->name(),
-            'email' => $faker->unique()->email(),
-            'address' => $faker->address(),
-            'created_at' => $faker->date('Y-m-d H:i:s'),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->email(),
+            'address' => $this->faker->address(),
+            'created_at' => $this->faker->date('Y-m-d H:i:s'),
         ];
     }
 }
@@ -59,7 +57,7 @@ class UserFactory extends Factory
 
 ### Core Methods
 - `times(int $count): static` — Specify how many entities to generate. Returns `$this` for method chaining.
-- `make(array $overrides = []): array` — Generate a single entity array, or an array of arrays if `times()` was called. **Resets the batch count after use.**
+- `make(array $overrides = []): array` — Generate a single entity array, or an array of arrays if `times()` was called. **Resets the batch count and unique state after use.**
 - **Field overrides:** Pass an array to `make()` to override default values. In batch mode, the same overrides apply to **all** generated items.
 
 **Examples:**

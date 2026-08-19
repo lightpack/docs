@@ -22,7 +22,7 @@ The console CLI provides a comprehensive set of commands for code generation, da
 
 #### create:config
 
-Create a new `config` file in your project's **config** directory by copying from the example template.
+Create a new `config` file in your project's **config** directory.
 
 ```cli
 php console create:config hello
@@ -33,6 +33,36 @@ You can force replace an existing config file with the same name using the `--fo
 ```cli
 php console create:config hello --force
 ```
+
+**Generate a supported config template** using `--support=<name>`:
+
+```cli
+php console create:config --support=db
+```
+
+Supported config templates:
+
+- `--support=ai` — AI services configuration
+- `--support=app` — Application settings
+- `--support=auth` — Authentication configuration
+- `--support=cable` — WebSocket / Cable configuration
+- `--support=captcha` — Captcha driver configuration
+- `--support=cookies` — Cookie settings
+- `--support=cors` — CORS configuration
+- `--support=db` — Database connection configuration
+- `--support=logs` — Logging configuration
+- `--support=mfa` — Multi-factor authentication configuration
+- `--support=redis` — Redis connection configuration
+- `--support=S3` — Amazon S3 storage configuration
+- `--support=session` — Session configuration
+- `--support=settings` — Application settings store
+- `--support=sms` — SMS provider configuration
+- `--support=social` — Social login (OAuth) configuration
+- `--support=storage` — File storage disk configuration
+- `--support=uploads` — File uploads configuration
+- `--support=webhooks` — Webhook configuration
+- `--support=deploy` — Deployment configuration
+- `--force` : Overwrite an existing config file.
 
 #### create:env
 Create a new `.env` file in your project root by copying from the example template.
@@ -102,6 +132,29 @@ Generate a new migration file in `database/migrations`.
 ```cli
 php console create:migration create_table_users
 ```
+
+**Generate a predefined schema migration** using `--support=<name>`:
+
+```cli
+php console create:migration --support=users
+```
+
+Supported schema templates:
+
+- `--support=audits` — Audit log table
+- `--support=cable` — WebSocket / Cable tables
+- `--support=cache` — Cache table
+- `--support=jobs` — Queue jobs table
+- `--support=rbac` — Role-based access control tables
+- `--support=secrets` — Secrets table
+- `--support=settings` — Settings table
+- `--support=social` — Social login tables
+- `--support=tags` — Tags and taggables tables
+- `--support=taxonomies` — Taxonomy tables
+- `--support=uploads` — File uploads table
+- `--support=users` — Users table
+- `--support=webhooks` — Webhooks table
+- `--force` : Overwrite an existing migration file.
 
 #### create:job
 Generate a new job class in `app/Jobs`.
@@ -266,6 +319,12 @@ php console app:serve
 
 ```cli
 php console app:serve --port=3000
+```
+
+**Specify a custom host** (default: 127.0.0.1):
+
+```cli
+php console app:serve --host=0.0.0.0
 ```
 
 ---

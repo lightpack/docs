@@ -61,15 +61,15 @@ Once you have made a request to a route, you can then assert returned response u
 $this->assertRouteNotFound();
 $this->assertResponseStatus();
 $this->assertResponseBody();
+$this->assertResponseBodyContains();
 ```
 
 - **assertRouteNotFound()** 
   
-Asserts that the last request resulted in a 404 Not Found response. Use this to verify that a route does not exist or is not accessible.
+Sets up an expectation that the next request to the given route will throw a `RouteNotFoundException`. Pass the route as the argument — the method internally makes the `GET` request and expects the exception.
 
 ```php
-$this->request('GET', '/invalid-route');
-$this->assertRouteNotFound();
+$this->assertRouteNotFound('/invalid-route');
 ```
 
 - **assertResponseStatus()** 
@@ -94,6 +94,15 @@ $this->request('GET', '/hello');
 $this->assertResponseBody('Hello, World!');
 ```
 
+- **assertResponseBodyContains()**
+  
+Asserts that the response body contains the given string. Use this for partial matches when you don't need to check the entire response.
+
+```php
+$this->request('GET', '/page');
+$this->assertResponseBodyContains('Welcome');
+```
+
 ## Asserting JSON Responses
 
 ```php
@@ -101,6 +110,7 @@ $this->assertResponseHasValidJson();
 $this->assertResponseJson();
 $this->assertResponseJsonHasKey();
 $this->assertResponseJsonKeyValue();
+$this->assertResponseJsonKeyMissing();
 ```
 
 - **assertResponseHasValidJson()**
@@ -139,10 +149,20 @@ $this->assertResponseJsonKeyValue();
   $this->assertResponseJsonKeyValue('profile.email', 'john@example.com');
   ```
 
+- **assertResponseJsonKeyMissing()**
+  
+  Asserts that a specific key is absent from the response JSON. Supports dot notation for nested keys.
+
+  ```php
+  $this->request('GET', '/api/user');
+  $this->assertResponseJsonKeyMissing('password');
+  ```
+
 ## Asserting Redirect Responses
 
 ```php
 $this->assertRedirectUrl();
+$this->assertRedirectRoute();
 $this->assertResponseIsRedirect();
 ```
 
@@ -156,6 +176,24 @@ $this->assertResponseIsRedirect();
       'password' => 'secret'
   ]);
   $this->assertRedirectUrl('/dashboard');
+  ```
+
+- **assertRedirectRoute()**
+  
+  Asserts that the response is a redirect to a named route. Accepts route name and optional route parameters. Use this instead of `assertRedirectUrl()` when your redirect uses named routes.
+
+  ```php
+  $this->request('POST', '/login', [
+      'email' => 'foo@bar.com',
+      'password' => 'secret'
+  ]);
+  $this->assertRedirectRoute('dashboard');
+  ```
+
+  With route parameters:
+
+  ```php
+  $this->assertRedirectRoute('profile.show', ['id' => 1]);
   ```
 
 - **assertResponseIsRedirect()**
@@ -172,7 +210,9 @@ $this->assertResponseIsRedirect();
 ```php
 $this->withSession();
 $this->assertSessionHas();
+$this->assertSessionMissing();
 $this->assertSessionHasErrors();
+$this->assertSessionHasNoErrors();
 $this->assertSessionHasOldInput();
 ```
 
@@ -197,6 +237,21 @@ $this->assertSessionHasOldInput();
   $this->assertSessionHas('user_id');
   ```
 
+  With expected value:
+
+  ```php
+  $this->assertSessionHas('status', 'active');
+  ```
+
+- **assertSessionMissing()**
+  
+  Asserts that the session does not contain the given key. Use this to verify that session data was cleared after an action.
+
+  ```php
+  $this->request('POST', '/logout');
+  $this->assertSessionMissing('user_id');
+  ```
+
 - **assertSessionHasErrors()**
   
   Asserts that the session contains validation errors for the given fields. Use this to verify validation error handling.
@@ -207,6 +262,24 @@ $this->assertSessionHasOldInput();
       'password' => ''
   ]);
   $this->assertSessionHasErrors(['email', 'password']);
+  ```
+
+  Without arguments, asserts that the session has at least one validation error:
+
+  ```php
+  $this->assertSessionHasErrors();
+  ```
+
+- **assertSessionHasNoErrors()**
+  
+  Asserts that the session contains no validation errors. Use this to verify that a successful request did not produce validation errors.
+
+  ```php
+  $this->request('POST', '/register', [
+      'email' => 'foo@bar.com',
+      'password' => 'secret'
+  ]);
+  $this->assertSessionHasNoErrors();
   ```
 
 - **assertSessionHasOldInput()**
@@ -267,7 +340,7 @@ $this->assertInvalidUrlSignature();
   
   Asserts that the request will throw an `InvalidUrlSignatureException` with a 403 status code. 
   
-  Use this before making a request to a signed URL that should fail due to an tampered, invalid, expired, or missing signature.
+  Use this before making a request to a signed URL that should fail due to a tampered, invalid, expired, or missing signature.
 
   ```php
   $this->assertInvalidUrlSignature();
@@ -319,6 +392,31 @@ $this->assertCookieMissing();
   $this->assertCookieMissing('old_token');
   ```
 
+## Asserting Authentication
+
+```php
+$this->assertGuest();
+$this->assertAuthenticated();
+```
+
+- **assertGuest()**
+  
+  Asserts that the current user is a guest (not authenticated).
+
+  ```php
+  $this->request('POST', '/logout');
+  $this->assertGuest();
+  ```
+
+- **assertAuthenticated()**
+  
+  Asserts that the current user is authenticated.
+
+  ```php
+  auth()->loginAs($user);
+  $this->assertAuthenticated();
+  ```
+
 ## Asserting File Uploads
 
 ```php
@@ -327,19 +425,64 @@ $this->withFiles();
 
 - **withFiles()**
   
-  Sets files for the next request. Use this to simulate file uploads in your tests.
+  Simulates file uploads for the next request. Accepts file specs keyed by form field name. Each spec may contain `name`, `content`, and `mime` — all optional with sensible defaults.
+
+  Storage is automatically faked to an isolated temp directory so that `store()` never writes to the real storage directory. All temp files and the temp storage directory are cleaned up after the test.
+
+  **Single file upload:**
 
   ```php
-  $file = [
-      'name' => 'avatar.png',
-      'type' => 'image/png',
-      'tmp_name' => __DIR__ . '/fixtures/avatar.png',
-      'error' => UPLOAD_ERR_OK,
-      'size' => filesize(__DIR__ . '/fixtures/avatar.png'),
-  ];
-  $this->withFiles(['avatar' => $file]);
-  $this->request('POST', '/upload');
+  $this->withFiles([
+      'avatar' => ['name' => 'photo.jpg', 'mime' => 'image/jpeg'],
+  ])->request('POST', '/settings/avatar');
   ```
+
+  **Multiple files on the same field:**
+
+  ```php
+  $this->withFiles([
+      'images' => [
+          ['name' => 'photo1.jpg', 'mime' => 'image/jpeg'],
+          ['name' => 'photo2.jpg', 'mime' => 'image/jpeg'],
+          ['name' => 'photo3.png', 'mime' => 'image/png'],
+      ],
+  ])->request('POST', '/gallery');
+  ```
+
+  **With custom content:**
+
+  ```php
+  $this->withFiles([
+      'document' => ['name' => 'report.pdf', 'content' => '%PDF-1.4...', 'mime' => 'application/pdf'],
+  ])->request('POST', '/upload');
+  ```
+
+- **fakeStorage()**
+  
+  Replaces the `storage` service in the container with a `LocalStorage` instance pointing to an isolated temp directory. This ensures `store()`, `delete()`, and other storage operations during your test never touch the real `storage/` directory.
+
+  **You usually don't call this directly** — `withFiles()` calls it automatically when faking file uploads.
+
+  **Call it manually** only when you need storage faking without a file upload. For example, testing a route that deletes a file from storage:
+
+  ```php
+  public function testDeleteFileRoute()
+  {
+      // Fake storage so delete() operates on a temp dir, not real storage
+      $dir = $this->fakeStorage();
+
+      // Create a fake file in the temp storage so the route can delete it
+      file_put_contents($dir . '/report.pdf', 'fake content');
+
+      // Hit the DELETE route — it will call $storage->delete('report.pdf')
+      $this->request('DELETE', '/files/report');
+
+      // Assert the file was actually removed from temp storage
+      $this->assertFalse(file_exists($dir . '/report.pdf'));
+  }
+  ```
+
+  The temp directory and all its contents are automatically removed after the test.
 
 ## Asserting Emails
 
@@ -562,6 +705,47 @@ The `DatabaseTrait` provides:
 - Automatically rolls back changes after each test
 - Ensures clean database state between tests
 
+### Database Assertions
+
+```php
+$this->assertDatabaseHas();
+$this->assertDatabaseMissing();
+$this->assertDatabaseCount();
+```
+
+- **assertDatabaseHas()**
+  
+  Asserts that a database table contains a row matching the given conditions. Use this to verify that a record was created or updated correctly.
+
+  ```php
+  $this->request('POST', '/register', [
+      'email' => 'foo@bar.com',
+      'password' => 'secret'
+  ]);
+  
+  $this->assertDatabaseHas('users', ['email' => 'foo@bar.com']);
+  ```
+
+- **assertDatabaseMissing()**
+  
+  Asserts that a database table contains no row matching the given conditions. Use this to verify that a record was deleted or never created.
+
+  ```php
+  $this->request('DELETE', '/users/1');
+  
+  $this->assertDatabaseMissing('users', ['id' => 1]);
+  ```
+
+- **assertDatabaseCount()**
+  
+  Asserts that a database table has the given number of rows.
+
+  ```php
+  $this->request('POST', '/users/bulk', ['count' => 5]);
+  
+  $this->assertDatabaseCount('users', 5);
+  ```
+
 ## Authentication Testing
 
 Use `auth()->loginAs()` to simulate a logged-in user without requiring credentials.
@@ -585,7 +769,7 @@ public function testGuestCannotAccessProtectedRoute()
 {
     $this->request('GET', '/admin/users');
     $this->assertResponseStatus(302);
-    $this->assertRedirectUrl('/login');
+    $this->assertRedirectRoute('login');
 }
 ```
 
@@ -616,8 +800,8 @@ $this->request('POST', '/login', [
         'password' => 'secret'
     ])
     ->assertResponseStatus(302)
-    ->assertRedirectUrl('/dashboard')
-    ->assertSessionHas('_logged_in', true)
+    ->assertRedirectRoute('dashboard')
+    ->assertSessionHasNoErrors()
     ->assertMailSent()
     ->assertMailSentTo('user@example.com');
 ```

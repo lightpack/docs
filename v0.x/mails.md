@@ -387,7 +387,7 @@ Building HTML emails is notoriously difficult:
 - ✅ **Automatic plain text** - Generates readable plain text from your components
 - ✅ **Beautiful default layout** - Professional design out of the box
 - ✅ **Programmatic building** - Type-safe, IDE-friendly fluent interface
-- ✅ **XSS protection** - Automatic HTML escaping
+- ✅ **XSS protection** - Automatic HTML escaping at render time (component builders keep raw values available)
 - ✅ **Customizable** - Override colors, fonts, spacing, and layouts
 - ✅ **UTF-8 safe** - Handles international characters and currency symbols
 
@@ -562,9 +562,11 @@ $template->html('<p style="color: #666;">Custom <strong>formatted</strong> text<
 // ❌ DANGEROUS - XSS vulnerability
 $template->html($userInput);
 
-// ✅ SAFE - Use paragraph() instead (auto-escaped)
+// ✅ SAFE - Use paragraph() instead (auto-escaped at render time)
 $template->paragraph($userInput);
 ```
+
+> **Note:** All component builder methods (`button()`, `heading()`, `paragraph()`, `link()`, `alert()`, `code()`, `bulletList()`, `keyValueTable()`, `table()`, `image()`) keep raw values internally and escape them at render time. This means you can still access unescaped values before calling `toHtml()` or `toPlainText()`.
 
 ### Header & Footer
 

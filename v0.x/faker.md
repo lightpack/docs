@@ -114,6 +114,7 @@ All methods are explicit, chainable, and deterministic (with seeding):
 ### Text
 - `sentence(int $words = 8): string` — Random sentence using common English words
 - `paragraph(int $sentences = 3): string` — Random paragraph (each sentence has 7-15 words)
+- `richText(int $paragraphs = 3): string` — Structured HTML content (h2, intro, h3, bullet list, body paragraphs, blockquote, conclusion) suitable for blog posts or product descriptions
 
 ### Dates & Time
 - `date(string $format = 'Y-m-d'): string` — Random date (between 10 years ago and now)
@@ -152,6 +153,20 @@ $email2 = $uniqueFaker->email(); // Always different from $email1
 - Throws `RuntimeException` if unable to generate unique value after 100 attempts
 - Tracks all generated values in memory to ensure uniqueness
 - Supports all Faker methods via `__call()` magic method
+- `unique()` returns a **cached instance** — the same `UniqueFaker` is reused across calls within the same batch
+- Call `resetUnique()` to clear the cached state and start a fresh uniqueness scope
+
+### resetUnique()
+
+Clears the cached `UniqueFaker` state so the next `unique()` call starts fresh:
+
+```php
+$faker->unique()->email(); // starts tracking
+$faker->resetUnique();     // clears all tracked values
+$faker->unique()->email(); // fresh start, may repeat previous values
+```
+
+> **Note:** `Factory::make()` calls `resetUnique()` automatically before each batch, so uniqueness is scoped per `make()` call.
 
 **Example of exhaustion:**
 ```php
@@ -214,7 +229,7 @@ $user = [
 $post = [
     'title' => ucwords($faker->sentence(6)),
     'slug' => $faker->slug(5),
-    'content' => $faker->paragraph(5),
+    'content' => $faker->richText(5),
     'author' => $faker->name(),
     'published_at' => $faker->datetime('Y-m-d H:i:s'),
 ];

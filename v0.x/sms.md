@@ -20,6 +20,8 @@ Please run following command to create `config/sms.php` configuration file.
 php console create:config --support=sms
 ```
 
+> **Note:** If `SMS_PROVIDER` is not set in your `.env` file or config, the default provider is `log`. Valid options: `twilio`, `log`, `null`.
+
 ## Sending an SMS
 
 ```php
@@ -71,7 +73,7 @@ Add to your config:
 ## FAQ & Troubleshooting
 
 **Q: How do I switch providers?**  
-A: Change the `default` driver in your config or instantiate the desired provider.
+A: Change the `SMS_PROVIDER` value in your `.env` file or `sms.provider` in your config. The default is `log` if not specified. Valid options: `twilio`, `log`, `null`.
 
 **Q: Can I queue SMS for async sending?**  
 A: Yes! Use Lightpack’s jobs system to queue jobs that call `sms()->send()`.
